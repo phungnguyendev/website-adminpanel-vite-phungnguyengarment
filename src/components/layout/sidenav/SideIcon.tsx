@@ -1,16 +1,12 @@
-import { Avatar } from 'antd'
-import React from 'react'
+import * as React from 'react'
 
 export interface SideIconProps extends React.HTMLAttributes<HTMLElement> {
-  src: string
+  icon: React.LazyExoticComponent<() => JSX.Element> | React.ReactNode | any
+  active: boolean
 }
 
-const SideIcon = (src: string) => {
-  return (
-    <div className=''>
-      <Avatar size='small' shape='square' src={<img src={src} alt='icon' />} />
-    </div>
-  )
+const SideIcon: React.FC<SideIconProps> = ({ icon: Icon }) => {
+  return <Icon size={20} className='transition-colors duration-300' />
 }
 
 export default SideIcon

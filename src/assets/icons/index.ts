@@ -1,33 +1,14 @@
-import AgeGroupIcon from './age-group.svg'
-import ColorIcon from './color.svg'
-import CutIcon from './cut.svg'
-import DashboardIcon from './dashboard.svg'
-import DeliveryIcon from './delivery.svg'
-import ImportIcon from './import.svg'
-import NoteIcon from './note.svg'
-import PackageSearchIcon from './package-search.svg'
-import PackageSuccessIcon from './package-success.svg'
-import PrintIcon from './print.svg'
-import SewingMachineIcon from './sewing-machine.svg'
-import UnitIcon from './unit.svg'
-import UserRoleIcon from './user-role.svg'
-import UserIcon from './user.svg'
-import WarehouseIcon from './warehouse.svg'
+// import HiringIcon from './HiringIcon'
+// import HomeIcon from './HomeIcon'
+// import InfoIcon from './InfoIcon'
+// import NewsIcon from './NewsIcon'
+// import ProductIcon from './ProductIcon'
+// import ServiceIcon from './ServiceIcon'
+import HiringIcon from './hiring.svg'
+import HomeIcon from './house-blank.svg'
+import InfoIcon from './info.svg'
+import NewsIcon from './newspaper.svg'
+import ProductIcon from './product-outline2.svg'
+import ServiceIcon from './setting-outline.svg'
 
-export {
-  AgeGroupIcon,
-  ColorIcon,
-  CutIcon,
-  DashboardIcon,
-  DeliveryIcon,
-  ImportIcon,
-  NoteIcon,
-  PackageSearchIcon,
-  PackageSuccessIcon,
-  PrintIcon,
-  SewingMachineIcon,
-  UnitIcon,
-  UserIcon,
-  UserRoleIcon,
-  WarehouseIcon
-}
+export { HiringIcon, HomeIcon, InfoIcon, NewsIcon, ProductIcon, ServiceIcon }

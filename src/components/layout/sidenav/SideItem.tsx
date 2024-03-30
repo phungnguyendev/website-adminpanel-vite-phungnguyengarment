@@ -2,7 +2,7 @@ import { Divider, Flex, Typography } from 'antd'
 import { Link } from 'react-router-dom'
 import { SideType } from '~/utils/route'
 
-const SideItem = (item: SideType) => {
+const SideItem = (item: SideType, collapsed: boolean) => {
   return (
     <>
       {item.isGroup ? (
@@ -11,9 +11,13 @@ const SideItem = (item: SideType) => {
           <Typography.Text type='secondary'>{item.name}</Typography.Text>
         </Flex>
       ) : (
-        <Link to={item.path}>
-          <span>{item.name}</span>
-        </Link>
+        <>
+          {collapsed && (
+            <Link to={item.path} className='mx-2 transition-none'>
+              <span>{item.name}</span>
+            </Link>
+          )}
+        </>
       )}
     </>
   )

@@ -6,6 +6,10 @@ module.exports = {
       center: true
     },
     extend: {
+      fontFamily: {
+        'roboto-condensed': ['Roboto Condensed', 'sans-serif'],
+        'roboto-flex': ['Roboto Flex', 'sans-serif']
+      },
       colors: {
         background: 'var(--background)',
         foreground: 'var(--foreground)',

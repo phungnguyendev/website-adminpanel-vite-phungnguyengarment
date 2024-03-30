@@ -49,27 +49,9 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  userRolesFromAccessToken: async (accessToken: string): Promise<ResponseDataType | undefined> => {
+  getUserFromAccessToken: async (accessToken: string): Promise<ResponseDataType | undefined> => {
     return await client
-      .get(`${NAMESPACE}/user-roles`, {
-        headers: {
-          authorization: accessToken
-        }
-      })
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  userFromAccessToken: async (accessToken: string): Promise<ResponseDataType | undefined> => {
-    return await client
-      .get(`${NAMESPACE}/users`, {
-        headers: {
-          authorization: accessToken
-        }
-      })
+      .get(`${NAMESPACE}/accessToken/${accessToken}`)
       .then((res) => {
         return responseFormatter(res)
       })

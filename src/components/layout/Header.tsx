@@ -1,7 +1,7 @@
 import { CaretDownOutlined } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
-import { Badge, Button, Divider, Dropdown, Flex, Layout, Space, Typography } from 'antd'
-import { Bell, Menu } from 'lucide-react'
+import { Button, Divider, Dropdown, Flex, Layout, Space, Typography } from 'antd'
+import { Menu } from 'lucide-react'
 import React, { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
@@ -13,11 +13,11 @@ import { cn, extractEmailName } from '~/utils/helpers'
 const { Header: AntHeader } = Layout
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
-  collapsed?: boolean
   onMenuClick: (event: React.MouseEvent<HTMLElement, globalThis.MouseEvent>) => void
 }
 
 const Header: React.FC<Props> = ({ onMenuClick, ...props }) => {
+  const [collapsed, setCollapsed] = useState<boolean>(false)
   const [openProfile, setOpenProfile] = useState<boolean>(false)
   const [, setAccessTokenStored] = useLocalStorage<string>('accessToken', '')
   const [isHidden, setIsHidden] = useState(false)
@@ -70,23 +70,32 @@ const Header: React.FC<Props> = ({ onMenuClick, ...props }) => {
     <AntHeader>
       <Flex
         {...props}
-        className={cn('fixed left-0 right-0 top-0 z-[999] min-h-[52px] bg-white px-5 transition-all duration-300', {
-          'shadow-sm': offsetY > 1,
-          '-translate-y-full': isHidden && offsetY > 52,
-          'top-0': !isHidden
-        })}
+        className={cn(
+          'fixed right-0 top-0 z-[999] min-h-[52px] bg-white px-5 transition-all duration-200',
+          {
+            'left-[250px]': collapsed,
+            'left-[80px]': !collapsed
+          },
+          {
+            'shadow-sm': offsetY > 1,
+            '-translate-y-full': isHidden && offsetY > 52,
+            'top-0': !isHidden
+          }
+        )}
         justify='space-between'
         align='center'
       >
-        <Button type='link' className='text-foreground hover:text-primary' onClick={onMenuClick}>
+        <Button
+          type='link'
+          className='text-foreground hover:text-primary'
+          onClick={(e) => {
+            onMenuClick(e)
+            setCollapsed((prev) => !prev)
+          }}
+        >
           <Menu size={20} />
         </Button>
-        <Space split={<Divider type='vertical' />} className='h-full'>
-          <Flex>
-            <Badge dot>
-              <Button shape='circle' icon={<Bell size={20} />} />
-            </Badge>
-          </Flex>
+        <Space split={<Divider type='vertical' />} className='h-[70px]'>
           <Flex vertical>
             <Dropdown menu={{ items }}>
               <Flex align='center' justify='center' gap={8} className='h-full'>

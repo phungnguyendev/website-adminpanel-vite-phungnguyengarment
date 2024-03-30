@@ -2,12 +2,12 @@ import client, { ResponseDataType } from '~/api/client'
 import { User } from '~/typing'
 import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatter'
 
-const NAMESPACE = 'users'
+const NAMESPACE = 'auth'
 
 export default {
   login: async (user: User): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(`${NAMESPACE}/auth/login`, user)
+      .post(`${NAMESPACE}/login`, user)
       .then((res) => {
         return responseFormatter(res)
       })
@@ -17,7 +17,7 @@ export default {
   },
   sendEmail: async (emailToSend: string): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(`${NAMESPACE}/auth/send-email/${emailToSend}`)
+      .post(`${NAMESPACE}/send-email/${emailToSend}`)
       .then((res) => {
         return responseFormatter(res)
       })
@@ -27,7 +27,7 @@ export default {
   },
   verifyOTP: async (user: { email: string; otp: string }): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(`${NAMESPACE}/auth/verify-otp/${user.email}`, { otp: user.otp })
+      .post(`${NAMESPACE}/verify-otp/${user.email}`, { otp: user.otp })
       .then((res) => {
         return responseFormatter(res)
       })

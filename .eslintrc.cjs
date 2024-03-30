@@ -16,6 +16,8 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     'react-hooks/exhaustive-deps': 'off',
     'react-refresh/only-export-components': 'off',
+    react: 'off',
+    'no-undef': 'off',
     'prettier/prettier': [
       'warn',
       {

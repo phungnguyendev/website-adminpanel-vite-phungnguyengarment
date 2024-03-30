@@ -12,6 +12,11 @@ const theme: ThemeConfig = {
     Button: {
       defaultColor: '#000000',
       textHoverBg: '#ffffff'
+    },
+    Menu: {
+      itemActiveBg: '#ff6b00',
+      itemSelectedBg: '#ff6b00',
+      itemSelectedColor: '#fff'
     }
   }
 }

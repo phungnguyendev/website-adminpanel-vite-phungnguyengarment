@@ -1,12 +1,9 @@
-import type { MenuProps } from 'antd'
-import { Flex, Menu } from 'antd'
+import { Flex, Menu, MenuProps } from 'antd'
 import React, { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
 import { useLocation } from 'react-router-dom'
 import logo from '~/assets/logo.svg'
-import { RootState } from '~/store/store'
 import { cn } from '~/utils/helpers'
-import { SideType, appRoutes } from '~/utils/route'
+import { appRoutes } from '~/utils/route'
 import SideIcon from './SideIcon'
 import SideItem from './SideItem'
 
@@ -26,10 +23,9 @@ function getItem(label: React.ReactNode, key: React.Key, icon?: React.ReactNode,
   } as MenuItem
 }
 
-const SideNav: React.FC<Props> = ({ openDrawer, setOpenDrawer, ...props }) => {
+const SideNav: React.FC<Props> = ({ openDrawer, ...props }) => {
   const { pathname } = useLocation()
   const [selectedKey, setSelectedKey] = useState<string>(appRoutes[0].key)
-  const currentUser = useSelector((state: RootState) => state.user)
 
   useEffect(() => {
     const keyFound = appRoutes.find((route) => route.path === lastPath(pathname))
@@ -44,31 +40,27 @@ const SideNav: React.FC<Props> = ({ openDrawer, setOpenDrawer, ...props }) => {
     return path
   }
 
-  const routes = (appRoutes: SideType[]): SideType[] => {
-    const routesMapping = appRoutes.filter((route) => {
-      return currentUser.userRoles.includes('admin') ? route : route.role !== 'admin'
-    })
-
-    return routesMapping
-  }
-
-  const items: MenuProps['items'] = routes(appRoutes).map((route) => {
+  const items: MenuProps['items'] = appRoutes.map((route) => {
     if (route.isGroup) {
-      return getItem(SideItem(route), route.key, null, 'group')
+      return getItem(SideItem(route, openDrawer), route.key, null, 'group')
     } else {
-      return getItem(SideItem(route), route.key, SideIcon(route.icon))
+      return getItem(SideItem(route, openDrawer), route.key, SideIcon({ icon: route.icon, active: true }))
     }
   })
 
   const onClick: MenuProps['onClick'] = (e) => {
     setSelectedKey(e.key)
-    setOpenDrawer(!openDrawer)
   }
 
   return (
-    <Flex vertical gap={20} {...props} className={cn('bg-white', props.className)}>
-      <Flex align='center' justify='center'>
+    <Flex vertical gap={20} {...props} className={cn('my-5 bg-white', props.className)}>
+      <Flex align='center' justify='center' gap={8}>
         <img src={logo} alt='logo' className='h-16 w-16 object-contain lg:h-10 lg:w-10' />
+        {/* {openDrawer && (
+          <Typography.Text className='font-roboto-condensed font-bold uppercase text-primary'>
+            PHUNG NGUYEN GARMENT
+          </Typography.Text>
+        )} */}
       </Flex>
       <Menu
         onClick={onClick}

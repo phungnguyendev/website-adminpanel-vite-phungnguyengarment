@@ -13,7 +13,7 @@
     --card-foreground: #262626;
 
     /* Muted backgrounds such as <TabsList />, <Skeleton /> and <Switch /> */
-    --muted: #bfbfbf;
+    --muted: #758994;
     --muted-foreground: #ffffff;
 
     /* Background color for popovers such as <DropdownMenu />, <HoverCard />, <Popover /> */
@@ -26,7 +26,7 @@
 
     /* Secondary colors for <Button /> */
     --secondary: #fbc095;
-    --secondary-foreground: #ff6b00;
+    --secondary-foreground: #ff6a00;
 
     /* Used for accents such as hover effects on <DropdownMenuItem>, <SelectItem>...etc */
     --accent: #eeeeee;
@@ -43,9 +43,9 @@
     --input: #e8e5e3;
 
     /* Used for focus ring */
-    --ring: #ff6b00;
+    --ring: #ff6a00;
 
-    --normal: rgba(42, 46, 54, 0.25);
+    --normal: #2a2e3640;
     --warn: #faad14;
     --error: #ff4d4f;
     --success: #52c41a;
@@ -127,8 +127,20 @@
   }
 }
 
-@layer components {
-  .social-icons {
-    @apply h-[24px] w-[24px] text-foreground;
+@layer utilities {
+  .button-small {
+    font-size: 14px;
+    padding: 0px 16px;
+    height: 32px;
+  }
+  .button-medium {
+    font-size: 16px;
+    padding: 0px 24px;
+    height: 44px;
+  }
+  .button-large {
+    font-size: 16px;
+    padding: 0px 32px;
+    height: 52px;
   }
 }

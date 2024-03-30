@@ -6,8 +6,8 @@ import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import UserAPI from '~/api/services/UserAPI'
 import useLocalStorage from '~/hooks/useLocalStorage'
-import { setUserAction, setUserRoleAction } from '~/store/actions-creator'
-import { User, UserRole, UserRoleType } from '~/typing'
+import { setUserAction } from '~/store/actions-creator'
+import { User } from '~/typing'
 
 interface ActionProps {
   onClick?: (e?: React.MouseEvent<HTMLElement, MouseEvent>) => void
@@ -67,19 +67,12 @@ const BaseLayout: React.FC<Props> = ({
         onLoading?.(true)
         setLoading(true)
         if (accessTokenStored) {
-          UserAPI.userRolesFromAccessToken(accessTokenStored)
+          UserAPI.getUserFromAccessToken(accessTokenStored)
             .then((meta) => {
               if (!meta?.success) throw new Error(meta?.message)
 
-              const userRoles = meta.data as UserRole[]
-              dispatch(
-                setUserRoleAction(
-                  userRoles.map((userRole) => {
-                    return userRole.role?.role as UserRoleType
-                  })
-                )
-              )
-              dispatch(setUserAction(meta.meta as User))
+              const user = meta.data as User
+              dispatch(setUserAction(user))
             })
             .catch((error) => {
               console.error(error)
