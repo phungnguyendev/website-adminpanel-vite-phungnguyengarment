@@ -20,6 +20,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { HTMLAttributes, memo, useState } from 'react'
 import { InputType } from '~/typing'
 import { cn } from '~/utils/helpers'
+import FileDragger, { FileUploaderProps } from '../FileUploader'
 
 export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
   isEditing: boolean
@@ -29,6 +30,7 @@ export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
   initialValue?: any
   onValueChange?: (value: any, option?: any) => void
   selectProps?: SelectProps
+  uploadProps?: FileUploaderProps
   colorPickerProps?: ColorPickerProps
   checkboxProps?: CheckboxProps
   inputNumberProps?: InputNumberProps
@@ -55,6 +57,7 @@ function EditableStateCell({
   placeholder,
   allowClear,
   value,
+  uploadProps,
   colorPickerProps,
   datePickerProps,
   checkboxProps,
@@ -75,6 +78,16 @@ function EditableStateCell({
 
   const inputNode = ((): React.ReactNode => {
     switch (inputType) {
+      case 'uploadFile':
+        return (
+          <FileDragger
+            name={dataIndex}
+            disabled={disabled}
+            {...uploadProps}
+            className={restProps.className}
+            onFinish={(val) => onValueChange?.(val)}
+          />
+        )
       case 'colorpicker':
         return (
           <ColorPicker

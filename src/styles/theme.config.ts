@@ -16,7 +16,8 @@ const theme: ThemeConfig = {
     Menu: {
       itemActiveBg: '#ff6b00',
       itemSelectedBg: '#ff6b00',
-      itemSelectedColor: '#fff'
+      itemSelectedColor: '#fff',
+      itemBorderRadius: 6
     }
   }
 }

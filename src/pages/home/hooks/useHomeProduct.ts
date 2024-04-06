@@ -1,54 +1,57 @@
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
 import { ResponseDataType, defaultRequestBody } from '~/api/client'
-import ImportationAPI from '~/api/services/ImportationAPI'
+import HeroBannerAPI from '~/api/services/HeroBannerAPI'
 import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
-import { ProductTableDataType } from '~/pages/home/type'
-import { Importation, Product } from '~/typing'
-import { dateFormatter } from '~/utils/date-formatter'
-import { ImportationTableDataType } from '../type'
+import { HeroBannerTableDataType } from '~/pages/home/type'
+import { HeroBanner, Product } from '~/typing'
+import { ProductAddNewProps } from '../components/herobanner/ModalAddNewHeroBanner'
 
-export default function useImportationTable(
-  table: UseTableProps<ImportationTableDataType>,
-  record: ProductTableDataType
-) {
-  const { dataSource, setDataSource, setLoading, handleConfirmCancelEditing } = table
+export interface ProductNewRecordProps {
+  colorID?: number | null
+  quantityPO?: number | null
+  productCode?: string | null
+  dateInputNPL?: string | null
+  dateOutputFCR?: string | null
+  groupID?: number | null
+  printID?: number | null
+}
 
-  // Services
-  const importationService = useAPIService<Importation>(ImportationAPI)
+export default function useProduct(table: UseTableProps<ProductTableDataType>) {
+  const { showDeleted, setLoading, setDataSource, handleConfirmCancelEditing, handleConfirmDeleting } = table
 
-  // UI
+  const heroBannerService = useAPIService<HeroBanner>(HeroBannerAPI)
+
   const { message } = AntApp.useApp()
 
-  // State changes
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
-  const [newRecord, setNewRecord] = useState<Importation>({})
+  const [newRecord, setNewRecord] = useState<ProductNewRecordProps>({})
 
-  // List
-  const [importations, setImportations] = useState<Importation[]>([])
+  const [heroBanners, setHeroBanners] = useState<HeroBanner[]>([])
 
-  const amountQuantity =
-    dataSource && dataSource.length > 0 ? dataSource.reduce((acc, current) => acc + (current.quantity ?? 0), 0) : 0
-
-  // New
   const loadData = async () => {
     try {
       setLoading(true)
-      await importationService.getListItems(
-        {
-          ...defaultRequestBody,
-          paginator: { page: importationService.page, pageSize: defaultRequestBody.paginator?.pageSize },
-          search: { field: 'productID', term: `${record.id}` }
-        },
-        setLoading,
-        (meta) => {
-          if (meta?.success) {
-            setImportations(meta.data as Importation[])
+      try {
+        await heroBannerService.getListItems(
+          {
+            ...defaultRequestBody,
+            paginator: { page: heroBannerService.page, pageSize: defaultRequestBody.paginator?.pageSize },
+            filter: { ...defaultRequestBody.filter }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              setHeroBanners(meta.data as HeroBanner[])
+            }
           }
-        }
-      )
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
+      }
     } catch (error: any) {
       const resError: ResponseDataType = error.data
       message.error(`${resError.message}`)
@@ -59,62 +62,28 @@ export default function useImportationTable(
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [showDeleted])
 
   useEffect(() => {
-    selfConvertDataSource(importations)
-  }, [importations])
+    selfConvertDataSource(heroBanners)
+  }, [heroBanners])
 
-  const selfConvertDataSource = (_importations: Importation[]) => {
-    const items = _importations ? _importations : importations
+  const selfConvertDataSource = (_heroBanners: HeroBanner[]) => {
+    const items = _heroBanners
     setDataSource(
       items.map((item) => {
         return {
-          ...item,
-          key: item.id
-        } as ImportationTableDataType
+          key: item.id,
+          ...item
+        } as HeroBannerTableDataType
       })
     )
   }
 
-  const handleSaveClick = async (record: TableItemWithKey<ImportationTableDataType>) => {
+  const handleSaveClick = async (record: TableItemWithKey<ProductTableDataType>) => {
     // const row = (await form.validateFields()) as any
-    console.log({ old: record, new: newRecord })
     try {
       setLoading(true)
-      if (newRecord) {
-        console.log('Importation progressing: ', newRecord)
-        try {
-          await importationService.updateItemByPk(
-            record.id!,
-            {
-              ...newRecord
-            },
-            setLoading,
-            (meta) => {
-              if (!meta?.success) {
-                throw new Error('API update failed')
-              }
-            }
-          )
-        } catch (error: any) {
-          const resError: ResponseDataType = error
-          throw resError
-        }
-      } else {
-        console.log('add new')
-        try {
-          await importationService.createNewItem(newRecord, table.setLoading, (meta) => {
-            if (!meta?.success) {
-              throw new Error('API create failed')
-            }
-          })
-        } catch (error: any) {
-          const resError: ResponseDataType = error
-          throw resError
-        }
-      }
-      message.success('Success!')
     } catch (error: any) {
       const resError: ResponseDataType = error.data
       message.error(`${resError.message}`)
@@ -125,22 +94,12 @@ export default function useImportationTable(
     }
   }
 
-  const handleAddNewItem = async (formAddNew: any) => {
+  const handleAddNewItem = async (formAddNew: ProductAddNewProps) => {
     try {
       console.log(formAddNew)
       setLoading(true)
-      await importationService.createNewItem(
-        {
-          productID: record.id!,
-          quantity: formAddNew.quantity,
-          dateImported: dateFormatter(formAddNew.dateImported, 'iso8601')
-        },
-        setLoading,
-        async (meta, msg) => {
-          if (!meta?.success) throw new Error('API create failed')
-          message.success(msg)
-        }
-      )
+
+      message.success('Success')
     } catch (error: any) {
       const resError: ResponseDataType = error.data
       message.error(`${resError.message}`)
@@ -152,24 +111,30 @@ export default function useImportationTable(
   }
 
   const handleConfirmDelete = async (
-    record: TableItemWithKey<ImportationTableDataType>,
+    item: TableItemWithKey<ProductTableDataType>,
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
     try {
       setLoading(true)
-      await importationService.deleteItemByPk(record.id!, setLoading, (meta, msg) => {
-        if (!meta?.success) {
-          throw new Error('API delete failed')
-        }
-        message.success(msg)
-        onDataSuccess?.(meta)
-      })
+    } catch (error: any) {
+      const resError: ResponseDataType = error.data
+      message.error(`${resError.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleConfirmRestore = async (
+    item: TableItemWithKey<ProductTableDataType>,
+    onDataSuccess?: (meta: ResponseDataType | undefined) => void
+  ) => {
+    try {
+      setLoading(true)
     } catch (error: any) {
       const resError: ResponseDataType = error.data
       message.error(`${resError.message}`)
     } finally {
       loadData()
-      setOpenModal(false)
       setLoading(false)
     }
   }
@@ -177,7 +142,7 @@ export default function useImportationTable(
   const handlePageChange = async (_page: number) => {
     try {
       setLoading(true)
-      await importationService.pageChange(
+      await heroBannerService.pageChange(
         _page,
         setLoading,
         (meta) => {
@@ -203,7 +168,7 @@ export default function useImportationTable(
   const handleSortChange = async (checked: boolean) => {
     try {
       setLoading(true)
-      await importationService.sortedListItems(
+      await heroBannerService.sortedListItems(
         checked ? 'asc' : 'desc',
         setLoading,
         (meta) => {
@@ -225,7 +190,7 @@ export default function useImportationTable(
     try {
       setLoading(true)
       if (value.length > 0) {
-        await importationService.getListItems(
+        await heroBannerService.getListItems(
           {
             ...defaultRequestBody,
             search: {
@@ -260,14 +225,14 @@ export default function useImportationTable(
     setOpenModal,
     setDataSource,
     handleSaveClick,
-    handleAddNewItem,
-    handleConfirmDelete,
-    selfConvertDataSource,
-    handlePageChange,
-    handleSortChange,
     handleResetClick,
+    handleSortChange,
     handleSearch,
-    importationService,
-    amountQuantity
+    handleAddNewItem,
+    handlePageChange,
+    handleConfirmDelete,
+    handleConfirmRestore,
+    selfConvertDataSource,
+    handleConfirmCancelEditing
   }
 }

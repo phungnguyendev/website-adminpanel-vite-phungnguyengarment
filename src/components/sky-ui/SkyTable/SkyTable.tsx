@@ -1,3 +1,6 @@
+import { DndContext, DragEndEvent } from '@dnd-kit/core'
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
+import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { Table } from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
 import { ColumnType } from 'antd/lib/table'
@@ -5,6 +8,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ResponseDataType, defaultRequestBody } from '~/api/client'
 import { cn } from '~/utils/helpers'
 import ActionRow, { ActionProps } from '../ActionRow'
+import SkyTableRow from './SkyTableRow'
 
 export interface SkyTableProps<T extends { key?: React.Key; createdAt?: string; updatedAt?: string }>
   extends TableProps<T> {
@@ -16,6 +20,8 @@ export interface SkyTableProps<T extends { key?: React.Key; createdAt?: string; 
   actions?: ActionProps<T>
   scrollTo?: number
   pageSize?: number
+  dataSource: T[]
+  setDataSource: (dataSource: T[]) => void
 }
 
 const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: string }>({
@@ -104,31 +110,52 @@ const SkyTable = <T extends { key?: React.Key; createdAt?: string; updatedAt?: s
         : [...props.columns]
     : []
 
+  const onDragEnd = ({ active, over }: DragEndEvent) => {
+    if (active.id !== over?.id && props.dataSource) {
+      const activeIndex = props.dataSource.findIndex((i: T) => i.key === active.id)
+      const overIndex = props.dataSource.findIndex((i: T) => i.key === over?.id)
+      const newData = arrayMove(props.dataSource, activeIndex, overIndex)
+      props.setDataSource?.(newData)
+    }
+  }
+
   return (
-    <Table
-      {...props}
-      ref={tblRef}
-      className={props.className}
-      loading={props.loading}
-      bordered
-      columns={columns}
-      dataSource={props.dataSource}
-      rowClassName={cn('editable-row', props.rowClassName)}
-      pagination={
-        props.pagination ?? {
-          onChange: props.onPageChange,
-          current: props.metaData?.page,
-          // pageSize: props.metaData?.pageSize
-          //   ? props.metaData.pageSize !== -1
-          //     ? props.metaData.pageSize
-          //     : undefined
-          //   : 10,
-          pageSize: props.pageSize ?? defaultRequestBody.paginator?.pageSize,
-          total: props.metaData?.total
-        }
-      }
-      expandable={props.expandable}
-    />
+    <>
+      <DndContext modifiers={[restrictToVerticalAxis]} onDragEnd={onDragEnd}>
+        <SortableContext items={props.dataSource!.map((i) => `${i.key}`)} strategy={verticalListSortingStrategy}>
+          <Table
+            {...props}
+            ref={tblRef}
+            className={props.className}
+            loading={props.loading}
+            bordered
+            columns={columns}
+            dataSource={props.dataSource}
+            rowClassName={cn('editable-row', props.rowClassName)}
+            components={{
+              body: {
+                row: SkyTableRow
+              }
+            }}
+            rowKey='key'
+            pagination={
+              props.pagination ?? {
+                onChange: props.onPageChange,
+                current: props.metaData?.page,
+                // pageSize: props.metaData?.pageSize
+                //   ? props.metaData.pageSize !== -1
+                //     ? props.metaData.pageSize
+                //     : undefined
+                //   : 10,
+                pageSize: props.pageSize ?? defaultRequestBody.paginator?.pageSize,
+                total: props.metaData?.total
+              }
+            }
+            expandable={props.expandable}
+          />
+        </SortableContext>
+      </DndContext>
+    </>
   )
 }
 

@@ -7,8 +7,7 @@ export default {
   createNewItem: async (user: User): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}`, {
-        ...user,
-        status: user.status ?? 'active'
+        ...user
       })
       .then((res) => {
         return responseFormatter(res)

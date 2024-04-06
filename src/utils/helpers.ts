@@ -1,3 +1,4 @@
+import type { GetProp, UploadProps } from 'antd'
 import { clsx, type ClassValue } from 'clsx'
 import dayjs from 'dayjs'
 import { twMerge } from 'tailwind-merge'
@@ -131,4 +132,18 @@ export const extractEmailName = (email: string): string => {
 
   // Trả về phần username
   return username
+}
+
+type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0]
+
+export const getBase64 = (file: FileType): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = (error) => reject(error)
+  })
+
+export const getPublicUrlGoogleDrive = (fileId: string): string => {
+  return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`
 }

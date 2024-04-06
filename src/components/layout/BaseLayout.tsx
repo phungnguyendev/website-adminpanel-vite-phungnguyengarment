@@ -1,5 +1,6 @@
 import { Button, Flex, Input, Spin, Switch, Typography } from 'antd'
 import { SwitchChangeEventHandler } from 'antd/es/switch'
+import { TitleProps } from 'antd/es/typography/Title'
 import { Plus } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
@@ -8,6 +9,7 @@ import UserAPI from '~/api/services/UserAPI'
 import useLocalStorage from '~/hooks/useLocalStorage'
 import { setUserAction } from '~/store/actions-creator'
 import { User } from '~/typing'
+import { cn } from '~/utils/helpers'
 
 interface ActionProps {
   onClick?: (e?: React.MouseEvent<HTMLElement, MouseEvent>) => void
@@ -16,6 +18,7 @@ interface ActionProps {
 }
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
+  titleProps?: TitleProps
   searchPlaceHolder?: string
   defaultSearchValue?: string | number | readonly string[] | undefined
   searchValue?: string | undefined
@@ -54,6 +57,7 @@ const BaseLayout: React.FC<Props> = ({
   onAddNewClick,
   children,
   onLoading,
+  titleProps,
   ...props
 }) => {
   const [loading, setLoading] = useState<boolean>(true)
@@ -95,9 +99,13 @@ const BaseLayout: React.FC<Props> = ({
   // }, [accessTokenStored])
 
   return (
-    <div {...props} className='w-full'>
+    <div {...props} className={cn('w-full', props.className)}>
       <Flex vertical gap={20} className='w-full'>
-        {props.title && <Typography.Title level={2}>{props.title}</Typography.Title>}
+        {props.title && (
+          <Typography.Title className='w-fit' {...titleProps} level={titleProps?.level ? titleProps.level : 2}>
+            {props.title}
+          </Typography.Title>
+        )}
         <Flex vertical gap={20} className='w-full'>
           {onSearch && (
             <Search
@@ -155,7 +163,7 @@ const BaseLayout: React.FC<Props> = ({
                 />
               )}
             </Flex>
-            <Flex gap={10} align='center' wrap='wrap' justify='flex-end'>
+            <Flex gap={10} align='center' wrap='wrap' justify='flex-end' className='w-full'>
               {onResetClick?.isShow && (
                 <Button onClick={onResetClick.onClick} className='flex items-center' type='default'>
                   Reset

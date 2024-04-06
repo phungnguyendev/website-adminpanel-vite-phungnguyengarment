@@ -19,7 +19,7 @@ function ProfileDialog({ open, setOpen }: Props) {
   const userService = useAPIService<User>(UserAPI)
   const [loading, setLoading] = useState<boolean>(false)
   const currentUser = useSelector((state: RootState) => state.user)
-  // const [imageUrl, setImageUrl] = useState<string>()
+  // const [imageId, setImageId] = useState<string>()
 
   const handleModalUpdate = async () => {
     try {
@@ -60,7 +60,7 @@ function ProfileDialog({ open, setOpen }: Props) {
   //     authorization: accessTokenStored ?? ''
   //   },
   //   data: {
-  //     avatar: imageUrl
+  //     avatar: imageId
   //   },
   //   beforeUpload: (file: File) => {
   //     const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png'
@@ -96,7 +96,7 @@ function ProfileDialog({ open, setOpen }: Props) {
   //       // Get this url from response in real world.
   //       getBase64(info.file.originFileObj as FileType, (url) => {
   //         setLoading(false)
-  //         setImageUrl(url)
+  //         setImageId(url)
   //       })
   //     }
   //   }
@@ -119,7 +119,7 @@ function ProfileDialog({ open, setOpen }: Props) {
           {/* <Flex className='relative h-[200px] w-[200px]'>
             <ImgCrop rotationSlider>
               <Upload name='avatar' className='h-[200px] w-[200px]' {...uploadProps}>
-                <Avatar className='h-full w-full rounded-3xl' src={imageUrl ? imageUrl : currentUser.user.avatar} />
+                <Avatar className='h-full w-full rounded-3xl' src={imageId ? imageId : currentUser.user.avatar} />
                 <Flex
                   className='absolute bottom-0 left-0 right-0 top-0 z-10 cursor-pointer rounded-3xl bg-slate-500 bg-opacity-50 opacity-0 transition-opacity duration-300 hover:opacity-100'
                   justify='center'

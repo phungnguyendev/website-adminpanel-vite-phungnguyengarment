@@ -5,8 +5,8 @@ import { IoSettingsOutline } from 'react-icons/io5'
 import { TbSmartHome } from 'react-icons/tb'
 const CuttingGroupPage = lazy(() => import('~/pages/cutting-group/CuttingGroupPage'))
 // const RolePage = lazy(() => import('~/pages/role/RolePage'))
-const GarmentAccessoryPage = lazy(() => import('~/pages/garment-accessory/GarmentAccessoryPage'))
-const ProductPage = lazy(() => import('~/pages/product/ProductPage'))
+const GarmentAccessoryPage = lazy(() => import('~/pages/about/AboutPage'))
+const ProductPage = lazy(() => import('~/pages/home/HomePage'))
 // const ImportationPage = lazy(() => import('~/pages/importation/ImportationPage'))
 const SewingLineDeliveryPage = lazy(() => import('~/pages/sewing-line-delivery/SewingLineDeliveryPage'))
 const FinishPage = lazy(() => import('~/pages/completion/CompletionPage'))

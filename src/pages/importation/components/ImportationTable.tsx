@@ -9,7 +9,7 @@ import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import ExpandableItemRow from '~/components/sky-ui/SkyTable/ExpandableItemRow'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { ProductTableDataType } from '~/pages/product/type'
+import { ProductTableDataType } from '~/pages/home/type'
 import { RootState } from '~/store/store'
 import {
   breakpoint,

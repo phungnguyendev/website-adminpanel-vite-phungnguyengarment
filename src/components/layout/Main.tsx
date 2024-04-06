@@ -44,7 +44,7 @@ const Main: React.FC = () => {
           zIndex: 10
         }}
       >
-        <SideNav openDrawer={openDrawer} setOpenDrawer={setOpenDrawer} />
+        <SideNav openDrawer={openDrawer} />
       </Sider>
       <Layout
         className={cn({
