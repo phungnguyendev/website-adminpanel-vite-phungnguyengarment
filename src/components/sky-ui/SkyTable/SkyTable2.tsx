@@ -10,7 +10,13 @@ import { defaultRequestBody, ResponseDataType } from '~/api/client'
 import ActionRow, { ActionProps } from '../ActionRow'
 import SkyTableRow2 from './SkyTableRow2'
 
-type RequiredDataType = { key: string; createdAt?: string; updatedAt?: string }
+export type RequiredDataType = {
+  key: string
+  id?: number
+  createdAt?: string
+  updatedAt?: string
+  orderNumber?: number | null
+}
 
 export interface SkyTable2Props<T extends RequiredDataType> extends TableProps {
   dataSource: T[]
@@ -22,6 +28,7 @@ export interface SkyTable2Props<T extends RequiredDataType> extends TableProps {
   editingKey?: string
   deletingKey?: string
   pageSize?: number
+  onDraggableChange?: (oldData?: T[], newData?: T[]) => void
 }
 
 const SkyTable2 = <T extends RequiredDataType>({ ...props }: SkyTable2Props<T>) => {
@@ -95,6 +102,7 @@ const SkyTable2 = <T extends RequiredDataType>({ ...props }: SkyTable2Props<T>) 
       const activeIndex = props.dataSource.findIndex((i) => i.key === active.id)
       const overIndex = props.dataSource.findIndex((i) => i.key === over?.id)
       const newData = arrayMove(props.dataSource, activeIndex, overIndex)
+      props.onDraggableChange?.(props.dataSource, newData)
       props.setDataSource(newData)
     }
   }

@@ -1,10 +1,8 @@
 import { useState } from 'react'
 import { ResponseDataType } from '~/api/client'
+import { RequiredDataType } from '../sky-ui/SkyTable/SkyTable2'
 
-export type TableItemWithKey<T> = T & { key: string }
-export type TableItemWithId<T> = T & { id?: number }
-
-export interface UseTableProps<T extends { key: string }> {
+export interface UseTableProps<T extends RequiredDataType> {
   loading: boolean
   setLoading: (state: boolean) => void
   scrollIndex: number
@@ -15,27 +13,27 @@ export interface UseTableProps<T extends { key: string }> {
   deletingKey: string
   showDeleted: boolean
   setDeletedRecordState: (enable: boolean) => void
-  dataSource: TableItemWithKey<T>[]
-  setDataSource: (newDataSource: TableItemWithKey<T>[]) => void
+  dataSource: T[]
+  setDataSource: (newDataSource: T[]) => void
   isEditing: (key: string) => boolean
   isDelete: (key: string) => boolean
   handleStartEditing: (key: string) => void
   handleStartDeleting: (key: string) => void
   handleStartRestore: (key: string) => void
   handleStartSaveEditing: (key: string, itemToUpdate: T, onDataSuccess?: (updatedItem: T) => void) => void
-  handleStartAddNew: (item: TableItemWithKey<T>) => void
-  handleConfirmDeleting: (key: string, onDataSuccess?: (deletedItem: TableItemWithKey<T>) => void) => void
-  handleConfirmRestore: (key: string, onDataSuccess?: (deletedItem: TableItemWithKey<T>) => void) => void
+  handleStartAddNew: (item: T) => void
+  handleConfirmDeleting: (key: string, onDataSuccess?: (deletedItem: T) => void) => void
+  handleConfirmRestore: (key: string, onDataSuccess?: (deletedItem: T) => void) => void
   handleConfirmCancelEditing: () => void
   handleConfirmCancelDeleting: () => void
   handleConfirmCancelRestore: () => void
   handleConvertDataSource: (meta: ResponseDataType) => void
 }
 
-export default function useTable<T extends { key: string }>(initValue: TableItemWithKey<T>[]): UseTableProps<T> {
+export default function useTable<T extends RequiredDataType>(initValue: T[]): UseTableProps<T> {
   const [scrollIndex, setScrollIndex] = useState<number>(0)
   const [loading, setLoading] = useState<boolean>(false)
-  const [dataSource, setDataSource] = useState<TableItemWithKey<T>[]>(initValue)
+  const [dataSource, setDataSource] = useState<T[]>(initValue)
   const [editingKey, setEditingKey] = useState<string>('')
   const [deletingKey, setDeletingKey] = useState<string>('')
   const [showDeleted, setDeletedRecordState] = useState<boolean>(false)
@@ -44,13 +42,13 @@ export default function useTable<T extends { key: string }>(initValue: TableItem
 
   const handleConvertDataSource = (meta: ResponseDataType) => {
     setLoading(true)
-    const items = meta.data as TableItemWithId<T>[]
+    const items = meta.data as T[]
     setDataSource(
-      items.map((item: TableItemWithId<T>) => {
+      items.map((item: T) => {
         return {
           ...item,
-          key: item.id
-        } as TableItemWithKey<T>
+          key: `${item.id}`
+        } as T
       })
     )
     setLoading(false)
@@ -68,7 +66,7 @@ export default function useTable<T extends { key: string }>(initValue: TableItem
     setDeletingKey(key)
   }
 
-  const handleConfirmDeleting = (key: string, onDataSuccess?: (deletedItem: TableItemWithKey<T>) => void) => {
+  const handleConfirmDeleting = (key: string, onDataSuccess?: (deletedItem: T) => void) => {
     setLoading(true)
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
@@ -79,7 +77,7 @@ export default function useTable<T extends { key: string }>(initValue: TableItem
     setLoading(false)
   }
 
-  const handleConfirmRestore = (key: string, onDataSuccess?: (deletedItem: TableItemWithKey<T>) => void) => {
+  const handleConfirmRestore = (key: string, onDataSuccess?: (deletedItem: T) => void) => {
     setLoading(true)
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
@@ -131,12 +129,12 @@ export default function useTable<T extends { key: string }>(initValue: TableItem
     }
   }
 
-  const handleStartAddNew = (item: TableItemWithKey<T>) => {
+  const handleStartAddNew = (item: T) => {
     const newDataSource = [...dataSource]
     newDataSource.unshift({
       ...item,
       key: item.key
-    } as TableItemWithKey<T>)
+    } as T)
     setDataSource(newDataSource)
   }
 

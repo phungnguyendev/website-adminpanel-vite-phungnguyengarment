@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { ResponseDataType, defaultRequestBody } from '~/api/client'
 import GoogleDriveAPI from '~/api/services/GoogleDriveAPI'
 import HeroBannerAPI from '~/api/services/HeroBannerAPI'
-import { TableItemWithKey, UseTableProps } from '~/components/hooks/useTable'
+import { UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
 import { HeroBannerTableDataType } from '~/pages/home/type'
 import { HeroBanner, Product } from '~/typing'
@@ -34,7 +34,7 @@ export default function useHeroBanner(table: UseTableProps<HeroBannerTableDataTy
             ...defaultRequestBody,
             paginator: { page: heroBannerService.page, pageSize: defaultRequestBody.paginator?.pageSize },
             filter: { ...defaultRequestBody.filter },
-            sorting: { ...defaultRequestBody.sorting, direction: 'asc' }
+            sorting: { ...defaultRequestBody.sorting, column: 'orderNumber', direction: 'asc' }
           },
           setLoading,
           (meta) => {
@@ -75,7 +75,7 @@ export default function useHeroBanner(table: UseTableProps<HeroBannerTableDataTy
     )
   }
 
-  const handleSaveClick = async (record: TableItemWithKey<HeroBannerTableDataType>) => {
+  const handleSaveClick = async (record: HeroBannerTableDataType) => {
     // const row = (await form.validateFields()) as any
     try {
       setLoading(true)
@@ -88,9 +88,11 @@ export default function useHeroBanner(table: UseTableProps<HeroBannerTableDataTy
           setLoading,
           (meta) => {
             if (!meta?.success) throw new Error('API update group failed')
-            GoogleDriveAPI.deleteFile(record.imageId!).then((res) => {
-              if (!res?.success) throw new Error('Remove old image failed!')
-            })
+            if (newRecord.imageId !== record.imageId) {
+              GoogleDriveAPI.deleteFile(record.imageId!).then((res) => {
+                if (!res?.success) throw new Error('Remove old image failed!')
+              })
+            }
             message.success(meta.message)
           }
         )
@@ -124,7 +126,7 @@ export default function useHeroBanner(table: UseTableProps<HeroBannerTableDataTy
   }
 
   const handleConfirmDelete = async (
-    item: TableItemWithKey<HeroBannerTableDataType>,
+    item: HeroBannerTableDataType,
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
     try {

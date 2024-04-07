@@ -1,12 +1,14 @@
 import { Image, Skeleton, UploadFile } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import 'react-lazy-load-image-component/src/effects/blur.css'
+import HeroBannerAPI from '~/api/services/HeroBannerAPI'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable2 from '~/components/sky-ui/SkyTable/SkyTable2'
 import SkyTableRow from '~/components/sky-ui/SkyTable/SkyTableRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import { HeroBanner } from '~/typing'
 import { getPublicUrlGoogleDrive, textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
 import useHeroBanner from '../../hooks/useHeroBanner'
 import { HeroBannerTableDataType } from '../../type'
@@ -36,7 +38,6 @@ const HeroBannerTable: React.FC = () => {
           isEditing={table.isEditing(record.key)}
           dataIndex='imageId'
           title='Image'
-          required={true}
           inputType='uploadFile'
           initialValue={textValidatorInit(record.imageId)}
           value={newRecord.imageId}
@@ -44,18 +45,13 @@ const HeroBannerTable: React.FC = () => {
             setNewRecord({ ...newRecord, imageId: textValidatorChange(val.response.data.id) })
           }}
         >
-          {/* <Image
-            src={getPublicUrlGoogleDrive(record.imageId ?? '')}
-            className='h-[200px] max-h-[200px] min-h-[200px] w-[200px] min-w-[200px] max-w-[200px] object-cover'
-            fallback={NoImage}
-          /> */}
           <Image
             alt='banner-img'
             src={getPublicUrlGoogleDrive(record.imageId ?? '')}
             height={120}
             width={120}
             className='object-cover'
-            placeholder={<Skeleton.Avatar active={true} size={200} shape='square' />}
+            placeholder={<Skeleton.Avatar active={true} size={120} shape='square' />}
           />
         </EditableStateCell>
       )
@@ -139,6 +135,23 @@ const HeroBannerTable: React.FC = () => {
           components={{
             body: {
               row: SkyTableRow
+            }
+          }}
+          onDraggableChange={(oldData, newData) => {
+            if (newData) {
+              console.log({
+                oldData,
+                newData
+              })
+              HeroBannerAPI.updateList(
+                newData.map((item, index) => {
+                  return { ...item, orderNumber: index } as HeroBanner
+                }) as HeroBanner[]
+              )
+                .then((res) => {
+                  if (res?.success) console.log(res?.data)
+                })
+                .catch((e) => console.log(`${e}`))
             }
           }}
           actionProps={{

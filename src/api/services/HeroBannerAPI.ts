@@ -95,6 +95,16 @@ export default {
         throwErrorFormatter(error)
       })
   },
+  updateList: async (itemsToUpdate: HeroBanner[]): Promise<ResponseDataType | undefined> => {
+    return client
+      .post(`${NAMESPACE}/all`, itemsToUpdate)
+      .then((res) => {
+        return responseFormatter(res)
+      })
+      .catch(function (error) {
+        throwErrorFormatter(error)
+      })
+  },
   updateItemBy: async (
     query: {
       field: string
