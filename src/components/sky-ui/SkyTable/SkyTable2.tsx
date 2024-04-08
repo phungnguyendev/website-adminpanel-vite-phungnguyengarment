@@ -122,6 +122,7 @@ const SkyTable2 = <T extends RequiredDataType>({ ...props }: SkyTable2Props<T>) 
               row: SkyTableRow2
             }
           }}
+          className='z-0'
           rowKey='key'
           dataSource={props.dataSource}
           pagination={

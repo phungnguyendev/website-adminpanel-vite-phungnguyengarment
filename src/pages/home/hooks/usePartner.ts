@@ -2,44 +2,44 @@ import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
 import { ResponseDataType, defaultRequestBody } from '~/api/client'
 import GoogleDriveAPI from '~/api/services/GoogleDriveAPI'
-import HomeProductAPI from '~/api/services/HomeProductAPI'
+import PartnerAPI from '~/api/services/PartnerAPI'
 import { UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
-import { HomeProduct, Product } from '~/typing'
-import { HomeProductTableDataType } from '../type'
+import { Partner, Product } from '~/typing'
+import { PartnerTableDataType } from '../type'
 
-export interface HomeProductNewRecordProps {
+export interface PartnerNewRecordProps {
   title?: string | null
   imageId?: string | null
 }
 
-export default function useHomeProduct(table: UseTableProps<HomeProductTableDataType>) {
+export default function usePartner(table: UseTableProps<PartnerTableDataType>) {
   const { showDeleted, setLoading, setDataSource, handleConfirmDeleting, handleConfirmCancelEditing } = table
 
-  const homeProductService = useAPIService<HomeProduct>(HomeProductAPI)
+  const partnerService = useAPIService<Partner>(PartnerAPI)
 
   const { message } = AntApp.useApp()
 
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
-  const [newRecord, setNewRecord] = useState<HomeProductNewRecordProps>({})
-  const [heroBanners, setHomeProducts] = useState<HomeProduct[]>([])
+  const [newRecord, setNewRecord] = useState<PartnerNewRecordProps>({})
+  const [partners, setPartners] = useState<Partner[]>([])
 
   const loadData = async () => {
     try {
       setLoading(true)
       try {
-        await homeProductService.getListItems(
+        await partnerService.getListItems(
           {
             ...defaultRequestBody,
-            paginator: { page: homeProductService.page, pageSize: defaultRequestBody.paginator?.pageSize },
+            paginator: { page: partnerService.page, pageSize: defaultRequestBody.paginator?.pageSize },
             filter: { ...defaultRequestBody.filter },
             sorting: { ...defaultRequestBody.sorting, column: 'orderNumber', direction: 'asc' }
           },
           setLoading,
           (meta) => {
             if (meta?.success) {
-              setHomeProducts(meta.data as HomeProduct[])
+              setPartners(meta.data as Partner[])
             }
           }
         )
@@ -60,29 +60,29 @@ export default function useHomeProduct(table: UseTableProps<HomeProductTableData
   }, [showDeleted])
 
   useEffect(() => {
-    selfConvertDataSource(heroBanners)
-  }, [heroBanners])
+    selfConvertDataSource(partners)
+  }, [partners])
 
-  const selfConvertDataSource = (_heroBanners: HomeProduct[]) => {
-    const items = _heroBanners
+  const selfConvertDataSource = (_partners: Partner[]) => {
+    const items = _partners
     setDataSource(
       items.map((item) => {
         return {
           key: `${item.id}`,
           ...item
-        } as HomeProductTableDataType
+        } as PartnerTableDataType
       })
     )
   }
 
-  const handleSaveClick = async (record: HomeProductTableDataType) => {
+  const handleSaveClick = async (record: PartnerTableDataType) => {
     // const row = (await form.validateFields()) as any
     try {
       setLoading(true)
       console.log(newRecord)
       if (newRecord.title && (newRecord.title !== record.title || newRecord.imageId !== record.imageId)) {
-        console.log('HomeProduct update progressing...')
-        await homeProductService.updateItemByPk(
+        console.log('Partner update progressing...')
+        await partnerService.updateItemByPk(
           record.id!,
           { title: newRecord.title, imageId: newRecord.imageId },
           setLoading,
@@ -107,11 +107,11 @@ export default function useHomeProduct(table: UseTableProps<HomeProductTableData
     }
   }
 
-  const handleAddNewItem = async (formAddNew: HomeProductNewRecordProps) => {
+  const handleAddNewItem = async (formAddNew: PartnerNewRecordProps) => {
     try {
       console.log(formAddNew)
       setLoading(true)
-      await homeProductService.createNewItem(formAddNew as HomeProduct, setLoading, (meta) => {
+      await partnerService.createNewItem(formAddNew as Partner, setLoading, (meta) => {
         if (!meta?.success) throw new Error('Create failed!')
         message.success('Success')
       })
@@ -126,12 +126,12 @@ export default function useHomeProduct(table: UseTableProps<HomeProductTableData
   }
 
   const handleConfirmDelete = async (
-    item: HomeProductTableDataType,
+    item: PartnerTableDataType,
     onDataSuccess?: (meta: ResponseDataType | undefined) => void
   ) => {
     try {
       setLoading(true)
-      await homeProductService.deleteItemByPk(item.id!, setLoading, (meta) => {
+      await partnerService.deleteItemByPk(item.id!, setLoading, (meta) => {
         if (!meta?.success) throw new Error('Delete item failed!')
         handleConfirmDeleting(`${item.id}`)
         message.success('Deleted!')
@@ -148,7 +148,7 @@ export default function useHomeProduct(table: UseTableProps<HomeProductTableData
   const handlePageChange = async (_page: number) => {
     try {
       setLoading(true)
-      await homeProductService.pageChange(
+      await partnerService.pageChange(
         _page,
         setLoading,
         (meta) => {
@@ -174,7 +174,7 @@ export default function useHomeProduct(table: UseTableProps<HomeProductTableData
   const handleSortChange = async (checked: boolean) => {
     try {
       setLoading(true)
-      await homeProductService.sortedListItems(
+      await partnerService.sortedListItems(
         checked ? 'asc' : 'desc',
         setLoading,
         (meta) => {
@@ -196,7 +196,7 @@ export default function useHomeProduct(table: UseTableProps<HomeProductTableData
     try {
       setLoading(true)
       if (value.length > 0) {
-        await homeProductService.getListItems(
+        await partnerService.getListItems(
           {
             ...defaultRequestBody,
             search: {
@@ -230,7 +230,7 @@ export default function useHomeProduct(table: UseTableProps<HomeProductTableData
     setLoading,
     setOpenModal,
     setDataSource,
-    homeProductService,
+    partnerService,
     handleSaveClick,
     handleResetClick,
     handleSortChange,

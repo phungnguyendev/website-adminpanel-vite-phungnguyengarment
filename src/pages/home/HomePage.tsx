@@ -1,6 +1,8 @@
 import useTitle from '~/components/hooks/useTitle'
 import BaseLayout from '~/components/layout/BaseLayout'
-import HeroBannerTable from './components/herobanner/HeroBannerTable'
+import HeroBannerTable from './components/hero-banner/HeroBannerTable'
+import HomeProductTable from './components/home-product/HomeProductTable'
+import PartnerTable from './components/partner/PartnerTable'
 
 const HomePage: React.FC = () => {
   useTitle('Home page')
@@ -9,6 +11,8 @@ const HomePage: React.FC = () => {
     <>
       <BaseLayout title='Trang chủ'>
         <HeroBannerTable />
+        <HomeProductTable />
+        <PartnerTable />
       </BaseLayout>
     </>
   )

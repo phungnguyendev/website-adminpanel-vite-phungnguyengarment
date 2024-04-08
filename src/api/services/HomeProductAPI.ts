@@ -1,11 +1,10 @@
 import client, { RequestBodyType, ResponseDataType } from '~/api/client'
-import { AccessoryNote } from '~/typing'
+import { HomeProduct } from '~/typing'
 import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatter'
-
 const NAMESPACE = 'home-products'
 
 export default {
-  createNewItem: async (item: AccessoryNote, accessToken: string): Promise<ResponseDataType | undefined> => {
+  createNewItem: async (item: HomeProduct, accessToken: string): Promise<ResponseDataType | undefined> => {
     return await client
       .post(
         `${NAMESPACE}`,
@@ -76,17 +75,29 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItemByPk: async (
-    id: number,
-    itemToUpdate: AccessoryNote,
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
+  updateItemByPk: async (id: number, item: HomeProduct, accessToken: string): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${NAMESPACE}/${id}`, itemToUpdate, {
-        headers: {
-          authorization: accessToken
+      .put(
+        `${NAMESPACE}/${id}`,
+        {
+          ...item
+        },
+        {
+          headers: {
+            authorization: accessToken
+          }
         }
+      )
+      .then((res) => {
+        return responseFormatter(res)
       })
+      .catch(function (error) {
+        throwErrorFormatter(error)
+      })
+  },
+  updateList: async (itemsToUpdate: HomeProduct[]): Promise<ResponseDataType | undefined> => {
+    return client
+      .post(`${NAMESPACE}/all`, itemsToUpdate)
       .then((res) => {
         return responseFormatter(res)
       })
@@ -99,15 +110,21 @@ export default {
       field: string
       key: React.Key
     },
-    item: AccessoryNote,
+    item: HomeProduct,
     accessToken: string
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${NAMESPACE}/${query.field}/${query.key}`, item, {
-        headers: {
-          authorization: accessToken
+      .put(
+        `${NAMESPACE}/${query.field}/${query.key}`,
+        {
+          ...item
+        },
+        {
+          headers: {
+            authorization: accessToken
+          }
         }
-      })
+      )
       .then((res) => {
         return responseFormatter(res)
       })

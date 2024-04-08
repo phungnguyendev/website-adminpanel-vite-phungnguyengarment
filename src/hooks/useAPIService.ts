@@ -19,7 +19,7 @@ export interface APIService<T extends ItemWithId> {
     accessToken: string
   ) => Promise<ResponseDataType | undefined>
   getItemByPk: (id: number, accessToken: string) => Promise<ResponseDataType | undefined>
-  getItemBy: (query: { field: string; key: React.Key }, accessToken: string) => Promise<ResponseDataType | undefined>
+  getItemBy?: (query: { field: string; key: React.Key }, accessToken: string) => Promise<ResponseDataType | undefined>
   getItems: (params: RequestBodyType, accessToken: string) => Promise<ResponseDataType | undefined>
   updateItemByPk: (id: number, itemToUpdate: Partial<T>, accessToken: string) => Promise<ResponseDataType | undefined>
   updateItemsBy?: (
@@ -27,7 +27,7 @@ export interface APIService<T extends ItemWithId> {
     recordsToUpdate: Partial<T>[],
     accessToken: string
   ) => Promise<ResponseDataType | undefined>
-  updateItemBy: (
+  updateItemBy?: (
     query: {
       field: string
       key: React.Key
@@ -277,7 +277,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.updateItemBy(query, itemToUpdate, accessTokenStored ?? '')
+      const meta = await apiService.updateItemBy?.(query, itemToUpdate, accessTokenStored ?? '')
       if (meta?.success) {
         onDataSuccess?.(meta, 'Updated!')
       } else {

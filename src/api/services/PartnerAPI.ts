@@ -1,11 +1,11 @@
 import client, { RequestBodyType, ResponseDataType } from '~/api/client'
-import { AccessoryNote } from '~/typing'
+import { Partner } from '~/typing'
 import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatter'
 
 const NAMESPACE = 'partners'
 
 export default {
-  createNewItem: async (item: AccessoryNote, accessToken: string): Promise<ResponseDataType | undefined> => {
+  createNewItem: async (item: Partner, accessToken: string): Promise<ResponseDataType | undefined> => {
     return await client
       .post(
         `${NAMESPACE}`,
@@ -76,17 +76,9 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItemByPk: async (
-    id: number,
-    itemToUpdate: AccessoryNote,
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
+  updateList: async (itemsToUpdate: Partner[]): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${NAMESPACE}/${id}`, itemToUpdate, {
-        headers: {
-          authorization: accessToken
-        }
-      })
+      .post(`${NAMESPACE}/all`, itemsToUpdate)
       .then((res) => {
         return responseFormatter(res)
       })
@@ -94,16 +86,13 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItemBy: async (
-    query: {
-      field: string
-      key: React.Key
-    },
-    item: AccessoryNote,
+  updateItemByPk: async (
+    id: number,
+    itemToUpdate: Partner,
     accessToken: string
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${NAMESPACE}/${query.field}/${query.key}`, item, {
+      .put(`${NAMESPACE}/${id}`, itemToUpdate, {
         headers: {
           authorization: accessToken
         }

@@ -13,7 +13,7 @@ const SkyModalWrapper: React.FC<SkyModalWrapperProps> = ({ loading, ...props }) 
       title={<Typography.Title level={2}>{props.title}</Typography.Title>}
       centered
       width={900}
-      className='w-full'
+      className='z-10 w-full'
     >
       <Spin spinning={loading} tip='loading'>
         {props.children}

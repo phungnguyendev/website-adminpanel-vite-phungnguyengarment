@@ -5,8 +5,8 @@ import GoogleDriveAPI from '~/api/services/GoogleDriveAPI'
 import HeroBannerAPI from '~/api/services/HeroBannerAPI'
 import { UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
-import { HeroBannerTableDataType } from '~/pages/home/type'
 import { HeroBanner, Product } from '~/typing'
+import { HeroBannerTableDataType } from '../type'
 
 export interface HeroBannerNewRecordProps {
   title?: string | null
