@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ResponseDataType } from '~/api/client'
-import { RequiredDataType } from '../sky-ui/SkyTable/SkyTable2'
+import { RequiredDataType } from '../sky-ui/SkyTable/SkyTable'
 
 export interface UseTableProps<T extends RequiredDataType> {
   loading: boolean

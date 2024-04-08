@@ -207,6 +207,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
           page: _page,
           pageSize: 5
         },
+        sorting: { ...defaultRequestBody.sorting, column: 'orderNumber', direction: 'asc' },
         search: search
       }
       await getListItems(body, setLoading, onDataSuccess)

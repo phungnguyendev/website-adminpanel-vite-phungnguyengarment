@@ -1,11 +1,11 @@
 import { UploadFile } from 'antd'
 import { ColumnsType } from 'antd/es/table'
-import { LazyLoadImage } from 'react-lazy-load-image-component'
 import HeroBannerAPI from '~/api/services/HeroBannerAPI'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
+import LazyImage from '~/components/sky-ui/LazyImage'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
-import SkyTable2 from '~/components/sky-ui/SkyTable/SkyTable2'
+import SkyTable2 from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableRow from '~/components/sky-ui/SkyTable/SkyTableRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { HeroBanner } from '~/typing'
@@ -45,21 +45,14 @@ const HeroBannerTable: React.FC = () => {
             setNewRecord({ ...newRecord, imageId: textValidatorChange(val.response.data.id) })
           }}
         >
-          {/* <Image
+          <LazyImage alt='banner-img' src={getPublicUrlGoogleDrive(record.imageId ?? '')} height={120} width={120} />
+          {/* <LazyLoadImage
+            width={120}
+            height={120}
+            className='object-cover'
             alt='banner-img'
             src={getPublicUrlGoogleDrive(record.imageId ?? '')}
-            height={120}
-            width={120}
-            className='object-cover'
-            placeholder={<Skeleton.Avatar active={true} size={120} shape='square' />}
           /> */}
-          <LazyLoadImage
-            width={120}
-            height={120}
-            className='object-cover'
-            alt='banner-img'
-            src={getPublicUrlGoogleDrive(record.imageId ?? '')}
-          />
         </EditableStateCell>
       )
     },

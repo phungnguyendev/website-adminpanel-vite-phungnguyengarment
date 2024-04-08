@@ -6,7 +6,6 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import useLocalStorage from '~/hooks/useLocalStorage'
-import ProfileDialog from '~/pages/user/components/profiles/ProfileDialog'
 import { RootState } from '~/store/store'
 import { cn, extractEmailName } from '~/utils/helpers'
 
@@ -18,7 +17,6 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
 
 const Header: React.FC<Props> = ({ onMenuClick, ...props }) => {
   const [collapsed, setCollapsed] = useState<boolean>(false)
-  const [openProfile, setOpenProfile] = useState<boolean>(false)
   const [, setAccessTokenStored] = useLocalStorage<string>('accessToken', '')
   const [isHidden, setIsHidden] = useState(false)
   const [offsetY, setOffsetY] = useState<number>(0)
@@ -45,10 +43,6 @@ const Header: React.FC<Props> = ({ onMenuClick, ...props }) => {
   }, [])
 
   const items: MenuProps['items'] = [
-    {
-      label: <a onClick={() => setOpenProfile(true)}>View your profile</a>,
-      key: '0'
-    },
     // {
     //   label: <a>Change password</a>,
     //   key: '1'
@@ -117,7 +111,6 @@ const Header: React.FC<Props> = ({ onMenuClick, ...props }) => {
           </Flex>
         </Space>
       </Flex>
-      <ProfileDialog open={openProfile} setOpen={setOpenProfile} />
     </AntHeader>
   )
 }

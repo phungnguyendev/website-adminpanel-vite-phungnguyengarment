@@ -158,6 +158,14 @@ export interface Product {
   updatedAt?: string
 }
 
+export interface ProductCategory {
+  id?: number
+  categoryID?: number | null
+  productID?: number | null
+  createdAt?: string
+  updatedAt?: string
+}
+
 export interface Project {
   id?: number
   title?: string | null

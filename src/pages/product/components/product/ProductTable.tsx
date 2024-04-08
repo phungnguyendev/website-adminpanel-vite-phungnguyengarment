@@ -1,6 +1,6 @@
 import { UploadFile } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
-import PartnerAPI from '~/api/services/PartnerAPI'
+import { ColumnsType } from 'antd/es/table'
+import ProductAPI from '~/api/services/ProductAPI'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import LazyImage from '~/components/sky-ui/LazyImage'
@@ -8,14 +8,14 @@ import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable2 from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableRow from '~/components/sky-ui/SkyTable/SkyTableRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { Partner } from '~/typing'
+import { Product } from '~/typing'
 import { getPublicUrlGoogleDrive, textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
-import usePartner from '../../hooks/usePartner'
-import { PartnerTableDataType } from '../../type'
-import ModalAddNewPartner from './ModalAddNewPartner'
+import useProduct from '../../hooks/useProduct'
+import { ProductTableDataType } from '../../type'
+import ModalAddNewProduct from './ModalAddNewProduct'
 
-const PartnerTable: React.FC = () => {
-  const table = useTable<PartnerTableDataType>([])
+const ProductTable: React.FC = () => {
+  const table = useTable<ProductTableDataType>([])
   const {
     newRecord,
     setNewRecord,
@@ -25,14 +25,14 @@ const PartnerTable: React.FC = () => {
     handleAddNewItem,
     handleConfirmDelete,
     handlePageChange,
-    partnerService
-  } = usePartner(table)
+    productService
+  } = useProduct(table)
 
   const columns = {
-    id: (record: PartnerTableDataType) => {
+    id: (record: ProductTableDataType) => {
       return <SkyTableTypography strong>{textValidatorDisplay(String(record.id))}</SkyTableTypography>
     },
-    image: (record: PartnerTableDataType) => {
+    image: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
           isEditing={table.isEditing(record.key)}
@@ -45,17 +45,11 @@ const PartnerTable: React.FC = () => {
             setNewRecord({ ...newRecord, imageId: textValidatorChange(val.response.data.id) })
           }}
         >
-          <LazyImage
-            alt='banner-img'
-            className='object-contain'
-            src={getPublicUrlGoogleDrive(record.imageId ?? '')}
-            height={120}
-            width={120}
-          />
+          <LazyImage alt='banner-img' src={getPublicUrlGoogleDrive(record.imageId ?? '')} height={120} width={120} />
         </EditableStateCell>
       )
     },
-    title: (record: PartnerTableDataType) => {
+    title: (record: ProductTableDataType) => {
       return (
         <EditableStateCell
           isEditing={table.isEditing(record.key!)}
@@ -72,10 +66,28 @@ const PartnerTable: React.FC = () => {
           </SkyTableTypography>
         </EditableStateCell>
       )
+    },
+    desc: (record: ProductTableDataType) => {
+      return (
+        <EditableStateCell
+          isEditing={table.isEditing(record.key!)}
+          dataIndex='desc'
+          title='Description'
+          inputType='text'
+          required={true}
+          initialValue={textValidatorInit(record.desc)}
+          value={newRecord.desc}
+          onValueChange={(val: string) => setNewRecord({ ...newRecord, desc: textValidatorChange(val) })}
+        >
+          <SkyTableTypography placeholder='asd' status={'active'}>
+            {textValidatorDisplay(record.desc)}
+          </SkyTableTypography>
+        </EditableStateCell>
+      )
     }
   }
 
-  const tableColumns: ColumnsType<PartnerTableDataType> = [
+  const tableColumns: ColumnsType<ProductTableDataType> = [
     {
       key: 'sort',
       width: '2%'
@@ -84,7 +96,7 @@ const PartnerTable: React.FC = () => {
       title: 'ID',
       dataIndex: 'id',
       width: '5%',
-      render: (_value: any, record: PartnerTableDataType) => {
+      render: (_value: any, record: ProductTableDataType) => {
         return columns.id(record)
       }
     },
@@ -93,7 +105,7 @@ const PartnerTable: React.FC = () => {
       dataIndex: 'imageId',
       width: '10%',
       responsive: ['sm'],
-      render: (_value: any, record: PartnerTableDataType) => {
+      render: (_value: any, record: ProductTableDataType) => {
         return columns.image(record)
       }
     },
@@ -102,8 +114,17 @@ const PartnerTable: React.FC = () => {
       dataIndex: 'title',
       width: '20%',
       responsive: ['sm'],
-      render: (_value: any, record: PartnerTableDataType) => {
+      render: (_value: any, record: ProductTableDataType) => {
         return columns.title(record)
+      }
+    },
+    {
+      title: 'Description',
+      dataIndex: 'desc',
+      width: '20%',
+      responsive: ['sm'],
+      render: (_value: any, record: ProductTableDataType) => {
+        return columns.desc(record)
       }
     }
   ]
@@ -111,7 +132,7 @@ const PartnerTable: React.FC = () => {
   return (
     <>
       <BaseLayout
-        title='Partners'
+        title='Products'
         titleProps={{
           level: 5,
           type: 'secondary'
@@ -126,9 +147,10 @@ const PartnerTable: React.FC = () => {
           setDataSource={table.setDataSource}
           loading={table.loading}
           columns={tableColumns}
+          pageSize={10}
           editingKey={table.editingKey}
           deletingKey={table.deletingKey}
-          metaData={partnerService.metaData}
+          metaData={productService.metaData}
           onPageChange={handlePageChange}
           isShowDeleted={table.showDeleted}
           components={{
@@ -142,10 +164,10 @@ const PartnerTable: React.FC = () => {
                 oldData,
                 newData
               })
-              PartnerAPI.updateList(
+              ProductAPI.updateList(
                 newData.map((item, index) => {
-                  return { ...item, orderNumber: index } as Partner
-                }) as Partner[]
+                  return { ...item, orderNumber: index } as Product
+                }) as Product[]
               )
                 .then((res) => {
                   if (res?.success) console.log(res?.data)
@@ -183,15 +205,10 @@ const PartnerTable: React.FC = () => {
         />
       </BaseLayout>
       {openModal && (
-        <ModalAddNewPartner
-          loading={table.loading}
-          openModal={openModal}
-          setOpenModal={setOpenModal}
-          onAddNew={handleAddNewItem}
-        />
+        <ModalAddNewProduct openModal={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNewItem} />
       )}
     </>
   )
 }
 
-export default PartnerTable
+export default ProductTable

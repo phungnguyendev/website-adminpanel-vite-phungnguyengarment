@@ -1,12 +1,11 @@
-import { Skeleton, UploadFile } from 'antd'
+import { UploadFile } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
-import { LazyLoadImage } from 'react-lazy-load-image-component'
 import HomeProductAPI from '~/api/services/HomeProductAPI'
-import { NoImage } from '~/assets'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
+import LazyImage from '~/components/sky-ui/LazyImage'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
-import SkyTable2 from '~/components/sky-ui/SkyTable/SkyTable2'
+import SkyTable2 from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableRow from '~/components/sky-ui/SkyTable/SkyTableRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { HomeProduct } from '~/typing'
@@ -46,15 +45,8 @@ const HomeProductTable: React.FC = () => {
             setNewRecord({ ...newRecord, imageId: textValidatorChange(val.response.data.id) })
           }}
         >
-          {/* <Image
-            alt='banner-img'
-            src={getPublicUrlGoogleDrive(record.imageId ?? '')}
-            height={120}
-            width={120}
-            className='object-cover'
-            placeholder={<Skeleton.Avatar active={true} size={120} shape='square' />}
-          /> */}
-          <LazyLoadImage
+          <LazyImage alt='banner-img' src={getPublicUrlGoogleDrive(record.imageId ?? '')} height={120} width={120} />
+          {/* <LazyLoadImage
             width={120}
             height={120}
             className='object-contain'
@@ -62,7 +54,7 @@ const HomeProductTable: React.FC = () => {
             src={getPublicUrlGoogleDrive(record.imageId ?? '')}
             placeholder={<Skeleton.Avatar active size={120} shape='square' />}
             placeholderSrc={NoImage}
-          />
+          /> */}
         </EditableStateCell>
       )
     },

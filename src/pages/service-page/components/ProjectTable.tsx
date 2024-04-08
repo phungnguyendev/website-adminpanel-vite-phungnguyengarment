@@ -1,6 +1,6 @@
 import { UploadFile } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
-import PartnerAPI from '~/api/services/PartnerAPI'
+import { ColumnsType } from 'antd/es/table'
+import ProjectAPI from '~/api/services/ProjectAPI'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import LazyImage from '~/components/sky-ui/LazyImage'
@@ -8,14 +8,14 @@ import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable2 from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableRow from '~/components/sky-ui/SkyTable/SkyTableRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { Partner } from '~/typing'
+import { Project } from '~/typing'
 import { getPublicUrlGoogleDrive, textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
-import usePartner from '../../hooks/usePartner'
-import { PartnerTableDataType } from '../../type'
-import ModalAddNewPartner from './ModalAddNewPartner'
+import useProject from '../hooks/useProject'
+import { ProjectTableDataType } from '../type'
+import ModalAddNewProject from './ModalAddNewProject'
 
-const PartnerTable: React.FC = () => {
-  const table = useTable<PartnerTableDataType>([])
+const ProjectTable: React.FC = () => {
+  const table = useTable<ProjectTableDataType>([])
   const {
     newRecord,
     setNewRecord,
@@ -25,14 +25,14 @@ const PartnerTable: React.FC = () => {
     handleAddNewItem,
     handleConfirmDelete,
     handlePageChange,
-    partnerService
-  } = usePartner(table)
+    projectService
+  } = useProject(table)
 
   const columns = {
-    id: (record: PartnerTableDataType) => {
+    id: (record: ProjectTableDataType) => {
       return <SkyTableTypography strong>{textValidatorDisplay(String(record.id))}</SkyTableTypography>
     },
-    image: (record: PartnerTableDataType) => {
+    image: (record: ProjectTableDataType) => {
       return (
         <EditableStateCell
           isEditing={table.isEditing(record.key)}
@@ -45,17 +45,11 @@ const PartnerTable: React.FC = () => {
             setNewRecord({ ...newRecord, imageId: textValidatorChange(val.response.data.id) })
           }}
         >
-          <LazyImage
-            alt='banner-img'
-            className='object-contain'
-            src={getPublicUrlGoogleDrive(record.imageId ?? '')}
-            height={120}
-            width={120}
-          />
+          <LazyImage alt='banner-img' src={getPublicUrlGoogleDrive(record.imageId ?? '')} height={120} width={120} />
         </EditableStateCell>
       )
     },
-    title: (record: PartnerTableDataType) => {
+    title: (record: ProjectTableDataType) => {
       return (
         <EditableStateCell
           isEditing={table.isEditing(record.key!)}
@@ -72,10 +66,28 @@ const PartnerTable: React.FC = () => {
           </SkyTableTypography>
         </EditableStateCell>
       )
+    },
+    desc: (record: ProjectTableDataType) => {
+      return (
+        <EditableStateCell
+          isEditing={table.isEditing(record.key!)}
+          dataIndex='desc'
+          title='Description'
+          inputType='text'
+          required={true}
+          initialValue={textValidatorInit(record.desc)}
+          value={newRecord.desc}
+          onValueChange={(val: string) => setNewRecord({ ...newRecord, desc: textValidatorChange(val) })}
+        >
+          <SkyTableTypography placeholder='asd' status={'active'}>
+            {textValidatorDisplay(record.desc)}
+          </SkyTableTypography>
+        </EditableStateCell>
+      )
     }
   }
 
-  const tableColumns: ColumnsType<PartnerTableDataType> = [
+  const tableColumns: ColumnsType<ProjectTableDataType> = [
     {
       key: 'sort',
       width: '2%'
@@ -84,7 +96,7 @@ const PartnerTable: React.FC = () => {
       title: 'ID',
       dataIndex: 'id',
       width: '5%',
-      render: (_value: any, record: PartnerTableDataType) => {
+      render: (_value: any, record: ProjectTableDataType) => {
         return columns.id(record)
       }
     },
@@ -93,7 +105,7 @@ const PartnerTable: React.FC = () => {
       dataIndex: 'imageId',
       width: '10%',
       responsive: ['sm'],
-      render: (_value: any, record: PartnerTableDataType) => {
+      render: (_value: any, record: ProjectTableDataType) => {
         return columns.image(record)
       }
     },
@@ -102,8 +114,17 @@ const PartnerTable: React.FC = () => {
       dataIndex: 'title',
       width: '20%',
       responsive: ['sm'],
-      render: (_value: any, record: PartnerTableDataType) => {
+      render: (_value: any, record: ProjectTableDataType) => {
         return columns.title(record)
+      }
+    },
+    {
+      title: 'Description',
+      dataIndex: 'desc',
+      width: '20%',
+      responsive: ['sm'],
+      render: (_value: any, record: ProjectTableDataType) => {
+        return columns.desc(record)
       }
     }
   ]
@@ -111,7 +132,7 @@ const PartnerTable: React.FC = () => {
   return (
     <>
       <BaseLayout
-        title='Partners'
+        title='Projects'
         titleProps={{
           level: 5,
           type: 'secondary'
@@ -126,9 +147,10 @@ const PartnerTable: React.FC = () => {
           setDataSource={table.setDataSource}
           loading={table.loading}
           columns={tableColumns}
+          pageSize={10}
           editingKey={table.editingKey}
           deletingKey={table.deletingKey}
-          metaData={partnerService.metaData}
+          metaData={projectService.metaData}
           onPageChange={handlePageChange}
           isShowDeleted={table.showDeleted}
           components={{
@@ -142,10 +164,10 @@ const PartnerTable: React.FC = () => {
                 oldData,
                 newData
               })
-              PartnerAPI.updateList(
+              ProjectAPI.updateList(
                 newData.map((item, index) => {
-                  return { ...item, orderNumber: index } as Partner
-                }) as Partner[]
+                  return { ...item, orderNumber: index } as Project
+                }) as Project[]
               )
                 .then((res) => {
                   if (res?.success) console.log(res?.data)
@@ -183,7 +205,7 @@ const PartnerTable: React.FC = () => {
         />
       </BaseLayout>
       {openModal && (
-        <ModalAddNewPartner
+        <ModalAddNewProject
           loading={table.loading}
           openModal={openModal}
           setOpenModal={setOpenModal}
@@ -194,4 +216,4 @@ const PartnerTable: React.FC = () => {
   )
 }
 
-export default PartnerTable
+export default ProjectTable

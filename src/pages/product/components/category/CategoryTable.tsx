@@ -1,6 +1,6 @@
 import { UploadFile } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
-import PartnerAPI from '~/api/services/PartnerAPI'
+import { ColumnsType } from 'antd/es/table'
+import CategoryAPI from '~/api/services/CategoryAPI'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import LazyImage from '~/components/sky-ui/LazyImage'
@@ -8,14 +8,14 @@ import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable2 from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableRow from '~/components/sky-ui/SkyTable/SkyTableRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { Partner } from '~/typing'
+import { Category } from '~/typing'
 import { getPublicUrlGoogleDrive, textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
-import usePartner from '../../hooks/usePartner'
-import { PartnerTableDataType } from '../../type'
-import ModalAddNewPartner from './ModalAddNewPartner'
+import useCategory from '../../hooks/useCategory'
+import { CategoryTableDataType } from '../../type'
+import ModalAddNewCategory from './ModalAddNewCategory'
 
-const PartnerTable: React.FC = () => {
-  const table = useTable<PartnerTableDataType>([])
+const CategoryTable: React.FC = () => {
+  const table = useTable<CategoryTableDataType>([])
   const {
     newRecord,
     setNewRecord,
@@ -25,37 +25,37 @@ const PartnerTable: React.FC = () => {
     handleAddNewItem,
     handleConfirmDelete,
     handlePageChange,
-    partnerService
-  } = usePartner(table)
+    categoryService
+  } = useCategory(table)
 
   const columns = {
-    id: (record: PartnerTableDataType) => {
+    id: (record: CategoryTableDataType) => {
       return <SkyTableTypography strong>{textValidatorDisplay(String(record.id))}</SkyTableTypography>
     },
-    image: (record: PartnerTableDataType) => {
+    icon: (record: CategoryTableDataType) => {
       return (
         <EditableStateCell
           isEditing={table.isEditing(record.key)}
-          dataIndex='imageId'
+          dataIndex='icon'
           title='Image'
           inputType='uploadFile'
-          initialValue={textValidatorInit(record.imageId)}
-          value={newRecord.imageId}
+          initialValue={textValidatorInit(record.icon)}
+          value={newRecord.icon}
           onValueChange={(val: UploadFile) => {
-            setNewRecord({ ...newRecord, imageId: textValidatorChange(val.response.data.id) })
+            setNewRecord({ ...newRecord, icon: textValidatorChange(val.response.data.id) })
           }}
         >
           <LazyImage
             alt='banner-img'
             className='object-contain'
-            src={getPublicUrlGoogleDrive(record.imageId ?? '')}
+            src={getPublicUrlGoogleDrive(record.icon ?? '')}
             height={120}
             width={120}
           />
         </EditableStateCell>
       )
     },
-    title: (record: PartnerTableDataType) => {
+    title: (record: CategoryTableDataType) => {
       return (
         <EditableStateCell
           isEditing={table.isEditing(record.key!)}
@@ -72,10 +72,28 @@ const PartnerTable: React.FC = () => {
           </SkyTableTypography>
         </EditableStateCell>
       )
+    },
+    desc: (record: CategoryTableDataType) => {
+      return (
+        <EditableStateCell
+          isEditing={table.isEditing(record.key!)}
+          dataIndex='desc'
+          title='Description'
+          inputType='text'
+          required={true}
+          initialValue={textValidatorInit(record.desc)}
+          value={newRecord.desc}
+          onValueChange={(val: string) => setNewRecord({ ...newRecord, desc: textValidatorChange(val) })}
+        >
+          <SkyTableTypography placeholder='asd' status={'active'}>
+            {textValidatorDisplay(record.desc)}
+          </SkyTableTypography>
+        </EditableStateCell>
+      )
     }
   }
 
-  const tableColumns: ColumnsType<PartnerTableDataType> = [
+  const tableColumns: ColumnsType<CategoryTableDataType> = [
     {
       key: 'sort',
       width: '2%'
@@ -84,17 +102,17 @@ const PartnerTable: React.FC = () => {
       title: 'ID',
       dataIndex: 'id',
       width: '5%',
-      render: (_value: any, record: PartnerTableDataType) => {
+      render: (_value: any, record: CategoryTableDataType) => {
         return columns.id(record)
       }
     },
     {
       title: 'Image',
-      dataIndex: 'imageId',
+      dataIndex: 'icon',
       width: '10%',
       responsive: ['sm'],
-      render: (_value: any, record: PartnerTableDataType) => {
-        return columns.image(record)
+      render: (_value: any, record: CategoryTableDataType) => {
+        return columns.icon(record)
       }
     },
     {
@@ -102,8 +120,17 @@ const PartnerTable: React.FC = () => {
       dataIndex: 'title',
       width: '20%',
       responsive: ['sm'],
-      render: (_value: any, record: PartnerTableDataType) => {
+      render: (_value: any, record: CategoryTableDataType) => {
         return columns.title(record)
+      }
+    },
+    {
+      title: 'Description',
+      dataIndex: 'desc',
+      width: '20%',
+      responsive: ['sm'],
+      render: (_value: any, record: CategoryTableDataType) => {
+        return columns.desc(record)
       }
     }
   ]
@@ -111,7 +138,7 @@ const PartnerTable: React.FC = () => {
   return (
     <>
       <BaseLayout
-        title='Partners'
+        title='Categories'
         titleProps={{
           level: 5,
           type: 'secondary'
@@ -128,7 +155,7 @@ const PartnerTable: React.FC = () => {
           columns={tableColumns}
           editingKey={table.editingKey}
           deletingKey={table.deletingKey}
-          metaData={partnerService.metaData}
+          metaData={categoryService.metaData}
           onPageChange={handlePageChange}
           isShowDeleted={table.showDeleted}
           components={{
@@ -142,10 +169,10 @@ const PartnerTable: React.FC = () => {
                 oldData,
                 newData
               })
-              PartnerAPI.updateList(
+              CategoryAPI.updateList(
                 newData.map((item, index) => {
-                  return { ...item, orderNumber: index } as Partner
-                }) as Partner[]
+                  return { ...item, orderNumber: index } as Category
+                }) as Category[]
               )
                 .then((res) => {
                   if (res?.success) console.log(res?.data)
@@ -183,15 +210,10 @@ const PartnerTable: React.FC = () => {
         />
       </BaseLayout>
       {openModal && (
-        <ModalAddNewPartner
-          loading={table.loading}
-          openModal={openModal}
-          setOpenModal={setOpenModal}
-          onAddNew={handleAddNewItem}
-        />
+        <ModalAddNewCategory openModal={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNewItem} />
       )}
     </>
   )
 }
 
-export default PartnerTable
+export default CategoryTable
