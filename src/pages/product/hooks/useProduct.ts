@@ -1,12 +1,13 @@
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
 import { ResponseDataType, defaultRequestBody } from '~/api/client'
+import CategoryAPI from '~/api/services/CategoryAPI'
 import GoogleDriveAPI from '~/api/services/GoogleDriveAPI'
 import ProductAPI from '~/api/services/ProductAPI'
 import ProductCategoryAPI from '~/api/services/ProductCategoryAPI'
 import { UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
-import { Product, ProductCategory } from '~/typing'
+import { Category, Product, ProductCategory } from '~/typing'
 import { ProductTableDataType } from '../type'
 
 export interface ProductNewRecordProps {
@@ -20,6 +21,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
   const { showDeleted, setLoading, setDataSource, handleConfirmDeleting, handleConfirmCancelEditing } = table
 
   const productService = useAPIService<Product>(ProductAPI)
+  const categoryService = useAPIService<Category>(CategoryAPI)
   const productCategoryService = useAPIService<ProductCategory>(ProductCategoryAPI)
 
   const { message } = AntApp.useApp()
@@ -27,6 +29,8 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
   const [newRecord, setNewRecord] = useState<ProductNewRecordProps>({})
+  const [categories, setCategories] = useState<Category[]>([])
+  const [productCategories, setProductCategories] = useState<ProductCategory[]>([])
   const [products, setProducts] = useState<Product[]>([])
 
   const loadData = async () => {
@@ -51,6 +55,48 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
         const resError: ResponseDataType = error
         throw resError
       }
+
+      try {
+        await categoryService.getListItems(
+          {
+            ...defaultRequestBody,
+            paginator: { page: productService.page, pageSize: -1 },
+            filter: { ...defaultRequestBody.filter },
+            sorting: { ...defaultRequestBody.sorting, column: 'orderNumber', direction: 'asc' }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              console.log(meta.data)
+              setCategories(meta.data as Category[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
+      }
+
+      try {
+        await productCategoryService.getListItems(
+          {
+            ...defaultRequestBody,
+            paginator: { page: productService.page, pageSize: -1 },
+            filter: { ...defaultRequestBody.filter },
+            sorting: { ...defaultRequestBody.sorting, column: 'id', direction: 'asc' }
+          },
+          setLoading,
+          (meta) => {
+            if (meta?.success) {
+              console.log(meta.data)
+              setProductCategories(meta.data as ProductCategory[])
+            }
+          }
+        )
+      } catch (error: any) {
+        const resError: ResponseDataType = error
+        throw resError
+      }
     } catch (error: any) {
       const resError: ResponseDataType = error.data
       message.error(`${resError.message}`)
@@ -64,16 +110,31 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
   }, [showDeleted])
 
   useEffect(() => {
-    selfConvertDataSource(products)
-  }, [products])
+    selfConvertDataSource(products, categories, productCategories)
+  }, [products, categories, productCategories])
 
-  const selfConvertDataSource = (_products: Product[]) => {
+  const getCategory = (
+    _product: Product,
+    _categories: Category[],
+    _productCategories: ProductCategory[]
+  ): Category | undefined => {
+    const productCategoryFound = _productCategories.find((productCategory) => productCategory.productID === _product.id)
+    const categoryFound = _categories.find((category) => category.id === productCategoryFound?.categoryID)
+    return productCategoryFound ? categoryFound : undefined
+  }
+
+  const selfConvertDataSource = (
+    _products: Product[],
+    _categories: Category[],
+    _productCategories: ProductCategory[]
+  ) => {
     const items = _products
     setDataSource(
       items.map((item) => {
         return {
           key: `${item.id}`,
-          ...item
+          ...item,
+          category: getCategory(item, _categories, _productCategories)
         } as ProductTableDataType
       })
     )
@@ -86,20 +147,31 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
       console.log(newRecord)
       if (
         newRecord.title &&
-        (newRecord.title !== record.title || newRecord.desc !== record.desc || newRecord.imageId !== record.imageId)
+        (newRecord.title !== record.title ||
+          newRecord.desc !== record.desc ||
+          newRecord.imageId !== record.imageId ||
+          newRecord.categoryID !== record.category?.id)
       ) {
         console.log('Product update progressing...')
         await productService.updateItemByPk(
           record.id!,
           { title: newRecord.title, desc: newRecord.desc, imageId: newRecord.imageId },
           setLoading,
-          (meta) => {
+          async (meta) => {
             if (!meta?.success) throw new Error('API update group failed')
             if (newRecord.imageId !== record.imageId) {
               GoogleDriveAPI.deleteFile(record.imageId!).then((res) => {
                 if (!res?.success) throw new Error('Remove old image failed!')
               })
             }
+            await productCategoryService.updateItemBy(
+              { field: 'productID', key: Number(record.id) },
+              { categoryID: newRecord.categoryID },
+              setLoading,
+              (meta) => {
+                if (!meta?.success) throw new Error(`Can not update category at now :: ${meta?.message}`)
+              }
+            )
             message.success(meta.message)
           }
         )
@@ -172,7 +244,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
         setLoading,
         (meta) => {
           if (meta?.success) {
-            selfConvertDataSource(meta?.data as Product[])
+            // selfConvertDataSource(meta?.data as Product[])
           }
         },
         { field: 'id', term: searchText }
@@ -198,7 +270,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
         setLoading,
         (meta) => {
           if (meta?.success) {
-            selfConvertDataSource(meta?.data as Product[])
+            // selfConvertDataSource(meta?.data as Product[])
           }
         },
         { field: 'id', term: searchText }
@@ -226,7 +298,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
           setLoading,
           (meta) => {
             if (meta?.success) {
-              selfConvertDataSource(meta?.data as Product[])
+              // selfConvertDataSource(meta?.data as Product[])
             }
           }
         )
@@ -240,6 +312,8 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
   }
 
   return {
+    categories,
+    productCategories,
     searchText,
     setSearchText,
     openModal,

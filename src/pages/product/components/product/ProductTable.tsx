@@ -8,8 +8,14 @@ import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable2 from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableRow from '~/components/sky-ui/SkyTable/SkyTableRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { Product } from '~/typing'
-import { getPublicUrlGoogleDrive, textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
+import { Category, Product } from '~/typing'
+import {
+  getPublicUrlGoogleDrive,
+  numberValidatorChange,
+  textValidatorChange,
+  textValidatorDisplay,
+  textValidatorInit
+} from '~/utils/helpers'
 import useProduct from '../../hooks/useProduct'
 import { ProductTableDataType } from '../../type'
 import ModalAddNewProduct from './ModalAddNewProduct'
@@ -25,8 +31,21 @@ const ProductTable: React.FC = () => {
     handleAddNewItem,
     handleConfirmDelete,
     handlePageChange,
-    productService
+    productService,
+    categories,
+    productCategories
   } = useProduct(table)
+
+  const getCategoryFromRecord = (record: ProductTableDataType): Category | undefined => {
+    const productCategoryFound = productCategories.find((productCategory) => productCategory.productID === record.id)
+    const categoryFound = categories.find((category) => category.id === productCategoryFound?.categoryID)
+    return productCategoryFound ? categoryFound : undefined
+  }
+
+  const getCategoryFromCategoryID = (categoryID?: number | null): Category | undefined => {
+    const categoryFound = categories.find((category) => category.id === categoryID)
+    return categoryFound
+  }
 
   const columns = {
     id: (record: ProductTableDataType) => {
@@ -45,7 +64,40 @@ const ProductTable: React.FC = () => {
             setNewRecord({ ...newRecord, imageId: textValidatorChange(val.response.data.id) })
           }}
         >
-          <LazyImage alt='banner-img' src={getPublicUrlGoogleDrive(record.imageId ?? '')} height={120} width={120} />
+          <LazyImage
+            alt='banner-img'
+            className='object-contain'
+            src={getPublicUrlGoogleDrive(record.imageId ?? '')}
+            height={120}
+            width={120}
+          />
+        </EditableStateCell>
+      )
+    },
+    category: (record: ProductTableDataType) => {
+      return (
+        <EditableStateCell
+          isEditing={table.isEditing(record.key!)}
+          dataIndex='categoryID'
+          title='Category'
+          inputType='select'
+          placeholder='Select category'
+          selectProps={{
+            options: categories.map((item) => {
+              return {
+                label: item.title,
+                value: item.id,
+                key: item.id
+              }
+            })
+          }}
+          initialValue={textValidatorInit(record.category?.title)}
+          value={getCategoryFromCategoryID(newRecord.categoryID)}
+          onValueChange={(val: number) => setNewRecord({ ...newRecord, categoryID: numberValidatorChange(val) })}
+        >
+          <SkyTableTypography code placeholder='asd' status={'active'}>
+            {textValidatorDisplay(getCategoryFromRecord(record)?.title)}
+          </SkyTableTypography>
         </EditableStateCell>
       )
     },
@@ -110,6 +162,15 @@ const ProductTable: React.FC = () => {
       }
     },
     {
+      title: 'Category',
+      dataIndex: 'category',
+      width: '10%',
+      responsive: ['sm'],
+      render: (_value: any, record: ProductTableDataType) => {
+        return columns.category(record)
+      }
+    },
+    {
       title: 'Title',
       dataIndex: 'title',
       width: '20%',
@@ -147,7 +208,6 @@ const ProductTable: React.FC = () => {
           setDataSource={table.setDataSource}
           loading={table.loading}
           columns={tableColumns}
-          pageSize={10}
           editingKey={table.editingKey}
           deletingKey={table.deletingKey}
           metaData={productService.metaData}

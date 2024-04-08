@@ -149,7 +149,6 @@ export interface Prize {
 
 export interface Product {
   id?: number
-  categoryID?: number | null
   title?: string | null
   desc?: string | null
   imageId?: string | null
