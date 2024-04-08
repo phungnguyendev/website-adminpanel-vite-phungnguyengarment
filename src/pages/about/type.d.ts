@@ -1,8 +1,5 @@
-import { GarmentAccessory, GarmentAccessoryNote, Product, ProductColor } from '~/typing'
+import { Prize } from '~/typing'
 
-export interface GarmentAccessoryTableDataType extends Product {
-  key?: React.Key
-  productColor?: ProductColor
-  garmentAccessory?: GarmentAccessory
-  garmentAccessoryNotes?: GarmentAccessoryNote[]
+export interface PrizeTableDataType extends Prize {
+  key: string
 }

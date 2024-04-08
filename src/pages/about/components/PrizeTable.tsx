@@ -1,21 +1,21 @@
 import { UploadFile } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { LazyLoadImage } from 'react-lazy-load-image-component'
-import HeroBannerAPI from '~/api/services/HeroBannerAPI'
+import PrizeAPI from '~/api/services/PrizeAPI'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable2 from '~/components/sky-ui/SkyTable/SkyTable2'
 import SkyTableRow from '~/components/sky-ui/SkyTable/SkyTableRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { HeroBanner } from '~/typing'
+import { Prize } from '~/typing'
 import { getPublicUrlGoogleDrive, textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
-import useHeroBanner from '../../hooks/useHeroBanner'
-import { HeroBannerTableDataType } from '../../type'
-import ModalAddNewHeroBanner from './ModalAddNewHeroBanner'
+import usePrize from '../hooks/usePrize'
+import { PrizeTableDataType } from '../type'
+import ModalAddNewPrize from './ModalAddNewPrize'
 
-const HeroBannerTable: React.FC = () => {
-  const table = useTable<HeroBannerTableDataType>([])
+const PrizeTable: React.FC = () => {
+  const table = useTable<PrizeTableDataType>([])
   const {
     newRecord,
     setNewRecord,
@@ -25,14 +25,14 @@ const HeroBannerTable: React.FC = () => {
     handleAddNewItem,
     handleConfirmDelete,
     handlePageChange,
-    heroBannerService
-  } = useHeroBanner(table)
+    prizeService
+  } = usePrize(table)
 
   const columns = {
-    id: (record: HeroBannerTableDataType) => {
+    id: (record: PrizeTableDataType) => {
       return <SkyTableTypography strong>{textValidatorDisplay(String(record.id))}</SkyTableTypography>
     },
-    image: (record: HeroBannerTableDataType) => {
+    image: (record: PrizeTableDataType) => {
       return (
         <EditableStateCell
           isEditing={table.isEditing(record.key)}
@@ -63,7 +63,7 @@ const HeroBannerTable: React.FC = () => {
         </EditableStateCell>
       )
     },
-    title: (record: HeroBannerTableDataType) => {
+    title: (record: PrizeTableDataType) => {
       return (
         <EditableStateCell
           isEditing={table.isEditing(record.key!)}
@@ -83,7 +83,7 @@ const HeroBannerTable: React.FC = () => {
     }
   }
 
-  const tableColumns: ColumnsType<HeroBannerTableDataType> = [
+  const tableColumns: ColumnsType<PrizeTableDataType> = [
     {
       key: 'sort',
       width: '2%'
@@ -92,7 +92,7 @@ const HeroBannerTable: React.FC = () => {
       title: 'ID',
       dataIndex: 'id',
       width: '5%',
-      render: (_value: any, record: HeroBannerTableDataType) => {
+      render: (_value: any, record: PrizeTableDataType) => {
         return columns.id(record)
       }
     },
@@ -101,7 +101,7 @@ const HeroBannerTable: React.FC = () => {
       dataIndex: 'imageId',
       width: '10%',
       responsive: ['sm'],
-      render: (_value: any, record: HeroBannerTableDataType) => {
+      render: (_value: any, record: PrizeTableDataType) => {
         return columns.image(record)
       }
     },
@@ -110,7 +110,7 @@ const HeroBannerTable: React.FC = () => {
       dataIndex: 'title',
       width: '20%',
       responsive: ['sm'],
-      render: (_value: any, record: HeroBannerTableDataType) => {
+      render: (_value: any, record: PrizeTableDataType) => {
         return columns.title(record)
       }
     }
@@ -119,7 +119,7 @@ const HeroBannerTable: React.FC = () => {
   return (
     <>
       <BaseLayout
-        title='Hero banners'
+        title='Prizes'
         titleProps={{
           level: 5,
           type: 'secondary'
@@ -136,7 +136,7 @@ const HeroBannerTable: React.FC = () => {
           columns={tableColumns}
           editingKey={table.editingKey}
           deletingKey={table.deletingKey}
-          metaData={heroBannerService.metaData}
+          metaData={prizeService.metaData}
           onPageChange={handlePageChange}
           isShowDeleted={table.showDeleted}
           components={{
@@ -150,10 +150,10 @@ const HeroBannerTable: React.FC = () => {
                 oldData,
                 newData
               })
-              HeroBannerAPI.updateList(
+              PrizeAPI.updateList(
                 newData.map((item, index) => {
-                  return { ...item, orderNumber: index } as HeroBanner
-                }) as HeroBanner[]
+                  return { ...item, orderNumber: index } as Prize
+                }) as Prize[]
               )
                 .then((res) => {
                   if (res?.success) console.log(res?.data)
@@ -191,7 +191,7 @@ const HeroBannerTable: React.FC = () => {
         />
       </BaseLayout>
       {openModal && (
-        <ModalAddNewHeroBanner
+        <ModalAddNewPrize
           loading={table.loading}
           openModal={openModal}
           setOpenModal={setOpenModal}
@@ -202,4 +202,4 @@ const HeroBannerTable: React.FC = () => {
   )
 }
 
-export default HeroBannerTable
+export default PrizeTable

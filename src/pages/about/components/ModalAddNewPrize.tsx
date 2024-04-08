@@ -44,13 +44,7 @@ const ModalAddNewHeroBanner: React.FC<Props> = ({ loading, onAddNew, openModal, 
 
   return (
     <>
-      <SkyModalWrapper
-        loading={loading}
-        open={openModal}
-        onOk={handleOk}
-        onCancel={handleCancel}
-        title='Add new banner'
-      >
+      <SkyModalWrapper loading={loading} open={openModal} onOk={handleOk} onCancel={handleCancel} title='Add new prize'>
         <Form {...formProps} labelCol={{ span: 4 }} labelAlign='left' className='w-full' labelWrap form={form}>
           <Flex vertical gap={20} className='w-full'>
             <EditableFormCell

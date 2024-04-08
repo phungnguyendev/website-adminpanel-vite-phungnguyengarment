@@ -9,7 +9,7 @@ const HomePage: React.FC = () => {
 
   return (
     <>
-      <BaseLayout title='Trang chủ'>
+      <BaseLayout title='Home page'>
         <HeroBannerTable />
         <HomeProductTable />
         <PartnerTable />
