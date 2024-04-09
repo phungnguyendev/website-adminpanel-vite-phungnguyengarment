@@ -1,4 +1,4 @@
-import { Box } from 'lucide-react'
+import { Box, Newspaper } from 'lucide-react'
 import { lazy } from 'react'
 import { BsInfoSquare } from 'react-icons/bs'
 import { IoSettingsOutline } from 'react-icons/io5'
@@ -7,6 +7,7 @@ const HomePage = lazy(() => import('~/pages/home/HomePage'))
 const AboutPage = lazy(() => import('~/pages/about/AboutPage'))
 const ServicePage = lazy(() => import('~/pages/service-page/ServicePage'))
 const ProductPage = lazy(() => import('~/pages/product/ProductPage'))
+const NewsEventPage = lazy(() => import('~/pages/newsevent/NewsEventPage'))
 
 export type SideType = {
   key: string
@@ -48,21 +49,13 @@ export const appRoutes: SideType[] = [
     path: 'products',
     component: ProductPage,
     icon: Box
+  },
+  {
+    key: '5',
+    name: 'Tin tức & Sự kiện',
+    path: 'news',
+    component: NewsEventPage,
+    isGroup: false,
+    icon: Newspaper
   }
-  // {
-  //   key: '5',
-  //   name: 'Tin tức & Sự kiện',
-  //   path: 'news',
-  //   component: FinishPage,
-  //   isGroup: false,
-  //   icon: Newspaper
-  // },
-  // {
-  //   key: '6',
-  //   name: 'Tuyển dụng',
-  //   path: 'recruitment',
-  //   component: FinishPage,
-  //   isGroup: false,
-  //   icon: FileSearch
-  // }
 ]

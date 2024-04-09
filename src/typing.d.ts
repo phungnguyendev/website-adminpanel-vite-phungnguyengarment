@@ -12,6 +12,7 @@ export type InputType =
   | 'colorpicker'
   | 'select'
   | 'datepicker'
+  | 'dateTimePicker'
   | 'colorselector'
   | 'textarea'
   | 'checkbox'
@@ -19,6 +20,7 @@ export type InputType =
   | 'password'
   | 'email'
   | 'uploadFile'
+  | 'htmlEditor'
 
 export type ItemWithKeyAndTitleType = {
   key?: React.Key
@@ -132,6 +134,7 @@ export interface Post {
   id?: number
   title?: string | null
   content?: string | null
+  thumbID?: string | null
   publishedAt?: string | null
   orderNumber?: number | null
   createdAt?: string

@@ -18,9 +18,11 @@ import { SelectProps } from 'antd/es/select'
 import { DatePickerProps } from 'antd/lib'
 import { Eye, EyeOff } from 'lucide-react'
 import { HTMLAttributes, memo, useState } from 'react'
+import { ReactQuillProps } from 'react-quill'
 import { InputType } from '~/typing'
 import { cn } from '~/utils/helpers'
 import FileDragger, { FileUploaderProps } from '../FileUploader'
+import HTMLTextEditor from '../HTMLTextEditor'
 
 export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
   isEditing: boolean
@@ -37,6 +39,7 @@ export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
   textAreaProps?: TextAreaProps
   inputProps?: InputProps
   datePickerProps?: DatePickerProps
+  htmlEditorProps?: ReactQuillProps
   inputType?: InputType
   required?: boolean
   allowClear?: boolean
@@ -57,6 +60,7 @@ function EditableStateCell({
   placeholder,
   allowClear,
   value,
+  htmlEditorProps,
   uploadProps,
   colorPickerProps,
   datePickerProps,
@@ -88,6 +92,8 @@ function EditableStateCell({
             onFinish={(val) => onValueChange?.(val)}
           />
         )
+      case 'htmlEditor':
+        return <HTMLTextEditor {...htmlEditorProps} />
       case 'colorpicker':
         return (
           <ColorPicker
@@ -219,6 +225,23 @@ function EditableStateCell({
             value={value}
             defaultValue={initialValue}
             format={datePickerProps?.format ?? 'DD/MM/YYYY'}
+            className={cn('w-full', restProps.className)}
+          />
+        )
+      case 'dateTimePicker':
+        return (
+          <DatePicker
+            {...datePickerProps}
+            showTime
+            title={title}
+            placeholder={placeholder}
+            name={dataIndex}
+            required={required}
+            onChange={(val) => onValueChange?.(val)}
+            disabled={disabled}
+            value={value}
+            defaultValue={initialValue}
+            // format={datePickerProps?.format ?? 'DD/MM/YYYY'}
             className={cn('w-full', restProps.className)}
           />
         )

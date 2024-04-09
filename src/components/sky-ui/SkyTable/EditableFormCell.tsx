@@ -3,6 +3,7 @@ import { Checkbox, ColorPicker, DatePicker, Flex, Form, Input, InputNumber, Sele
 import { memo } from 'react'
 import { cn } from '~/utils/helpers'
 import FileDragger from '../FileUploader'
+import HTMLTextEditor from '../HTMLTextEditor'
 import { EditableStateCellProps } from './EditableStateCell'
 
 export type EditableCellRequiredType = { key?: React.Key; name?: string; id?: number }
@@ -19,11 +20,13 @@ function EditableFormCell({
   placeholder,
   allowClear,
   value,
+  htmlEditorProps,
   uploadProps,
   colorPickerProps,
   checkboxProps,
   inputNumberProps,
   textAreaProps,
+  datePickerProps,
   inputProps,
   selectProps,
   initialValue,
@@ -38,6 +41,8 @@ function EditableFormCell({
     switch (inputType) {
       case 'uploadFile':
         return <FileDragger name={dataIndex} disabled={disabled} {...uploadProps} className={restProps.className} />
+      case 'htmlEditor':
+        return <HTMLTextEditor {...htmlEditorProps} />
       case 'colorpicker':
         return (
           <ColorPicker
@@ -157,6 +162,7 @@ function EditableFormCell({
       case 'datepicker':
         return (
           <DatePicker
+            {...datePickerProps}
             name={dataIndex}
             title={title}
             placeholder={placeholder}
@@ -165,6 +171,22 @@ function EditableFormCell({
             onChange={(_val, dateString) => onValueChange?.(dateString)}
             disabled={disabled}
             format={'DD/MM/YYYY'}
+            className={cn('w-full', restProps.className)}
+          />
+        )
+      case 'dateTimePicker':
+        return (
+          <DatePicker
+            {...datePickerProps}
+            showTime
+            name={dataIndex}
+            title={title}
+            placeholder={placeholder}
+            value={value}
+            required={required}
+            format='DD/MM/YYYY HH:mm:ss'
+            onChange={(_val, dateString) => onValueChange?.(dateString)}
+            disabled={disabled}
             className={cn('w-full', restProps.className)}
           />
         )

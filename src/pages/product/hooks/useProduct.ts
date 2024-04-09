@@ -67,7 +67,6 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
           setLoading,
           (meta) => {
             if (meta?.success) {
-              console.log(meta.data)
               setCategories(meta.data as Category[])
             }
           }
@@ -88,7 +87,6 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
           setLoading,
           (meta) => {
             if (meta?.success) {
-              console.log(meta.data)
               setProductCategories(meta.data as ProductCategory[])
             }
           }
