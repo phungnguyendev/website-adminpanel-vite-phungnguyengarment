@@ -32,7 +32,7 @@ const SideNav: React.FC<Props> = ({ openDrawer }) => {
     }
   }, [pathname])
 
-  const lastPath: (pathname: string) => string = function (pathname) {
+  const lastPath = (pathname: string): string => {
     const arrPath = pathname.split('/')
     const path = arrPath[arrPath.length - 1]
     return path

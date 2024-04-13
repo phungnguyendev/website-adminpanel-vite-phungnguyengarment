@@ -5,7 +5,7 @@ import GoogleDriveAPI from '~/api/services/GoogleDriveAPI'
 import PostAPI from '~/api/services/PostAPI'
 import { UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
-import { Post, Product } from '~/typing'
+import { Post } from '~/typing'
 import { PostTableDataType } from '../type'
 
 export interface PostNewRecordProps {
@@ -41,7 +41,8 @@ export default function usePost(table: UseTableProps<PostTableDataType>) {
           setLoading,
           (meta) => {
             if (meta?.success) {
-              setPosts(meta.data as Product[])
+              const _posts = meta.data as Post[]
+              setPosts(_posts)
             }
           }
         )
@@ -65,7 +66,7 @@ export default function usePost(table: UseTableProps<PostTableDataType>) {
     selfConvertDataSource(posts)
   }, [posts])
 
-  const selfConvertDataSource = (_posts: Product[]) => {
+  const selfConvertDataSource = (_posts: Post[]) => {
     const items = _posts
     setDataSource(
       items.map((item) => {
@@ -113,7 +114,7 @@ export default function usePost(table: UseTableProps<PostTableDataType>) {
     try {
       console.log(formAddNew)
       setLoading(true)
-      await postService.createNewItem({ ...formAddNew } as Product, setLoading, async (meta) => {
+      await postService.createNewItem({ ...formAddNew }, setLoading, async (meta) => {
         if (!meta?.success) throw new Error('Create failed!')
         message.success('Success')
       })

@@ -1,4 +1,5 @@
 import { ColumnsType } from 'antd/es/table'
+import FroalaEditorView from 'react-froala-wysiwyg/FroalaEditorView'
 import PostAPI from '~/api/services/PostAPI'
 import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
@@ -54,15 +55,17 @@ const PostTable: React.FC = () => {
           isEditing={table.isEditing(record.key!)}
           dataIndex='content'
           title='Description'
-          inputType='text'
+          inputType='htmlEditor'
           required={true}
           initialValue={textValidatorInit(record.content)}
-          value={newRecord.content}
-          onValueChange={(val: string) => setNewRecord({ ...newRecord, content: textValidatorChange(val) })}
+          htmlEditorProps={{
+            model: newRecord.content,
+            onModelChange: (model: string) => {
+              setNewRecord({ ...newRecord, content: textValidatorChange(model) })
+            }
+          }}
         >
-          <SkyTableTypography placeholder='asd' status={'active'}>
-            {textValidatorDisplay(record.content)}
-          </SkyTableTypography>
+          <FroalaEditorView model={textValidatorDisplay(record.content)} />
         </EditableStateCell>
       )
     }
@@ -89,16 +92,16 @@ const PostTable: React.FC = () => {
       render: (_value: any, record: PostTableDataType) => {
         return columns.title(record)
       }
-    },
-    {
-      title: 'Content',
-      dataIndex: 'content',
-      width: '20%',
-      responsive: ['sm'],
-      render: (_value: any, record: PostTableDataType) => {
-        return columns.content(record)
-      }
     }
+    // {
+    //   title: 'Content',
+    //   dataIndex: 'content',
+    //   width: '20%',
+    //   responsive: ['sm'],
+    //   render: (_value: any, record: PostTableDataType) => {
+    //     return columns.content(record)
+    //   }
+    // }
   ]
 
   return (
@@ -149,6 +152,7 @@ const PostTable: React.FC = () => {
           actionProps={{
             onEdit: {
               onClick: (_e, record) => {
+                console.table(record)
                 setNewRecord({ ...record })
                 table.handleStartEditing(record!.key!)
               },

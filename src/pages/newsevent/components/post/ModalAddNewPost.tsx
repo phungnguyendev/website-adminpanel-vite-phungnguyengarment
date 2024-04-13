@@ -8,8 +8,9 @@ import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
 
 export interface PostAddNewProps {
   title?: string | null
-  desc?: string | null
-  icon?: string | null
+  content?: string | null
+  publishedAt?: string | null
+  thumbID?: string | null
 }
 
 interface Props {
@@ -23,15 +24,15 @@ const ModalAddNewPost: React.FC<Props> = ({ onAddNew, openModal, setOpenModal, f
   const { message } = AntApp.useApp()
   const [form] = Form.useForm()
   const [file, setFile] = useState<UploadFile>()
+  const [model, setModel] = useState<string>('')
 
   async function handleOk() {
     const row = await form.validateFields()
-    console.log(row)
-    // onAddNew({
-    //   title: row.title,
-    //   desc: row.desc,
-    //   icon: file?.response.data.id
-    // })
+    onAddNew({
+      ...row,
+      thumbID: `${file?.response.data.id}`,
+      content: model
+    })
   }
 
   async function handleCancel() {
@@ -80,7 +81,6 @@ const ModalAddNewPost: React.FC<Props> = ({ onAddNew, openModal, setOpenModal, f
               title='Thumb image'
               dataIndex='file'
               inputType='uploadFile'
-              required
             />
             <EditableFormCell
               isEditing={true}
@@ -88,7 +88,11 @@ const ModalAddNewPost: React.FC<Props> = ({ onAddNew, openModal, setOpenModal, f
               placeholder='Content...'
               dataIndex='content'
               inputType='htmlEditor'
-              required
+              required={model.length <= 0}
+              htmlEditorProps={{
+                model: model,
+                onModelChange: setModel
+              }}
             />
           </Flex>
         </Form>

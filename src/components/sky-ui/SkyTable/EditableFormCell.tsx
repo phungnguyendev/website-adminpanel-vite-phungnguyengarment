@@ -2,8 +2,8 @@ import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons'
 import { Checkbox, ColorPicker, DatePicker, Flex, Form, Input, InputNumber, Select, Table, Typography } from 'antd'
 import { memo } from 'react'
 import { cn } from '~/utils/helpers'
+import ContentEditor from '../ContentEditor'
 import FileDragger from '../FileUploader'
-import HTMLTextEditor from '../HTMLTextEditor'
 import { EditableStateCellProps } from './EditableStateCell'
 
 export type EditableCellRequiredType = { key?: React.Key; name?: string; id?: number }
@@ -42,7 +42,7 @@ function EditableFormCell({
       case 'uploadFile':
         return <FileDragger name={dataIndex} disabled={disabled} {...uploadProps} className={restProps.className} />
       case 'htmlEditor':
-        return <HTMLTextEditor {...htmlEditorProps} />
+        return <ContentEditor {...htmlEditorProps} />
       case 'colorpicker':
         return (
           <ColorPicker

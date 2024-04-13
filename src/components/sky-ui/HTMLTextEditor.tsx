@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactQuill, { ReactQuillProps } from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
+import { cn } from '~/utils/helpers'
 
 export interface HTMLTextEditorProps extends ReactQuillProps {}
 
@@ -19,18 +20,24 @@ const HTMLTextEditor: React.FC<HTMLTextEditorProps> = ({ ...props }) => {
       ],
       [
         {
-          size: []
+          size: ['small', false, 'large', 'huge']
         }
       ],
       ['bold', 'italic', 'underline', 'strike', 'blockquote'],
       [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
-      ['link', 'image', 'video']
+      ['link', 'image', 'video', 'formula']
     ]
   }
 
   return (
     <>
-      <ReactQuill {...props} theme='snow' modules={modules} />
+      <ReactQuill
+        {...props}
+        placeholder='Compose an epic...'
+        theme='snow'
+        modules={modules}
+        className={cn('', props.className)}
+      />
     </>
   )
 }
