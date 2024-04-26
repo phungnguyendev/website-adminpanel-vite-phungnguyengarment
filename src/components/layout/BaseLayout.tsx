@@ -1,13 +1,15 @@
-import { Button, Flex, Input, Spin, Switch, Typography } from 'antd'
+import { Breadcrumb, Button, Flex, Input, Switch, Typography } from 'antd'
 import { SwitchChangeEventHandler } from 'antd/es/switch'
 import { TitleProps } from 'antd/es/typography/Title'
 import { Plus } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import useBreadcrumbs from 'use-react-router-breadcrumbs'
 import UserAPI from '~/api/services/UserAPI'
 import useLocalStorage from '~/hooks/useLocalStorage'
 import { setUserAction } from '~/store/actions-creator'
+import { routes } from '~/types/routes'
 import { User } from '~/typing'
 import { cn } from '~/utils/helpers'
 
@@ -60,16 +62,16 @@ const BaseLayout: React.FC<Props> = ({
   titleProps,
   ...props
 }) => {
-  const [loading, setLoading] = useState<boolean>(true)
   const [accessTokenStored] = useLocalStorage<string>('accessToken', '')
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const breadcrumbs = useBreadcrumbs(routes)
 
   useEffect(() => {
     const callApi = async () => {
       try {
         onLoading?.(true)
-        setLoading(true)
         if (accessTokenStored) {
           UserAPI.getUserFromAccessToken(accessTokenStored)
             .then((meta) => {
@@ -88,24 +90,31 @@ const BaseLayout: React.FC<Props> = ({
         console.error(error)
       } finally {
         onLoading?.(false)
-        setLoading(false)
       }
     }
     callApi()
   }, [])
 
-  // useEffect(() => {
-  //   if (!accessTokenStored) navigate('/login')
-  // }, [accessTokenStored])
-
   return (
     <div {...props} className={cn('w-full', props.className)}>
+      <Breadcrumb
+        items={breadcrumbs.map((breadcrumb) => {
+          return {
+            title:
+              pathname === breadcrumb.match.pathname ? (
+                breadcrumb.breadcrumb
+              ) : (
+                <Link to={breadcrumb.match.pathname}>{breadcrumb.breadcrumb}</Link>
+              )
+          }
+        })}
+      />
+      {props.title && (
+        <Typography.Title className='w-fit' {...titleProps} level={titleProps?.level ? titleProps.level : 2}>
+          {props.title}
+        </Typography.Title>
+      )}
       <Flex vertical gap={20} className='w-full'>
-        {props.title && (
-          <Typography.Title className='w-fit' {...titleProps} level={titleProps?.level ? titleProps.level : 2}>
-            {props.title}
-          </Typography.Title>
-        )}
         <Flex vertical gap={20} className='w-full'>
           {onSearch && (
             <Search
@@ -182,7 +191,7 @@ const BaseLayout: React.FC<Props> = ({
             </Flex>
           </Flex>
         </Flex>
-        {loading ? <Spin /> : children}
+        {children}
       </Flex>
     </div>
   )

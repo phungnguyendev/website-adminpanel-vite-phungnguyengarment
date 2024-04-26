@@ -1,9 +1,9 @@
 import * as React from 'react'
 import { Link } from 'react-router-dom'
-import { SideType } from '~/utils/route'
+import { RouteType } from '~/types/routes'
 
 export interface SideIconProps extends React.HTMLAttributes<HTMLElement> {
-  item: SideType
+  item: RouteType
   collapsed: boolean
 }
 

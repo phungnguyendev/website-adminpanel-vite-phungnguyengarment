@@ -44,7 +44,7 @@ const Main: React.FC = () => {
           zIndex: 10
         }}
       >
-        <SideNav openDrawer={openDrawer} />
+        <SideNav openDrawer={openDrawer} setOpenDrawer={setOpenDrawer} />
       </Sider>
       <Layout
         className={cn({
@@ -53,6 +53,8 @@ const Main: React.FC = () => {
         })}
       >
         <Header
+          collapsed={openDrawer}
+          setCollapsed={setOpenDrawer}
           onMenuClick={() => {
             setOpenDrawer(!openDrawer)
           }}

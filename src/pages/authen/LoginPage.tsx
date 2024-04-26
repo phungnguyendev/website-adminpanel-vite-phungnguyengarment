@@ -3,13 +3,11 @@ import { App as AntApp, Button, Checkbox, Flex, Form, Input, Typography } from '
 import { LockKeyhole, Mail } from 'lucide-react'
 import React, { HTMLAttributes, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ResponseDataType } from '~/api/client'
 import AuthAPI from '~/api/services/AuthAPI'
 import bg from '~/assets/a1.jpg'
 import logo from '~/assets/logo.svg'
 import useTitle from '~/components/hooks/useTitle'
 import useLocalStorage from '~/hooks/useLocalStorage'
-import { User } from '~/typing'
 
 interface Props extends HTMLAttributes<HTMLElement> {}
 
@@ -45,25 +43,27 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
     setFormLayout(layout)
   }
 
-  const onFinish = async (user: { email: string; password: string }) => {
+  const onFinish = async (payload: any) => {
     try {
+      const { email, password } = payload
       setLoading(true)
       // Create a new request to login user
-      await AuthAPI.login(user).then((meta) => {
+      await AuthAPI.login({ email, password }).then((meta) => {
         if (!meta?.success) throw new Error(meta?.message)
-        const userLogged = meta.data as User
-        if (userLogged) {
-          // Save to local storage
-          setAccessTokenStored(userLogged.accessToken)
-        }
+        // const userLogged = meta.data as User
+        // if (userLogged) {
+        //   // Save to local storage
+        //   setAccessTokenStored(userLogged.accessToken)
+        // }
+        // console.log(meta)
         // Send message app
         message.success('Success!')
         // Navigation to '/' (Dashboard page) if login success
         navigate('/')
       })
     } catch (error: any) {
-      const resError: ResponseDataType = error.data
-      message.error(`${resError.message}`)
+      // const resError: ResponseDataType = error.data
+      message.error(`${error}`)
     } finally {
       setLoading(false)
     }
@@ -155,8 +155,6 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
                         className='w-full'
                         type='email'
                         prefix={<Mail className='mr-1' size={16} />}
-                        onChange={(e) => setEmail(e.target.value)}
-                        value={email}
                         allowClear
                       />
                     </Form.Item>
@@ -171,8 +169,8 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
                         className='w-full'
                         type='password'
                         prefix={<LockKeyhole className='mr-1' size={16} />}
-                        onChange={(e) => setPassword(e.target.value)}
-                        value={password}
+                        // onChange={(e) => setPassword(e.target.value)}
+                        // value={password}
                         allowClear
                         iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
                       />

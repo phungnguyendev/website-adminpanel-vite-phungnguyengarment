@@ -6,7 +6,7 @@ import LoginPage from './pages/authen/LoginPage'
 import ResetPasswordPage from './pages/authen/ResetPasswordPage'
 import VerifyEmailPage from './pages/authen/VerifyEmailPage'
 import VerifyOTPPage from './pages/authen/VerifyOTPPage'
-import { appRoutes } from './utils/route'
+import { routes } from './types/routes'
 
 function App() {
   return (
@@ -19,11 +19,10 @@ function App() {
             <Route path='verify-otp' element={<VerifyOTPPage />} />
             <Route path='reset-password' element={<ResetPasswordPage />} />
             <Route element={<Main />}>
-              {appRoutes.map((route, i) => {
+              {routes.map((route, index) => {
                 return (
                   <Route
-                    id={route.key || i.toString()}
-                    key={route.key}
+                    key={index}
                     path={route.path}
                     element={
                       <Suspense fallback={<div>loading...</div>}>

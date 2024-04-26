@@ -7,7 +7,10 @@ const NAMESPACE = 'auth'
 export default {
   login: async (user: User): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(`${NAMESPACE}/login`, user)
+      .post(`${NAMESPACE}/login`, {1
+        email: user.email,
+        password: user.password
+      })
       .then((res) => {
         return responseFormatter(res)
       })
@@ -15,19 +18,12 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  sendEmail: async (emailToSend: string): Promise<ResponseDataType | undefined> => {
+  register: async (user: User): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(`${NAMESPACE}/send-email/${emailToSend}`)
-      .then((res) => {
-        return responseFormatter(res)
+      .post(`${NAMESPACE}/register`, {
+        email: user.email,
+        password: user.password
       })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  verifyOTP: async (user: { email: string; otp: string }): Promise<ResponseDataType | undefined> => {
-    return await client
-      .post(`${NAMESPACE}/verify-otp/${user.email}`, { otp: user.otp })
       .then((res) => {
         return responseFormatter(res)
       })

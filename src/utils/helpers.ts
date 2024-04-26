@@ -147,3 +147,9 @@ export const getBase64 = (file: FileType): Promise<string> =>
 export const getPublicUrlGoogleDrive = (fileId: string): string => {
   return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`
 }
+
+export const lastPath = (pathname: string): string => {
+  const arrPath = pathname.split('/')
+  const path = arrPath[arrPath.length - 1]
+  return path
+}

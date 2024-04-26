@@ -2,12 +2,14 @@ import { Flex, Menu, MenuProps } from 'antd'
 import React, { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import logo from '~/assets/logo.svg'
-import { appRoutes } from '~/utils/route'
+import { routeSide } from '~/types/routes'
+import { lastPath } from '~/utils/helpers'
 import SideIcon from './SideIcon'
 import SideItem from './SideItem'
 
 export interface Props {
   openDrawer: boolean
+  setOpenDrawer: (enable: boolean) => void
 }
 
 type MenuItem = Required<MenuProps>['items'][number]
@@ -21,37 +23,28 @@ function getItem(label: React.ReactNode, key: React.Key, icon?: React.ReactNode,
   } as MenuItem
 }
 
-const SideNav: React.FC<Props> = ({ openDrawer }) => {
+const SideNav: React.FC<Props> = ({ openDrawer, setOpenDrawer }) => {
   const { pathname } = useLocation()
-  const [selectedKey, setSelectedKey] = useState<string>(appRoutes[0].key)
+  const [selectedKey, setSelectedKey] = useState<string>(routeSide[0].path)
 
   useEffect(() => {
-    const keyFound = appRoutes.find((route) => route.path === lastPath(pathname))
+    const keyFound = routeSide.find((route) => route.path === lastPath(pathname))
     if (keyFound) {
-      setSelectedKey(keyFound.key)
+      setSelectedKey(keyFound.path)
     }
   }, [pathname])
 
-  const lastPath = (pathname: string): string => {
-    const arrPath = pathname.split('/')
-    const path = arrPath[arrPath.length - 1]
-    return path
-  }
-
-  const items: MenuProps['items'] = appRoutes.map((route) => {
-    if (route.isGroup) {
-      return getItem(SideItem({ item: route, collapsed: openDrawer }), route.key, null, 'group')
-    } else {
-      return getItem(
-        SideItem({ item: route, collapsed: openDrawer }),
-        route.key,
-        SideIcon({ item: route, collapsed: openDrawer })
-      )
-    }
+  const items: MenuProps['items'] = routeSide.map((route) => {
+    return getItem(
+      SideItem({ item: route, collapsed: openDrawer }),
+      route.path,
+      SideIcon({ item: route, collapsed: openDrawer })
+    )
   })
 
   const onClick: MenuProps['onClick'] = (e) => {
     setSelectedKey(e.key)
+    setOpenDrawer(false)
   }
 
   return (

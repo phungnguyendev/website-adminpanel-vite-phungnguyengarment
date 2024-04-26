@@ -13,10 +13,11 @@ const { Header: AntHeader } = Layout
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   onMenuClick: (event: React.MouseEvent<HTMLElement, globalThis.MouseEvent>) => void
+  collapsed: boolean
+  setCollapsed: (enable: boolean) => void
 }
 
-const Header: React.FC<Props> = ({ onMenuClick, ...props }) => {
-  const [collapsed, setCollapsed] = useState<boolean>(false)
+const Header: React.FC<Props> = ({ onMenuClick, collapsed, setCollapsed, ...props }) => {
   const [, setAccessTokenStored] = useLocalStorage<string>('accessToken', '')
   const [isHidden, setIsHidden] = useState(false)
   const [offsetY, setOffsetY] = useState<number>(0)
@@ -84,7 +85,7 @@ const Header: React.FC<Props> = ({ onMenuClick, ...props }) => {
           className='text-foreground hover:text-primary'
           onClick={(e) => {
             onMenuClick(e)
-            setCollapsed((prev) => !prev)
+            setCollapsed(!collapsed)
           }}
         >
           <Menu size={20} />
