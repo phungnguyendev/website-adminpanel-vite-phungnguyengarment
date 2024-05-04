@@ -1,4 +1,3 @@
-import { UploadFile } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import CategoryAPI from '~/api/services/CategoryAPI'
 import useTable from '~/components/hooks/useTable'
@@ -9,7 +8,7 @@ import SkyTable2 from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableRow from '~/components/sky-ui/SkyTable/SkyTableRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { Category } from '~/typing'
-import { getPublicUrlGoogleDrive, textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
+import { textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
 import useCategory from '../../hooks/useCategory'
 import { CategoryTableDataType } from '../../type'
 import ModalAddNewCategory from './ModalAddNewCategory'
@@ -32,23 +31,23 @@ const CategoryTable: React.FC = () => {
     id: (record: CategoryTableDataType) => {
       return <SkyTableTypography strong>{textValidatorDisplay(String(record.id))}</SkyTableTypography>
     },
-    icon: (record: CategoryTableDataType) => {
+    imageUrl: (record: CategoryTableDataType) => {
       return (
         <EditableStateCell
           isEditing={table.isEditing(record.key)}
-          dataIndex='icon'
+          dataIndex='imageUrl'
           title='Image'
-          inputType='uploadFile'
-          initialValue={textValidatorInit(record.icon)}
-          value={newRecord.icon}
-          onValueChange={(val: UploadFile) => {
-            setNewRecord({ ...newRecord, icon: textValidatorChange(val.response.data.id) })
+          inputType='text'
+          initialValue={textValidatorInit(record.imageUrl)}
+          value={newRecord.imageUrl}
+          onValueChange={(val: string) => {
+            setNewRecord({ ...newRecord, imageUrl: textValidatorChange(val) })
           }}
         >
           <LazyImage
             alt='banner-img'
             className='object-contain'
-            src={getPublicUrlGoogleDrive(record.icon ?? '')}
+            src={textValidatorDisplay(record.imageUrl)}
             height={120}
             width={120}
           />
@@ -67,7 +66,7 @@ const CategoryTable: React.FC = () => {
           value={newRecord.title}
           onValueChange={(val: string) => setNewRecord({ ...newRecord, title: textValidatorChange(val) })}
         >
-          <SkyTableTypography placeholder='asd' status={'active'}>
+          <SkyTableTypography placeholder='Input your title..' status={'active'}>
             {textValidatorDisplay(record.title)}
           </SkyTableTypography>
         </EditableStateCell>
@@ -85,7 +84,7 @@ const CategoryTable: React.FC = () => {
           value={newRecord.desc}
           onValueChange={(val: string) => setNewRecord({ ...newRecord, desc: textValidatorChange(val) })}
         >
-          <SkyTableTypography placeholder='asd' status={'active'}>
+          <SkyTableTypography placeholder='Input your description..' status={'active'}>
             {textValidatorDisplay(record.desc)}
           </SkyTableTypography>
         </EditableStateCell>
@@ -108,11 +107,11 @@ const CategoryTable: React.FC = () => {
     },
     {
       title: 'Image',
-      dataIndex: 'icon',
+      dataIndex: 'imageUrl',
       width: '10%',
       responsive: ['sm'],
       render: (_value: any, record: CategoryTableDataType) => {
-        return columns.icon(record)
+        return columns.imageUrl(record)
       }
     },
     {
@@ -163,19 +162,17 @@ const CategoryTable: React.FC = () => {
               row: SkyTableRow
             }
           }}
-          onDraggableChange={(oldData, newData) => {
+          onDraggableChange={(_, newData) => {
             if (newData) {
-              console.log({
-                oldData,
-                newData
-              })
               CategoryAPI.updateList(
                 newData.map((item, index) => {
                   return { ...item, orderNumber: index } as Category
                 }) as Category[]
               )
                 .then((res) => {
-                  if (res?.success) console.log(res?.data)
+                  if (!res?.success) {
+                    throw new Error(`${res?.message}`)
+                  }
                 })
                 .catch((e) => console.log(`${e}`))
             }

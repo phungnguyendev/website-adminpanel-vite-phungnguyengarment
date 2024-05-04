@@ -153,3 +153,7 @@ export const lastPath = (pathname: string): string => {
   const path = arrPath[arrPath.length - 1]
   return path
 }
+
+export const checkFieldToUpdate = (oldField: any | null | undefined, newField?: any | null | undefined): boolean => {
+  return newField && newField !== oldField
+}

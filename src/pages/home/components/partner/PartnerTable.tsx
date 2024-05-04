@@ -1,4 +1,3 @@
-import { UploadFile } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import PartnerAPI from '~/api/services/PartnerAPI'
 import useTable from '~/components/hooks/useTable'
@@ -9,7 +8,7 @@ import SkyTable2 from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableRow from '~/components/sky-ui/SkyTable/SkyTableRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { Partner } from '~/typing'
-import { getPublicUrlGoogleDrive, textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
+import { textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
 import usePartner from '../../hooks/usePartner'
 import { PartnerTableDataType } from '../../type'
 import ModalAddNewPartner from './ModalAddNewPartner'
@@ -36,19 +35,20 @@ const PartnerTable: React.FC = () => {
       return (
         <EditableStateCell
           isEditing={table.isEditing(record.key)}
-          dataIndex='imageId'
+          dataIndex='imageUrl'
           title='Image'
-          inputType='uploadFile'
-          initialValue={textValidatorInit(record.imageId)}
-          value={newRecord.imageId}
-          onValueChange={(val: UploadFile) => {
-            setNewRecord({ ...newRecord, imageId: textValidatorChange(val.response.data.id) })
+          placeholder='Paste your image link..'
+          inputType='text'
+          initialValue={textValidatorInit(record.imageUrl)}
+          value={newRecord.imageUrl}
+          onValueChange={(newImage: string) => {
+            setNewRecord({ ...newRecord, imageUrl: textValidatorChange(newImage) })
           }}
         >
           <LazyImage
             alt='banner-img'
             className='object-contain'
-            src={getPublicUrlGoogleDrive(record.imageId ?? '')}
+            src={textValidatorDisplay(record.imageUrl)}
             height={120}
             width={120}
           />
@@ -90,7 +90,7 @@ const PartnerTable: React.FC = () => {
     },
     {
       title: 'Image',
-      dataIndex: 'imageId',
+      dataIndex: 'imageUrl',
       width: '10%',
       responsive: ['sm'],
       render: (_value: any, record: PartnerTableDataType) => {
@@ -136,19 +136,17 @@ const PartnerTable: React.FC = () => {
               row: SkyTableRow
             }
           }}
-          onDraggableChange={(oldData, newData) => {
+          onDraggableChange={(_, newData) => {
             if (newData) {
-              console.log({
-                oldData,
-                newData
-              })
               PartnerAPI.updateList(
                 newData.map((item, index) => {
                   return { ...item, orderNumber: index } as Partner
                 }) as Partner[]
               )
                 .then((res) => {
-                  if (res?.success) console.log(res?.data)
+                  if (!res?.success) {
+                    throw new Error(`${res?.message}`)
+                  }
                 })
                 .catch((e) => console.log(`${e}`))
             }

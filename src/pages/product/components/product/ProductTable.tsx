@@ -1,4 +1,3 @@
-import { UploadFile } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import ProductAPI from '~/api/services/ProductAPI'
 import useTable from '~/components/hooks/useTable'
@@ -9,13 +8,7 @@ import SkyTable2 from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableRow from '~/components/sky-ui/SkyTable/SkyTableRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { Category, Product } from '~/typing'
-import {
-  getPublicUrlGoogleDrive,
-  numberValidatorChange,
-  textValidatorChange,
-  textValidatorDisplay,
-  textValidatorInit
-} from '~/utils/helpers'
+import { numberValidatorChange, textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
 import useProduct from '../../hooks/useProduct'
 import { ProductTableDataType } from '../../type'
 import ModalAddNewProduct from './ModalAddNewProduct'
@@ -55,19 +48,19 @@ const ProductTable: React.FC = () => {
       return (
         <EditableStateCell
           isEditing={table.isEditing(record.key)}
-          dataIndex='imageId'
+          dataIndex='imageUrl'
           title='Image'
-          inputType='uploadFile'
-          initialValue={textValidatorInit(record.imageId)}
-          value={newRecord.imageId}
-          onValueChange={(val: UploadFile) => {
-            setNewRecord({ ...newRecord, imageId: textValidatorChange(val.response.data.id) })
+          inputType='text'
+          initialValue={textValidatorInit(record.imageUrl)}
+          value={newRecord.imageUrl}
+          onValueChange={(newImage: string) => {
+            setNewRecord({ ...newRecord, imageUrl: textValidatorChange(newImage) })
           }}
         >
           <LazyImage
             alt='banner-img'
             className='object-contain'
-            src={getPublicUrlGoogleDrive(record.imageId ?? '')}
+            src={textValidatorDisplay(record.imageUrl)}
             height={120}
             width={120}
           />
@@ -154,7 +147,7 @@ const ProductTable: React.FC = () => {
     },
     {
       title: 'Image',
-      dataIndex: 'imageId',
+      dataIndex: 'imageUrl',
       width: '10%',
       responsive: ['sm'],
       render: (_value: any, record: ProductTableDataType) => {
@@ -218,12 +211,8 @@ const ProductTable: React.FC = () => {
               row: SkyTableRow
             }
           }}
-          onDraggableChange={(oldData, newData) => {
+          onDraggableChange={(_, newData) => {
             if (newData) {
-              console.log({
-                oldData,
-                newData
-              })
               ProductAPI.updateList(
                 newData.map((item, index) => {
                   return { ...item, orderNumber: index } as Product

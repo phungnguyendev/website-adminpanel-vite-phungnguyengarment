@@ -3,14 +3,10 @@ import { SwitchChangeEventHandler } from 'antd/es/switch'
 import { TitleProps } from 'antd/es/typography/Title'
 import { Plus } from 'lucide-react'
 import React, { useEffect } from 'react'
-import { useDispatch } from 'react-redux'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import useBreadcrumbs from 'use-react-router-breadcrumbs'
-import UserAPI from '~/api/services/UserAPI'
 import useLocalStorage from '~/hooks/useLocalStorage'
-import { setUserAction } from '~/store/actions-creator'
 import { routes } from '~/types/routes'
-import { User } from '~/typing'
 import { cn } from '~/utils/helpers'
 
 interface ActionProps {
@@ -35,6 +31,7 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
       source?: 'clear' | 'input'
     }
   ) => void
+  breadcrumb?: boolean
   onLoading?: (enable: boolean) => void
   onSearchChange?: React.ChangeEventHandler<HTMLInputElement> | undefined
   showDeleted?: boolean
@@ -60,10 +57,10 @@ const BaseLayout: React.FC<Props> = ({
   children,
   onLoading,
   titleProps,
+  breadcrumb,
   ...props
 }) => {
   const [accessTokenStored] = useLocalStorage<string>('accessToken', '')
-  const dispatch = useDispatch()
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const breadcrumbs = useBreadcrumbs(routes)
@@ -72,20 +69,7 @@ const BaseLayout: React.FC<Props> = ({
     const callApi = async () => {
       try {
         onLoading?.(true)
-        if (accessTokenStored) {
-          UserAPI.getUserFromAccessToken(accessTokenStored)
-            .then((meta) => {
-              if (!meta?.success) throw new Error(meta?.message)
-
-              const user = meta.data as User
-              dispatch(setUserAction(user))
-            })
-            .catch((error) => {
-              console.error(error)
-            })
-        } else {
-          navigate('/login')
-        }
+        if (!accessTokenStored) navigate('/login')
       } catch (error) {
         console.error(error)
       } finally {
@@ -97,18 +81,20 @@ const BaseLayout: React.FC<Props> = ({
 
   return (
     <div {...props} className={cn('w-full', props.className)}>
-      <Breadcrumb
-        items={breadcrumbs.map((breadcrumb) => {
-          return {
-            title:
-              pathname === breadcrumb.match.pathname ? (
-                breadcrumb.breadcrumb
-              ) : (
-                <Link to={breadcrumb.match.pathname}>{breadcrumb.breadcrumb}</Link>
-              )
-          }
-        })}
-      />
+      {breadcrumb && (
+        <Breadcrumb
+          items={breadcrumbs.map((breadcrumb) => {
+            return {
+              title:
+                pathname === breadcrumb.match.pathname ? (
+                  breadcrumb.breadcrumb
+                ) : (
+                  <Link to={breadcrumb.match.pathname}>{breadcrumb.breadcrumb}</Link>
+                )
+            }
+          })}
+        />
+      )}
       {props.title && (
         <Typography.Title className='w-fit' {...titleProps} level={titleProps?.level ? titleProps.level : 2}>
           {props.title}

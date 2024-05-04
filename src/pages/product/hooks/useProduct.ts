@@ -8,13 +8,14 @@ import ProductCategoryAPI from '~/api/services/ProductCategoryAPI'
 import { UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
 import { Category, Product, ProductCategory } from '~/typing'
+import { checkFieldToUpdate } from '~/utils/helpers'
 import { ProductTableDataType } from '../type'
 
 export interface ProductNewRecordProps {
   categoryID?: number | null
   title?: string | null
   desc?: string | null
-  imageId?: string | null
+  imageUrl?: string | null
 }
 
 export default function useProduct(table: UseTableProps<ProductTableDataType>) {
@@ -144,32 +145,30 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
       setLoading(true)
       console.log(newRecord)
       if (
-        newRecord.title &&
-        (newRecord.title !== record.title ||
-          newRecord.desc !== record.desc ||
-          newRecord.imageId !== record.imageId ||
-          newRecord.categoryID !== record.category?.id)
+        checkFieldToUpdate(record.title, newRecord.title) ||
+        checkFieldToUpdate(record.desc, newRecord.desc) ||
+        checkFieldToUpdate(record.imageUrl, newRecord.imageUrl) ||
+        checkFieldToUpdate(record.category?.id, newRecord.categoryID)
       ) {
         console.log('Product update progressing...')
         await productService.updateItemByPk(
           record.id!,
-          { title: newRecord.title, desc: newRecord.desc, imageId: newRecord.imageId },
+          { title: newRecord.title, desc: newRecord.desc, imageUrl: newRecord.imageUrl },
           setLoading,
           async (meta) => {
-            if (!meta?.success) throw new Error('API update group failed')
-            if (newRecord.imageId !== record.imageId) {
-              GoogleDriveAPI.deleteFile(record.imageId!).then((res) => {
-                if (!res?.success) throw new Error('Remove old image failed!')
-              })
+            if (!meta?.success) {
+              throw new Error('API update group failed')
             }
-            await productCategoryService.updateItemBy(
-              { field: 'productID', key: Number(record.id) },
-              { categoryID: newRecord.categoryID },
-              setLoading,
-              (meta) => {
-                if (!meta?.success) throw new Error(`Can not update category at now :: ${meta?.message}`)
-              }
-            )
+            if (checkFieldToUpdate(record.category?.id, newRecord.categoryID)) {
+              await productCategoryService.updateItemBy(
+                { field: 'productID', key: Number(record.id) },
+                { categoryID: newRecord.categoryID },
+                setLoading,
+                (meta) => {
+                  if (!meta?.success) throw new Error(`Can not update category at now :: ${meta?.message}`)
+                }
+              )
+            }
             message.success(meta.message)
           }
         )
@@ -219,7 +218,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
       setLoading(true)
       await productService.deleteItemByPk(record.id!, setLoading, (meta) => {
         if (!meta?.success) throw new Error('Delete record failed!')
-        GoogleDriveAPI.deleteFile(record.imageId!).then((res) => {
+        GoogleDriveAPI.deleteFile(record.imageUrl!).then((res) => {
           if (!res?.success) throw new Error('Remove old image failed!')
         })
         handleConfirmDeleting(`${record.id}`)

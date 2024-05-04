@@ -1,6 +1,8 @@
+import { lazy } from 'react'
 import BaseLayout from '~/components/layout/BaseLayout'
-import CategoryTable from './components/category/CategoryTable'
-import ProductTable from './components/product/ProductTable'
+
+const CategoryTable = lazy(() => import('./components/category/CategoryTable'))
+const ProductTable = lazy(() => import('./components/product/ProductTable'))
 
 const ProductPage = () => {
   return (

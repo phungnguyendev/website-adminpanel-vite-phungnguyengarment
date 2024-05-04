@@ -11,7 +11,7 @@ import { ProjectTableDataType } from '../type'
 export interface ProjectNewRecordProps {
   title?: string | null
   desc?: string | null
-  imageId?: string | null
+  imageUrl?: string | null
 }
 
 export default function useProject(table: UseTableProps<ProjectTableDataType>) {
@@ -83,17 +83,17 @@ export default function useProject(table: UseTableProps<ProjectTableDataType>) {
       console.log(newRecord)
       if (
         newRecord.title &&
-        (newRecord.title !== record.title || newRecord.desc !== record.desc || newRecord.imageId !== record.imageId)
+        (newRecord.title !== record.title || newRecord.desc !== record.desc || newRecord.imageUrl !== record.imageUrl)
       ) {
         console.log('Project update progressing...')
         await projectService.updateItemByPk(
           record.id!,
-          { title: newRecord.title, desc: newRecord.desc, imageId: newRecord.imageId },
+          { title: newRecord.title, desc: newRecord.desc, imageUrl: newRecord.imageUrl },
           setLoading,
           (meta) => {
             if (!meta?.success) throw new Error('API update group failed')
-            if (newRecord.imageId !== record.imageId) {
-              GoogleDriveAPI.deleteFile(record.imageId!).then((res) => {
+            if (newRecord.imageUrl !== record.imageUrl) {
+              GoogleDriveAPI.deleteFile(record.imageUrl!).then((res) => {
                 if (!res?.success) throw new Error('Remove old image failed!')
               })
             }

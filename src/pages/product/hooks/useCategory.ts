@@ -1,17 +1,17 @@
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
 import { ResponseDataType, defaultRequestBody } from '~/api/client'
-import GoogleDriveAPI from '~/api/services/GoogleDriveAPI'
 import CategoryAPI from '~/api/services/CategoryAPI'
 import { UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
 import { Category } from '~/typing'
+import { checkFieldToUpdate } from '~/utils/helpers'
 import { CategoryTableDataType } from '../type'
 
 export interface CategoryNewRecordProps {
   title?: string | null
   desc?: string | null
-  icon?: string | null
+  imageUrl?: string | null
 }
 
 export default function useCategory(table: UseTableProps<CategoryTableDataType>) {
@@ -82,20 +82,18 @@ export default function useCategory(table: UseTableProps<CategoryTableDataType>)
       setLoading(true)
       console.log(newRecord)
       if (
-        newRecord.title &&
-        (newRecord.title !== record.title || newRecord.desc !== record.desc || newRecord.icon !== record.icon)
+        checkFieldToUpdate(record.title, newRecord.title) ||
+        checkFieldToUpdate(record.desc, newRecord.desc) ||
+        checkFieldToUpdate(record.imageUrl, newRecord.imageUrl)
       ) {
         console.log('Category update progressing...')
         await categoryService.updateItemByPk(
           record.id!,
-          { title: newRecord.title, desc: newRecord.desc, icon: newRecord.icon },
+          { title: newRecord.title, desc: newRecord.desc, imageUrl: newRecord.imageUrl },
           setLoading,
           (meta) => {
-            if (!meta?.success) throw new Error('API update group failed')
-            if (newRecord.icon !== record.icon) {
-              GoogleDriveAPI.deleteFile(record.icon!).then((res) => {
-                if (!res?.success) throw new Error('Remove old image failed!')
-              })
+            if (!meta?.success) {
+              throw new Error('API update group failed')
             }
             message.success(meta.message)
           }

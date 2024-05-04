@@ -1,22 +1,22 @@
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
 import { ResponseDataType, defaultRequestBody } from '~/api/client'
-import GoogleDriveAPI from '~/api/services/GoogleDriveAPI'
 import PostAPI from '~/api/services/PostAPI'
 import { UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
 import { Post } from '~/typing'
+import { checkFieldToUpdate } from '~/utils/helpers'
 import { PostTableDataType } from '../type'
 
 export interface PostNewRecordProps {
   title?: string | null
   publishedAt?: string | null
   content?: string | null
-  thumbID?: string | null
+  imageUrl?: string | null
 }
 
 export default function usePost(table: UseTableProps<PostTableDataType>) {
-  const { showDeleted, setLoading, setDataSource, handleConfirmDeleting, handleConfirmCancelEditing } = table
+  const { setLoading, setDataSource, handleConfirmDeleting, handleConfirmCancelEditing } = table
 
   const postService = useAPIService<Post>(PostAPI)
 
@@ -59,10 +59,6 @@ export default function usePost(table: UseTableProps<PostTableDataType>) {
   }
 
   useEffect(() => {
-    loadData()
-  }, [showDeleted])
-
-  useEffect(() => {
     selfConvertDataSource(posts)
   }, [posts])
 
@@ -84,18 +80,15 @@ export default function usePost(table: UseTableProps<PostTableDataType>) {
       setLoading(true)
       console.log(newRecord)
       if (
-        newRecord.title &&
-        (newRecord.title !== record.title ||
-          newRecord.publishedAt !== record.publishedAt ||
-          newRecord.content !== record.content)
+        checkFieldToUpdate(record.imageUrl, newRecord.imageUrl) ||
+        checkFieldToUpdate(record.title, newRecord.title) ||
+        checkFieldToUpdate(record.publishedAt, newRecord.publishedAt) ||
+        checkFieldToUpdate(record.content, newRecord.content)
       ) {
         console.log('Product update progressing...')
         await postService.updateItemByPk(record.id!, { ...newRecord }, setLoading, async (meta) => {
-          if (!meta?.success) throw new Error('API update group failed')
-          if (newRecord.thumbID !== record.thumbID) {
-            GoogleDriveAPI.deleteFile(record.thumbID!).then((res) => {
-              if (!res?.success) throw new Error('Remove old image failed!')
-            })
+          if (!meta?.success) {
+            throw new Error('API update group failed')
           }
           message.success(meta.message)
         })
@@ -195,34 +188,6 @@ export default function usePost(table: UseTableProps<PostTableDataType>) {
     }
   }
 
-  const handleSearch = async (value: string) => {
-    try {
-      setLoading(true)
-      if (value.length > 0) {
-        await postService.getListItems(
-          {
-            ...defaultRequestBody,
-            search: {
-              field: 'id',
-              term: value
-            }
-          },
-          setLoading,
-          (meta) => {
-            if (meta?.success) {
-              // selfConvertDataSource(meta?.data as Product[])
-            }
-          }
-        )
-      }
-    } catch (error: any) {
-      const resError: ResponseDataType = error.data
-      message.error(`${resError.message}`)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   return {
     posts,
     searchText,
@@ -238,7 +203,6 @@ export default function usePost(table: UseTableProps<PostTableDataType>) {
     handleSaveClick,
     handleResetClick,
     handleSortChange,
-    handleSearch,
     handleAddNewItem,
     handlePageChange,
     handleConfirmDelete,

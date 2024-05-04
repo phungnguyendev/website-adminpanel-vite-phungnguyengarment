@@ -1,5 +1,7 @@
+import { lazy } from 'react'
 import BaseLayout from '~/components/layout/BaseLayout'
-import PrizeTable from './components/PrizeTable'
+
+const PrizeTable = lazy(() => import('./components/PrizeTable'))
 
 const AboutPage = () => {
   return (

@@ -1,4 +1,3 @@
-import { UploadFile } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import ProjectAPI from '~/api/services/ProjectAPI'
 import useTable from '~/components/hooks/useTable'
@@ -9,7 +8,7 @@ import SkyTable2 from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableRow from '~/components/sky-ui/SkyTable/SkyTableRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { Project } from '~/typing'
-import { getPublicUrlGoogleDrive, textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
+import { textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
 import useProject from '../hooks/useProject'
 import { ProjectTableDataType } from '../type'
 import ModalAddNewProject from './ModalAddNewProject'
@@ -36,16 +35,17 @@ const ProjectTable: React.FC = () => {
       return (
         <EditableStateCell
           isEditing={table.isEditing(record.key)}
-          dataIndex='imageId'
+          dataIndex='imageUrl'
           title='Image'
-          inputType='uploadFile'
-          initialValue={textValidatorInit(record.imageId)}
-          value={newRecord.imageId}
-          onValueChange={(val: UploadFile) => {
-            setNewRecord({ ...newRecord, imageId: textValidatorChange(val.response.data.id) })
+          placeholder='Paste your image link..'
+          inputType='text'
+          initialValue={textValidatorInit(record.imageUrl)}
+          value={newRecord.imageUrl}
+          onValueChange={(newImage: string) => {
+            setNewRecord({ ...newRecord, imageUrl: textValidatorChange(newImage) })
           }}
         >
-          <LazyImage alt='banner-img' src={getPublicUrlGoogleDrive(record.imageId ?? '')} height={120} width={120} />
+          <LazyImage alt='banner-img' src={textValidatorDisplay(record.imageUrl)} height={120} width={120} />
         </EditableStateCell>
       )
     },
@@ -56,12 +56,13 @@ const ProjectTable: React.FC = () => {
           dataIndex='title'
           title='Title'
           inputType='text'
+          placeholder='Input your title..'
           required={true}
           initialValue={textValidatorInit(record.title)}
           value={newRecord.title}
           onValueChange={(val: string) => setNewRecord({ ...newRecord, title: textValidatorChange(val) })}
         >
-          <SkyTableTypography placeholder='asd' status={'active'}>
+          <SkyTableTypography placeholder='Input your title..' status={'active'}>
             {textValidatorDisplay(record.title)}
           </SkyTableTypography>
         </EditableStateCell>
@@ -74,12 +75,13 @@ const ProjectTable: React.FC = () => {
           dataIndex='desc'
           title='Description'
           inputType='text'
+          placeholder='Input your description..'
           required={true}
           initialValue={textValidatorInit(record.desc)}
           value={newRecord.desc}
           onValueChange={(val: string) => setNewRecord({ ...newRecord, desc: textValidatorChange(val) })}
         >
-          <SkyTableTypography placeholder='asd' status={'active'}>
+          <SkyTableTypography placeholder='Input your description..' status={'active'}>
             {textValidatorDisplay(record.desc)}
           </SkyTableTypography>
         </EditableStateCell>
@@ -102,7 +104,7 @@ const ProjectTable: React.FC = () => {
     },
     {
       title: 'Image',
-      dataIndex: 'imageId',
+      dataIndex: 'imageUrl',
       width: '10%',
       responsive: ['sm'],
       render: (_value: any, record: ProjectTableDataType) => {
@@ -158,19 +160,17 @@ const ProjectTable: React.FC = () => {
               row: SkyTableRow
             }
           }}
-          onDraggableChange={(oldData, newData) => {
+          onDraggableChange={(_, newData) => {
             if (newData) {
-              console.log({
-                oldData,
-                newData
-              })
               ProjectAPI.updateList(
                 newData.map((item, index) => {
                   return { ...item, orderNumber: index } as Project
                 }) as Project[]
               )
                 .then((res) => {
-                  if (res?.success) console.log(res?.data)
+                  if (!res?.success) {
+                    throw new Error(`${res?.message}`)
+                  }
                 })
                 .catch((e) => console.log(`${e}`))
             }

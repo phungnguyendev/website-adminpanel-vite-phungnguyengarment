@@ -10,7 +10,7 @@ import { PrizeTableDataType } from '../type'
 
 export interface PrizeNewRecordProps {
   title?: string | null
-  imageId?: string | null
+  imageUrl?: string | null
 }
 
 export default function usePrize(table: UseTableProps<PrizeTableDataType>) {
@@ -80,16 +80,16 @@ export default function usePrize(table: UseTableProps<PrizeTableDataType>) {
     try {
       setLoading(true)
       console.log(newRecord)
-      if (newRecord.title && (newRecord.title !== record.title || newRecord.imageId !== record.imageId)) {
+      if (newRecord.title && (newRecord.title !== record.title || newRecord.imageUrl !== record.imageUrl)) {
         console.log('Prize update progressing...')
         await prizeService.updateItemByPk(
           record.id!,
-          { title: newRecord.title, imageId: newRecord.imageId },
+          { title: newRecord.title, imageUrl: newRecord.imageUrl },
           setLoading,
           (meta) => {
             if (!meta?.success) throw new Error('API update group failed')
-            if (newRecord.imageId !== record.imageId) {
-              GoogleDriveAPI.deleteFile(record.imageId!).then((res) => {
+            if (newRecord.imageUrl !== record.imageUrl) {
+              GoogleDriveAPI.deleteFile(record.imageUrl!).then((res) => {
                 if (!res?.success) throw new Error('Remove old image failed!')
               })
             }

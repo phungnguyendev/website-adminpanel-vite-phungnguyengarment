@@ -10,7 +10,7 @@ import { HomeProductTableDataType } from '../type'
 
 export interface HomeProductNewRecordProps {
   title?: string | null
-  imageId?: string | null
+  imageUrl?: string | null
 }
 
 export default function useHomeProduct(table: UseTableProps<HomeProductTableDataType>) {
@@ -80,16 +80,16 @@ export default function useHomeProduct(table: UseTableProps<HomeProductTableData
     try {
       setLoading(true)
       console.log(newRecord)
-      if (newRecord.title && (newRecord.title !== record.title || newRecord.imageId !== record.imageId)) {
+      if (newRecord.title && (newRecord.title !== record.title || newRecord.imageUrl !== record.imageUrl)) {
         console.log('HomeProduct update progressing...')
         await homeProductService.updateItemByPk(
           record.id!,
-          { title: newRecord.title, imageId: newRecord.imageId },
+          { title: newRecord.title, imageUrl: newRecord.imageUrl },
           setLoading,
           (meta) => {
             if (!meta?.success) throw new Error('API update group failed')
-            if (newRecord.imageId !== record.imageId) {
-              GoogleDriveAPI.deleteFile(record.imageId!).then((res) => {
+            if (newRecord.imageUrl !== record.imageUrl) {
+              GoogleDriveAPI.deleteFile(record.imageUrl!).then((res) => {
                 if (!res?.success) throw new Error('Remove old image failed!')
               })
             }

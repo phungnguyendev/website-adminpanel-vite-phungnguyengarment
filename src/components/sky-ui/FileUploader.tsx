@@ -2,8 +2,6 @@ import { InboxOutlined } from '@ant-design/icons'
 import type { GetProp, UploadFile, UploadProps } from 'antd'
 import { App as AntApp, Image, Upload } from 'antd'
 import React, { useState } from 'react'
-import { ResponseDataType } from '~/api/client'
-import GoogleDriveAPI from '~/api/services/GoogleDriveAPI'
 import appConfig from '~/config/app.config'
 import { getBase64 } from '~/utils/helpers'
 
@@ -39,10 +37,6 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFinish, ...props }) => {
       } else if (info.file.status === 'error') {
         message.error(`${info.file.name} file upload failed.`)
       }
-    },
-    onRemove: (info) => {
-      const response = info.response as ResponseDataType
-      GoogleDriveAPI.deleteFile(response.data.id)
     },
     onPreview: async (file) => {
       if (!file.url && !file.preview) {

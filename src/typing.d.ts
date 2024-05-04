@@ -53,13 +53,9 @@ export type TableListDataType<T> = {
 
 export interface User {
   id?: number
-  fullName?: string | null
   email?: string | null
   password?: string | null
   avatar?: string | null
-  phone?: string | null
-  otp?: string | null
-  appPassword?: string | null
   accessToken?: string | null
   createdAt?: string
   updatedAt?: string
@@ -77,7 +73,7 @@ export interface Attachment {
 
 export interface Category {
   id?: number
-  icon?: string | null
+  imageUrl?: string | null
   title?: string | null
   desc?: string | null
   createdAt?: string
@@ -87,7 +83,7 @@ export interface Category {
 export interface HeroBanner {
   id?: number
   title?: string | null
-  imageId?: string | null
+  imageUrl?: string | null
   orderNumber?: number | null
   createdAt?: string
   updatedAt?: string
@@ -96,7 +92,7 @@ export interface HeroBanner {
 export interface HomeProduct {
   id?: number
   title?: string | null
-  imageId?: string | null
+  imageUrl?: string | null
   orderNumber?: number | null
   createdAt?: string
   updatedAt?: string
@@ -113,7 +109,7 @@ export interface IndustrySector {
 export interface Partner {
   id?: number
   title?: string | null
-  imageId?: string | null
+  imageUrl?: string | null
   orderNumber?: number | null
   createdAt?: string
   updatedAt?: string
@@ -134,7 +130,7 @@ export interface Post {
   id?: number
   title?: string | null
   content?: string | null
-  thumbID?: string | null
+  imageUrl?: string | null
   publishedAt?: string | null
   orderNumber?: number | null
   createdAt?: string
@@ -144,7 +140,7 @@ export interface Post {
 export interface Prize {
   id?: number
   title?: string | null
-  imageId?: string | null
+  imageUrl?: string | null
   orderNumber?: number | null
   createdAt?: string
   updatedAt?: string
@@ -154,7 +150,7 @@ export interface Product {
   id?: number
   title?: string | null
   desc?: string | null
-  imageId?: string | null
+  imageUrl?: string | null
   orderNumber?: number | null
   createdAt?: string
   updatedAt?: string
@@ -172,7 +168,7 @@ export interface Project {
   id?: number
   title?: string | null
   desc?: string | null
-  imageId?: string | null
+  imageUrl?: string | null
   orderNumber?: number | null
   createdAt?: string
   updatedAt?: string

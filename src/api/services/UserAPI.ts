@@ -1,6 +1,7 @@
 import client, { RequestBodyType, ResponseDataType } from '~/api/client'
 import { User } from '~/typing'
 import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatter'
+
 const NAMESPACE = 'users'
 
 export default {
@@ -41,16 +42,6 @@ export default {
       .post(`${NAMESPACE}/find`, {
         ...bodyRequest
       })
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  getUserFromAccessToken: async (accessToken: string): Promise<ResponseDataType | undefined> => {
-    return await client
-      .get(`${NAMESPACE}/accessToken/${accessToken}`)
       .then((res) => {
         return responseFormatter(res)
       })

@@ -1,4 +1,3 @@
-import { UploadFile } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import PrizeAPI from '~/api/services/PrizeAPI'
 import useTable from '~/components/hooks/useTable'
@@ -9,7 +8,7 @@ import SkyTable2 from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableRow from '~/components/sky-ui/SkyTable/SkyTableRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import { Prize } from '~/typing'
-import { getPublicUrlGoogleDrive, textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
+import { textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
 import usePrize from '../hooks/usePrize'
 import { PrizeTableDataType } from '../type'
 import ModalAddNewPrize from './ModalAddNewPrize'
@@ -36,16 +35,17 @@ const PrizeTable: React.FC = () => {
       return (
         <EditableStateCell
           isEditing={table.isEditing(record.key)}
-          dataIndex='imageId'
+          dataIndex='imageUrl'
           title='Image'
-          inputType='uploadFile'
-          initialValue={textValidatorInit(record.imageId)}
-          value={newRecord.imageId}
-          onValueChange={(val: UploadFile) => {
-            setNewRecord({ ...newRecord, imageId: textValidatorChange(val.response.data.id) })
+          placeholder='Paste your image link..'
+          inputType='text'
+          initialValue={textValidatorInit(record.imageUrl)}
+          value={newRecord.imageUrl}
+          onValueChange={(newImage: string) => {
+            setNewRecord({ ...newRecord, imageUrl: textValidatorChange(newImage) })
           }}
         >
-          <LazyImage alt='banner-img' src={getPublicUrlGoogleDrive(record.imageId ?? '')} height={120} width={120} />
+          <LazyImage alt='banner-img' src={textValidatorDisplay(record.imageUrl)} height={120} width={120} />
         </EditableStateCell>
       )
     },
@@ -84,7 +84,7 @@ const PrizeTable: React.FC = () => {
     },
     {
       title: 'Image',
-      dataIndex: 'imageId',
+      dataIndex: 'imageUrl',
       width: '10%',
       responsive: ['sm'],
       render: (_value: any, record: PrizeTableDataType) => {
@@ -130,12 +130,8 @@ const PrizeTable: React.FC = () => {
               row: SkyTableRow
             }
           }}
-          onDraggableChange={(oldData, newData) => {
+          onDraggableChange={(_, newData) => {
             if (newData) {
-              console.log({
-                oldData,
-                newData
-              })
               PrizeAPI.updateList(
                 newData.map((item, index) => {
                   return { ...item, orderNumber: index } as Prize

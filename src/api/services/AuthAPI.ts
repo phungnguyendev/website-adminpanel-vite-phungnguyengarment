@@ -7,7 +7,7 @@ const NAMESPACE = 'auth'
 export default {
   login: async (user: User): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(`${NAMESPACE}/login`, {1
+      .post(`${NAMESPACE}/login`, {
         email: user.email,
         password: user.password
       })

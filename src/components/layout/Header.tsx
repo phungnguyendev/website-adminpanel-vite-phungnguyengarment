@@ -7,6 +7,7 @@ import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import useLocalStorage from '~/hooks/useLocalStorage'
 import { RootState } from '~/store/store'
+import { User } from '~/typing'
 import { cn, extractEmailName } from '~/utils/helpers'
 
 const { Header: AntHeader } = Layout
@@ -19,6 +20,7 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
 
 const Header: React.FC<Props> = ({ onMenuClick, collapsed, setCollapsed, ...props }) => {
   const [, setAccessTokenStored] = useLocalStorage<string>('accessToken', '')
+  const [userStorage, setUserStorage] = useLocalStorage<User>('userStorage', {})
   const [isHidden, setIsHidden] = useState(false)
   const [offsetY, setOffsetY] = useState<number>(0)
   const navigate = useNavigate()
@@ -56,6 +58,7 @@ const Header: React.FC<Props> = ({ onMenuClick, collapsed, setCollapsed, ...prop
       key: '3',
       onClick: () => {
         setAccessTokenStored(null)
+        setUserStorage(null)
         navigate('/login')
       }
     }
@@ -100,9 +103,7 @@ const Header: React.FC<Props> = ({ onMenuClick, collapsed, setCollapsed, ...prop
                 <Flex className='h-full'>
                   <Button type='link' className='' onClick={(e) => e.preventDefault()}>
                     <Flex gap={4} justify='center' className='h-full text-foreground'>
-                      <Typography.Text className='m-0'>
-                        {extractEmailName(currentUser.user.email ?? '')}
-                      </Typography.Text>
+                      <Typography.Text className='m-0'>{extractEmailName(userStorage?.email ?? '')}</Typography.Text>
                       <CaretDownOutlined />
                     </Flex>
                   </Button>

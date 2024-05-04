@@ -1,7 +1,7 @@
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ResponseDataType, defaultRequestBody } from '~/api/client'
-import GoogleDriveAPI from '~/api/services/GoogleDriveAPI'
 import HeroBannerAPI from '~/api/services/HeroBannerAPI'
 import { UseTableProps } from '~/components/hooks/useTable'
 import useAPIService from '~/hooks/useAPIService'
@@ -10,7 +10,7 @@ import { HeroBannerTableDataType } from '../type'
 
 export interface HeroBannerNewRecordProps {
   title?: string | null
-  imageId?: string | null
+  imageUrl?: string | null
 }
 
 export default function useHeroBanner(table: UseTableProps<HeroBannerTableDataType>) {
@@ -24,6 +24,7 @@ export default function useHeroBanner(table: UseTableProps<HeroBannerTableDataTy
   const [searchText, setSearchText] = useState<string>('')
   const [newRecord, setNewRecord] = useState<HeroBannerNewRecordProps>({})
   const [heroBanners, setHeroBanners] = useState<HeroBanner[]>([])
+  const navigate = useNavigate()
 
   const loadData = async () => {
     try {
@@ -38,9 +39,8 @@ export default function useHeroBanner(table: UseTableProps<HeroBannerTableDataTy
           },
           setLoading,
           (meta) => {
-            if (meta?.success) {
-              setHeroBanners(meta.data as HeroBanner[])
-            }
+            if (!meta?.success) navigate('/login')
+            setHeroBanners(meta?.data as HeroBanner[])
           }
         )
       } catch (error: any) {
@@ -80,19 +80,17 @@ export default function useHeroBanner(table: UseTableProps<HeroBannerTableDataTy
     try {
       setLoading(true)
       console.log(newRecord)
-      if (newRecord.title && (newRecord.title !== record.title || newRecord.imageId !== record.imageId)) {
+      if (
+        (newRecord.title && newRecord.title !== record.title) ||
+        (newRecord.imageUrl && newRecord.imageUrl !== record.imageUrl)
+      ) {
         console.log('HeroBanner update progressing...')
         await heroBannerService.updateItemByPk(
           record.id!,
-          { title: newRecord.title, imageId: newRecord.imageId },
+          { title: newRecord.title, imageUrl: newRecord.imageUrl },
           setLoading,
           (meta) => {
             if (!meta?.success) throw new Error('API update group failed')
-            if (newRecord.imageId !== record.imageId) {
-              GoogleDriveAPI.deleteFile(record.imageId!).then((res) => {
-                if (!res?.success) throw new Error('Remove old image failed!')
-              })
-            }
             message.success(meta.message)
           }
         )
@@ -111,7 +109,7 @@ export default function useHeroBanner(table: UseTableProps<HeroBannerTableDataTy
     try {
       console.log(formAddNew)
       setLoading(true)
-      await heroBannerService.createNewItem(formAddNew as HeroBanner, setLoading, (meta) => {
+      await heroBannerService.createNewItem(formAddNew, setLoading, (meta) => {
         if (!meta?.success) throw new Error('Create failed!')
         message.success('Success')
       })

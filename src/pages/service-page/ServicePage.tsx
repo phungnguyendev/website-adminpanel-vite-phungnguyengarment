@@ -1,5 +1,7 @@
+import { lazy } from 'react'
 import BaseLayout from '~/components/layout/BaseLayout'
-import ProjectTable from './components/ProjectTable'
+
+const ProjectTable = lazy(() => import('./components/ProjectTable'))
 
 const ServicePage = () => {
   return (

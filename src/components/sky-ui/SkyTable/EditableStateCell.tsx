@@ -18,10 +18,9 @@ import { SelectProps } from 'antd/es/select'
 import { DatePickerProps } from 'antd/lib'
 import { Eye, EyeOff } from 'lucide-react'
 import { HTMLAttributes, memo, useState } from 'react'
-import type { MyComponentProps } from 'react-froala-wysiwyg'
+import ReactQuill, { ReactQuillProps } from 'react-quill'
 import { InputType } from '~/typing'
 import { cn } from '~/utils/helpers'
-import ContentEditor from '../ContentEditor'
 import FileDragger, { FileUploaderProps } from '../FileUploader'
 
 export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
@@ -39,7 +38,7 @@ export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
   textAreaProps?: TextAreaProps
   inputProps?: InputProps
   datePickerProps?: DatePickerProps
-  htmlEditorProps?: MyComponentProps
+  htmlEditorProps?: ReactQuillProps
   inputType?: InputType
   required?: boolean
   allowClear?: boolean
@@ -60,7 +59,7 @@ function EditableStateCell({
   placeholder,
   allowClear,
   value,
-  // htmlEditorProps,
+  htmlEditorProps,
   uploadProps,
   colorPickerProps,
   datePickerProps,
@@ -93,7 +92,34 @@ function EditableStateCell({
           />
         )
       case 'htmlEditor':
-        return <ContentEditor />
+        return (
+          <ReactQuill
+            {...htmlEditorProps}
+            modules={{
+              toolbar: [
+                ['bold', 'italic', 'underline', 'strike'], // toggled buttons
+                ['blockquote', 'code-block'],
+                ['link', 'image', 'video', 'formula'],
+
+                [{ header: 1 }, { header: 2 }], // custom button values
+                [{ list: 'ordered' }, { list: 'bullet' }, { list: 'check' }],
+                [{ script: 'sub' }, { script: 'super' }], // superscript/subscript
+                [{ indent: '-1' }, { indent: '+1' }], // outdent/indent
+                [{ direction: 'rtl' }], // text direction
+
+                [{ size: ['small', false, 'large', 'huge'] }], // custom dropdown
+                [{ header: [1, 2, 3, 4, 5, 6, false] }],
+
+                [{ color: [] }, { background: [] }], // dropdown with defaults from theme
+                [{ font: [] }],
+                [{ align: [] }],
+
+                ['clean'] // remove formatting button
+              ]
+            }}
+            theme='snow'
+          />
+        )
       case 'colorpicker':
         return (
           <ColorPicker

@@ -13,7 +13,7 @@ export interface ProductAddNewProps {
   categoryID?: number | null
   title?: string | null
   desc?: string | null
-  imageId?: string | null
+  imageUrl?: string | null
 }
 
 interface Props {
@@ -37,7 +37,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, openModal, setOpenModal
       categoryID: row.categoryID,
       title: row.title,
       desc: row.desc,
-      imageId: file?.response.data.id
+      imageUrl: file?.response.data.id
     })
   }
 

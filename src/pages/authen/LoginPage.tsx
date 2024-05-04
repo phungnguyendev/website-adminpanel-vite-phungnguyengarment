@@ -8,6 +8,7 @@ import bg from '~/assets/a1.jpg'
 import logo from '~/assets/logo.svg'
 import useTitle from '~/components/hooks/useTitle'
 import useLocalStorage from '~/hooks/useLocalStorage'
+import { User } from '~/typing'
 
 interface Props extends HTMLAttributes<HTMLElement> {}
 
@@ -18,20 +19,14 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
   const { message } = AntApp.useApp()
   const navigate = useNavigate()
   const [accessTokenStored, setAccessTokenStored] = useLocalStorage('accessToken', '')
-  const [emailStored, setEmailStored] = useLocalStorage('email-stored', '')
-  const [otpStored, setOtpStored] = useLocalStorage('otp-stored', '')
+  const [, setUserStorage] = useLocalStorage<User>('userStorage', {})
   const [loading, setLoading] = useState<boolean>(false)
-  const [email, setEmail] = useState<string>('')
-  const [password, setPassword] = useState<string>('')
   const [formLayout, setFormLayout] = useState<LayoutType>('horizontal')
   useTitle('Đăng nhập')
 
   useEffect(() => {
-    if (emailStored || otpStored) {
-      setEmailStored(null)
-      setOtpStored(null)
-    }
-  }, [emailStored, otpStored])
+    setAccessTokenStored(null)
+  }, [])
 
   useEffect(() => {
     if (accessTokenStored && accessTokenStored.length !== 0) {
@@ -50,12 +45,12 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
       // Create a new request to login user
       await AuthAPI.login({ email, password }).then((meta) => {
         if (!meta?.success) throw new Error(meta?.message)
-        // const userLogged = meta.data as User
-        // if (userLogged) {
-        //   // Save to local storage
-        //   setAccessTokenStored(userLogged.accessToken)
-        // }
-        // console.log(meta)
+        const user = meta.data as User
+        if (user) {
+          // Save to local storage
+          setAccessTokenStored(user.accessToken)
+          setUserStorage(user)
+        }
         // Send message app
         message.success('Success!')
         // Navigation to '/' (Dashboard page) if login success
@@ -149,6 +144,7 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
                           type: 'email'
                         }
                       ]}
+                      initialValue={'phungnguyengarment.dev@gmail.com'}
                     >
                       <Input
                         placeholder='Email'
@@ -163,6 +159,7 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
                       name='password'
                       className='m-0 w-full p-0'
                       rules={[{ required: true, message: 'Please input your password!' }]}
+                      initialValue={'Phungnguyen@2771'}
                     >
                       <Input.Password
                         placeholder='Password'

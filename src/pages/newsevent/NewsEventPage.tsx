@@ -1,10 +1,12 @@
+import { lazy } from 'react'
 import BaseLayout from '~/components/layout/BaseLayout'
-import PostList from './components/post/PostList'
+
+const PostList = lazy(() => import('./components/post/PostList'))
 
 const NewsEventPage = () => {
   return (
     <>
-      <BaseLayout title='News and page'>
+      <BaseLayout title='News and page' breadcrumb>
         {/* <PostTable /> */}
         <PostList />
         {/* <Outlet /> */}

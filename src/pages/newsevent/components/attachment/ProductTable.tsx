@@ -55,19 +55,19 @@ const ProductTable: React.FC = () => {
       return (
         <EditableStateCell
           isEditing={table.isEditing(record.key)}
-          dataIndex='imageId'
+          dataIndex='imageUrl'
           title='Image'
           inputType='uploadFile'
-          initialValue={textValidatorInit(record.imageId)}
-          value={newRecord.imageId}
+          initialValue={textValidatorInit(record.imageUrl)}
+          value={newRecord.imageUrl}
           onValueChange={(val: UploadFile) => {
-            setNewRecord({ ...newRecord, imageId: textValidatorChange(val.response.data.id) })
+            setNewRecord({ ...newRecord, imageUrl: textValidatorChange(val.response.data.id) })
           }}
         >
           <LazyImage
             alt='banner-img'
             className='object-contain'
-            src={getPublicUrlGoogleDrive(record.imageId ?? '')}
+            src={getPublicUrlGoogleDrive(record.imageUrl ?? '')}
             height={120}
             width={120}
           />
@@ -154,7 +154,7 @@ const ProductTable: React.FC = () => {
     },
     {
       title: 'Image',
-      dataIndex: 'imageId',
+      dataIndex: 'imageUrl',
       width: '10%',
       responsive: ['sm'],
       render: (_value: any, record: ProductTableDataType) => {

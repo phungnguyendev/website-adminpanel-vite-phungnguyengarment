@@ -1,13 +1,13 @@
 import { InboxOutlined } from '@ant-design/icons'
 import type { GetProp, UploadFile, UploadProps } from 'antd'
 import { App as AntApp, Image, Upload } from 'antd'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { getBase64 } from '~/utils/helpers'
 
 type ComponentType = 'dragger' | 'clicker'
 
 export interface ImageUploaderProps extends UploadProps {
-  onFinish?: (file: UploadFile) => void
+  onFinish?: (files: UploadFile[]) => void
   componentType?: ComponentType
 }
 
@@ -20,6 +20,10 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ ...props }) => {
   const [fileList, setFileList] = useState<UploadFile[]>([])
   const [previewOpen, setPreviewOpen] = useState(false)
   const [previewImage, setPreviewImage] = useState('')
+
+  useEffect(() => {
+    props.onFinish?.(fileList)
+  }, [fileList])
 
   const uploadProps: UploadProps = {
     ...props,
