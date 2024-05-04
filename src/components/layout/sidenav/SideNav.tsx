@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import logo from '~/assets/logo.svg'
 import { routeSide } from '~/types/routes'
-import { lastPath } from '~/utils/helpers'
 import SideIcon from './SideIcon'
 import SideItem from './SideItem'
 
@@ -28,7 +27,7 @@ const SideNav: React.FC<Props> = ({ openDrawer, setOpenDrawer }) => {
   const [selectedKey, setSelectedKey] = useState<string>(routeSide[0].path)
 
   useEffect(() => {
-    const keyFound = routeSide.find((route) => route.path === lastPath(pathname))
+    const keyFound = routeSide.find((route) => route.path === pathname)
     if (keyFound) {
       setSelectedKey(keyFound.path)
     }

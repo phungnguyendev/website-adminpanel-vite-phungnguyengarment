@@ -32,7 +32,7 @@ export const routeSide: RouteType[] = [
   { name: 'Sản phẩm', path: '/products', breadcrumb: 'Products', component: ProductPage, icon: Box },
   {
     name: 'Tin tức & Sự kiện',
-    path: 'news',
+    path: '/news',
     breadcrumb: 'News',
     component: NewsEventPage,
     icon: Newspaper
@@ -52,7 +52,7 @@ export const routes: RouteType[] = [
   { name: 'Sản phẩm', path: '/products', breadcrumb: 'Products', component: ProductPage, icon: Box },
   {
     name: 'Tin tức & Sự kiện',
-    path: 'news',
+    path: '/news',
     breadcrumb: 'News',
     component: NewsEventPage,
     icon: Newspaper
