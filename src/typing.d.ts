@@ -106,6 +106,14 @@ export interface IndustrySector {
   updatedAt?: string
 }
 
+export interface Branch {
+  id?: number
+  title?: string | null
+  orderNumber?: number | null
+  createdAt?: string
+  updatedAt?: string
+}
+
 export interface Partner {
   id?: number
   title?: string | null
@@ -181,7 +189,7 @@ export interface RecruitmentPost {
   quantity?: string | null
   wage?: string | null
   workingTime?: string | null
-  workPlace?: string | null
+  workingPlace?: string | null
   expirationDate?: string | null
   orderNumber?: number | null
   createdAt?: string

@@ -2,6 +2,7 @@ import { Box, Newspaper } from 'lucide-react'
 import { lazy } from 'react'
 import { BsInfoSquare } from 'react-icons/bs'
 import { IoSettingsOutline } from 'react-icons/io5'
+import { MdOutlineWorkOutline } from 'react-icons/md'
 import { TbSmartHome } from 'react-icons/tb'
 
 const HomePage = lazy(() => import('~/pages/home/HomePage'))
@@ -10,6 +11,7 @@ const ServicePage = lazy(() => import('~/pages/service-page/ServicePage'))
 const ProductPage = lazy(() => import('~/pages/product/ProductPage'))
 const NewsEventPage = lazy(() => import('~/pages/newsevent/NewsEventPage'))
 const PostDetails = lazy(() => import('~/pages/newsevent/components/post/PostDetails'))
+const RecruitmentPage = lazy(() => import('~/pages/recruitment/RecruitmentPage'))
 
 export interface RouteType {
   name: string
@@ -36,6 +38,13 @@ export const routeSide: RouteType[] = [
     breadcrumb: 'News',
     component: NewsEventPage,
     icon: Newspaper
+  },
+  {
+    name: 'Tuyển dụng',
+    path: '/careers',
+    breadcrumb: 'Recruitment',
+    component: RecruitmentPage,
+    icon: MdOutlineWorkOutline
   }
 ]
 
@@ -63,5 +72,12 @@ export const routes: RouteType[] = [
     breadcrumb: 'Post detail',
     component: PostDetails,
     icon: Newspaper
+  },
+  {
+    name: 'Tuyển dụng',
+    path: '/careers',
+    breadcrumb: 'Recruitment',
+    component: RecruitmentPage,
+    icon: MdOutlineWorkOutline
   }
 ]
