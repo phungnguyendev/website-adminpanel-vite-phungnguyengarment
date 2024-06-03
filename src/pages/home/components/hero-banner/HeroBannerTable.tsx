@@ -35,9 +35,13 @@ const HeroBannerTable: React.FC = () => {
       return (
         <EditableStateCell
           isEditing={table.isEditing(record.key)}
-          dataIndex='imageUrl'
+          dataIndex='image'
           title='Image'
-          inputType='text'
+          inputType='uploadFile'
+          uploadProps={{
+            multiple: true,
+            name: 'image'
+          }}
           initialValue={textValidatorInit(record.imageUrl)}
           value={newRecord.imageUrl}
           onValueChange={(newImage: string) => {
@@ -83,7 +87,7 @@ const HeroBannerTable: React.FC = () => {
     },
     {
       title: 'Image',
-      dataIndex: 'imageUrl',
+      dataIndex: 'image',
       width: '10%',
       responsive: ['sm'],
       render: (_value: any, record: HeroBannerTableDataType) => {

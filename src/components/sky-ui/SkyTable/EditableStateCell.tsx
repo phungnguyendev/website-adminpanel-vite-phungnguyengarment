@@ -21,7 +21,7 @@ import { HTMLAttributes, memo, useState } from 'react'
 import ReactQuill, { ReactQuillProps } from 'react-quill'
 import { InputType } from '~/typing'
 import { cn } from '~/utils/helpers'
-import FileDragger, { FileUploaderProps } from '../FileUploader'
+import Uploader, { UploaderProps } from '../Uploader'
 
 export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
   isEditing: boolean
@@ -31,7 +31,7 @@ export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
   initialValue?: any
   onValueChange?: (value: any, option?: any) => void
   selectProps?: SelectProps
-  uploadProps?: FileUploaderProps
+  uploadProps?: UploaderProps
   colorPickerProps?: ColorPickerProps
   checkboxProps?: CheckboxProps
   inputNumberProps?: InputNumberProps
@@ -82,15 +82,7 @@ function EditableStateCell({
   const inputNode = ((): React.ReactNode => {
     switch (inputType) {
       case 'uploadFile':
-        return (
-          <FileDragger
-            name={dataIndex}
-            disabled={disabled}
-            {...uploadProps}
-            className={restProps.className}
-            onFinish={(val) => onValueChange?.(val)}
-          />
-        )
+        return <Uploader {...uploadProps} name={dataIndex} />
       case 'htmlEditor':
         return (
           <ReactQuill

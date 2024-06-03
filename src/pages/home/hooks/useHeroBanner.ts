@@ -78,23 +78,23 @@ export default function useHeroBanner(table: UseTableProps<HeroBannerTableDataTy
   const handleSaveClick = async (record: HeroBannerTableDataType) => {
     // const row = (await form.validateFields()) as any
     try {
-      setLoading(true)
+      // setLoading(true)
       console.log(newRecord)
-      if (
-        (newRecord.title && newRecord.title !== record.title) ||
-        (newRecord.imageUrl && newRecord.imageUrl !== record.imageUrl)
-      ) {
-        console.log('HeroBanner update progressing...')
-        await heroBannerService.updateItemByPk(
-          record.id!,
-          { title: newRecord.title, imageUrl: newRecord.imageUrl },
-          setLoading,
-          (meta) => {
-            if (!meta?.success) throw new Error('API update group failed')
-            message.success(meta.message)
-          }
-        )
-      }
+      // if (
+      //   (newRecord.title && newRecord.title !== record.title) ||
+      //   (newRecord.imageUrl && newRecord.imageUrl !== record.imageUrl)
+      // ) {
+      //   console.log('HeroBanner update progressing...')
+      //   await heroBannerService.updateItemByPk(
+      //     record.id!,
+      //     { title: newRecord.title, imageUrl: newRecord.imageUrl },
+      //     setLoading,
+      //     (meta) => {
+      //       if (!meta?.success) throw new Error('API update group failed')
+      //       message.success(meta.message)
+      //     }
+      //   )
+      // }
     } catch (error: any) {
       const resError: ResponseDataType = error.data
       message.error(`${resError.message}`)
