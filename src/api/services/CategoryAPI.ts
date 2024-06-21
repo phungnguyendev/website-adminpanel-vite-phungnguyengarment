@@ -1,11 +1,11 @@
 import client, { RequestBodyType, ResponseDataType } from '~/api/client'
-import { Prize } from '~/typing'
+import { Category } from '~/typing'
 import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatter'
 
 const NAMESPACE = 'categories'
 
 export default {
-  createNewItem: async (item: Prize, accessToken: string): Promise<ResponseDataType | undefined> => {
+  createItem: async (item: Category, accessToken: string): Promise<ResponseDataType | undefined> => {
     return await client
       .post(
         `${NAMESPACE}`,
@@ -25,7 +25,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
+  getItem: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
     return client
       .get(`${NAMESPACE}/${id}`, {
         headers: {
@@ -76,9 +76,17 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateList: async (itemsToUpdate: Prize[]): Promise<ResponseDataType | undefined> => {
+  updateItem: async (
+    id: number,
+    itemToUpdate: Category,
+    accessToken: string
+  ): Promise<ResponseDataType | undefined> => {
     return client
-      .post(`${NAMESPACE}/all`, itemsToUpdate)
+      .put(`${NAMESPACE}/${id}`, itemToUpdate, {
+        headers: {
+          authorization: accessToken
+        }
+      })
       .then((res) => {
         return responseFormatter(res)
       })
@@ -86,13 +94,9 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItemByPk: async (
-    id: number,
-    itemToUpdate: Prize,
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
+  updateItems: async (itemsToUpdate: Category[], accessToken: string): Promise<ResponseDataType | undefined> => {
     return client
-      .put(`${NAMESPACE}/${id}`, itemToUpdate, {
+      .put(`${NAMESPACE}`, itemsToUpdate, {
         headers: {
           authorization: accessToken
         }

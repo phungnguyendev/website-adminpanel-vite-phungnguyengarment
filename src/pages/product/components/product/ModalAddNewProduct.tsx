@@ -3,7 +3,7 @@ import { Flex, Form } from 'antd'
 import React, { memo, useEffect, useState } from 'react'
 import { defaultRequestBody } from '~/api/client'
 import CategoryAPI from '~/api/services/CategoryAPI'
-import SkyModalWrapper from '~/components/sky-ui/SkyModalWrapper'
+import SkyModal from '~/components/sky-ui/SkyModal'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
 import useAPIService from '~/hooks/useAPIService'
 import { Category } from '~/typing'
@@ -50,7 +50,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, openModal, setOpenModal
 
   return (
     <>
-      <SkyModalWrapper
+      <SkyModal
         loading={loading}
         open={openModal}
         onOk={handleOk}
@@ -99,7 +99,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, openModal, setOpenModal
             />
           </Flex>
         </Form>
-      </SkyModalWrapper>
+      </SkyModal>
     </>
   )
 }

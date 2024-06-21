@@ -85,7 +85,7 @@ export default function useHeroBanner(table: UseTableProps<HeroBannerTableDataTy
         (newRecord.imageUrl && newRecord.imageUrl !== record.imageUrl)
       ) {
         console.log('HeroBanner update progressing...')
-        await heroBannerService.updateItemByPk(
+        await heroBannerService.updateItem(
           record.id!,
           { title: newRecord.title, imageUrl: newRecord.imageUrl },
           setLoading,
@@ -109,7 +109,7 @@ export default function useHeroBanner(table: UseTableProps<HeroBannerTableDataTy
     try {
       console.log(formAddNew)
       setLoading(true)
-      await heroBannerService.createNewItem(formAddNew, setLoading, (meta) => {
+      await heroBannerService.createItem(formAddNew, setLoading, (meta) => {
         if (!meta?.success) throw new Error('Create failed!')
         message.success('Success')
       })

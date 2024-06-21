@@ -77,7 +77,7 @@ export default function useIndustrySector(table: UseTableProps<IndustrySectorTab
       console.log(newRecord)
       if (newRecord.title && newRecord.title !== record.title) {
         console.log('IndustrySector update progressing...')
-        await industrySectorService.updateItemByPk(record.id!, { title: newRecord.title }, setLoading, (meta) => {
+        await industrySectorService.updateItem(record.id!, { title: newRecord.title }, setLoading, (meta) => {
           if (!meta?.success) throw new Error('API update group failed')
           message.success(meta.message)
         })
@@ -96,7 +96,7 @@ export default function useIndustrySector(table: UseTableProps<IndustrySectorTab
     try {
       console.log(formAddNew)
       setLoading(true)
-      await industrySectorService.createNewItem(formAddNew as IndustrySector, setLoading, (meta) => {
+      await industrySectorService.createItem(formAddNew as IndustrySector, setLoading, (meta) => {
         if (!meta?.success) throw new Error('Create failed!')
         message.success('Success')
       })

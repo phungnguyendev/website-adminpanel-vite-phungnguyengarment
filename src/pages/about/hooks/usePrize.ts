@@ -82,7 +82,7 @@ export default function usePrize(table: UseTableProps<PrizeTableDataType>) {
       console.log(newRecord)
       if (newRecord.title && (newRecord.title !== record.title || newRecord.imageUrl !== record.imageUrl)) {
         console.log('Prize update progressing...')
-        await prizeService.updateItemByPk(
+        await prizeService.updateItem(
           record.id!,
           { title: newRecord.title, imageUrl: newRecord.imageUrl },
           setLoading,
@@ -111,7 +111,7 @@ export default function usePrize(table: UseTableProps<PrizeTableDataType>) {
     try {
       console.log(formAddNew)
       setLoading(true)
-      await prizeService.createNewItem(formAddNew as Prize, setLoading, (meta) => {
+      await prizeService.createItem(formAddNew as Prize, setLoading, (meta) => {
         if (!meta?.success) throw new Error('Create failed!')
         message.success('Success')
       })

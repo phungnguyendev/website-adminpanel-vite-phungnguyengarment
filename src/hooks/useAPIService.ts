@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
-import { ItemStatusType, SortDirection } from '~/typing'
+import { ItemStatusType } from '~/typing'
+import { SortedDirection } from './useAPIService2'
 import useLocalStorage from './useLocalStorage'
 
 export interface ItemWithId {
@@ -10,18 +11,18 @@ export interface ItemWithId {
 }
 
 export interface APIService<T extends ItemWithId> {
-  createNewItem: (itemNew: Partial<T>, accessToken: string) => Promise<ResponseDataType | undefined>
-  createNewItems?: (itemsNew: Partial<T>[], accessToken: string) => Promise<ResponseDataType | undefined>
-  createOrUpdateItemByPk?: (id: number, item: Partial<T>, accessToken: string) => Promise<ResponseDataType | undefined>
+  createItem: (itemNew: Partial<T>, accessToken: string) => Promise<ResponseDataType | undefined>
+  createItems?: (itemsNew: Partial<T>[], accessToken: string) => Promise<ResponseDataType | undefined>
+  createOrUpdateItem?: (id: number, item: Partial<T>, accessToken: string) => Promise<ResponseDataType | undefined>
   createOrUpdateItemBy?: (
     query: { field: string; key: React.Key },
     item: Partial<T>,
     accessToken: string
   ) => Promise<ResponseDataType | undefined>
-  getItemByPk: (id: number, accessToken: string) => Promise<ResponseDataType | undefined>
+  getItem: (id: number, accessToken: string) => Promise<ResponseDataType | undefined>
   getItemBy?: (query: { field: string; key: React.Key }, accessToken: string) => Promise<ResponseDataType | undefined>
   getItems: (params: RequestBodyType, accessToken: string) => Promise<ResponseDataType | undefined>
-  updateItemByPk: (id: number, itemToUpdate: Partial<T>, accessToken: string) => Promise<ResponseDataType | undefined>
+  updateItem: (id: number, itemToUpdate: Partial<T>, accessToken: string) => Promise<ResponseDataType | undefined>
   updateItemsBy?: (
     query: { field: string; key: React.Key },
     recordsToUpdate: Partial<T>[],
@@ -47,14 +48,14 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
   const [metaData, setMetaData] = useState<ResponseDataType | undefined>(undefined)
   const [page, setPage] = useState<number>(1)
 
-  const createNewItem = async (
+  const createItem = async (
     itemNew: T,
     setLoading?: (enable: boolean) => void,
     onDataSuccess?: (meta: ResponseDataType | undefined, message?: string) => void
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.createNewItem(itemNew, accessTokenStored ?? '')
+      const meta = await apiService.createItem(itemNew, accessTokenStored ?? '')
       if (meta?.success) {
         onDataSuccess?.(meta, 'Created!')
       } else {
@@ -69,14 +70,14 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
     }
   }
 
-  const createNewItems = async (
+  const createItems = async (
     itemsNew: T[],
     setLoading?: (enable: boolean) => void,
     onDataSuccess?: (meta: ResponseDataType | undefined, message?: string) => void
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.createNewItems?.(itemsNew, accessTokenStored ?? '')
+      const meta = await apiService.createItems?.(itemsNew, accessTokenStored ?? '')
       if (meta?.success) {
         onDataSuccess?.(meta, 'Created!')
       } else {
@@ -91,14 +92,14 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
     }
   }
 
-  const getItemByPk = async (
+  const getItem = async (
     id: number,
     setLoading?: (enable: boolean) => void,
     onDataSuccess?: (data: ResponseDataType | undefined, message?: string) => void
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.getItemByPk(id, accessTokenStored ?? '')
+      const meta = await apiService.getItem(id, accessTokenStored ?? '')
       if (meta?.success) {
         onDataSuccess?.(meta, 'Success!')
       } else {
@@ -145,7 +146,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.getItems(params, accessTokenStored ?? '')
+      const meta = await apiService.getItems({ ...defaultRequestBody, ...params }, accessTokenStored ?? '')
       if (meta?.success) {
         onDataSuccess?.(meta, 'Success!')
       } else {
@@ -161,7 +162,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
   }
 
   const sortedListItems = async (
-    direction: SortDirection,
+    direction: SortedDirection,
     setLoading?: (enable: boolean) => void,
     onDataSuccess?: (data: ResponseDataType | undefined, message?: string) => void,
     search?: {
@@ -218,7 +219,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
     }
   }
 
-  const updateItemByPk = async (
+  const updateItem = async (
     id: number,
     itemToUpdate: T,
     setLoading?: (enable: boolean) => void,
@@ -226,7 +227,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.updateItemByPk(id, itemToUpdate, accessTokenStored ?? '')
+      const meta = await apiService.updateItem(id, itemToUpdate, accessTokenStored ?? '')
       if (meta?.success) {
         onDataSuccess?.(meta, 'Updated!')
       } else {
@@ -340,7 +341,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
     }
   }
 
-  const createOrUpdateItemByPk = async (
+  const createOrUpdateItem = async (
     id: number,
     item: Partial<T>,
     setLoading?: (enable: boolean) => void,
@@ -348,7 +349,7 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.createOrUpdateItemByPk?.(id, item, accessTokenStored ?? '')
+      const meta = await apiService.createOrUpdateItem?.(id, item, accessTokenStored ?? '')
       onDataSuccess?.(meta, meta?.message)
       setMetaData(meta)
     } catch (err) {
@@ -385,12 +386,12 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
     metaData,
     page,
     setPage,
-    createNewItem,
-    createNewItems,
-    getItemByPk,
+    createItem,
+    createItems,
+    getItem,
     getItemBy,
     getListItems,
-    updateItemByPk,
+    updateItem,
     updateItemBy,
     updateItemsBy,
     deleteItemByPk,
@@ -398,6 +399,6 @@ export default function useAPIService<T extends { id?: number }>(apiService: API
     sortedListItems,
     pageChange,
     createOrUpdateItemBy,
-    createOrUpdateItemByPk
+    createOrUpdateItem
   }
 }

@@ -97,7 +97,7 @@ const useRecruitmentViewModel = () => {
     try {
       console.log(itemNew)
       // setLoading(true)
-      // await recruitmentService.createNewItem(formAddNew as RecruitmentPost, setLoading, (meta) => {
+      // await recruitmentService.createItem(formAddNew as RecruitmentPost, setLoading, (meta) => {
       //   if (!meta?.success) throw new Error('Create failed!')
       //   message.success('Success')
       // })

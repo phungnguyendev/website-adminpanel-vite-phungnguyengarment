@@ -99,7 +99,7 @@ export default function useRecruitment(table: UseTableProps<RecruitmentPostTable
       console.log(newRecord)
       // if (newRecord.title && (newRecord.title !== record.title || newRecord.imageUrl !== record.imageUrl)) {
       //   console.log('RecruitmentPost update progressing...')
-      //   await recruitmentPost.updateItemByPk(
+      //   await recruitmentPost.updateItem(
       //     record.id!,
       //     { title: newRecord.title, imageUrl: newRecord.imageUrl },
       //     setLoading,
@@ -128,7 +128,7 @@ export default function useRecruitment(table: UseTableProps<RecruitmentPostTable
     try {
       console.log(formAddNew)
       // setLoading(true)
-      // await recruitmentService.createNewItem(formAddNew as RecruitmentPost, setLoading, (meta) => {
+      // await recruitmentService.createItem(formAddNew as RecruitmentPost, setLoading, (meta) => {
       //   if (!meta?.success) throw new Error('Create failed!')
       //   message.success('Success')
       // })

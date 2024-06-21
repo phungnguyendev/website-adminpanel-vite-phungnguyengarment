@@ -6,7 +6,8 @@
 
 import axios, { AxiosInstance } from 'axios'
 import axiosConfig from '~/config/axios.config'
-import { ItemStatusType, SortDirection } from '~/typing'
+import { SortedDirection } from '~/hooks/useAPIService2'
+import { ItemStatusType } from '~/typing'
 
 export type ResponseDataType = {
   success?: boolean
@@ -35,7 +36,7 @@ export type RequestBodyType = {
   }
   sorting?: {
     column?: string // id
-    direction?: SortDirection // direction: asc|desc sắp xếp trước sau
+    direction?: SortedDirection // direction: asc|desc sắp xếp trước sau
   }
 }
 

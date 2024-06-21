@@ -4,7 +4,7 @@ import FroalaEditorView from 'react-froala-wysiwyg/FroalaEditorView'
 import 'react-quill/dist/quill.snow.css'
 import PostAPI from '~/api/services/PostAPI'
 import LazyImage from '~/components/sky-ui/LazyImage'
-import SkyModalWrapper from '~/components/sky-ui/SkyModalWrapper'
+import SkyModal from '~/components/sky-ui/SkyModal'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
 import useAPIService from '~/hooks/useAPIService'
 import { Post } from '~/typing'
@@ -27,7 +27,7 @@ const PostDetails: React.FC<Props> = ({ post, openModal, setOpenModal, ...props 
   const handleSave = async () => {
     if (editing) {
       const row = await form.validateFields()
-      await postService.updateItemByPk(post.id!, { ...row, content: model }, setLoading, (meta) => {
+      await postService.updateItem(post.id!, { ...row, content: model }, setLoading, (meta) => {
         if (!meta?.success) message.error(`${meta?.message}`)
         setEditing(false)
         setOpenModal(false)
@@ -48,7 +48,7 @@ const PostDetails: React.FC<Props> = ({ post, openModal, setOpenModal, ...props 
 
   return (
     <>
-      <SkyModalWrapper
+      <SkyModal
         title='Post details'
         loading={loading}
         open={openModal}
@@ -113,7 +113,7 @@ const PostDetails: React.FC<Props> = ({ post, openModal, setOpenModal, ...props 
             </Flex>
           </Form>
         </Flex>
-      </SkyModalWrapper>
+      </SkyModal>
     </>
   )
 }

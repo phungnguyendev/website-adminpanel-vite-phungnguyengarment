@@ -4,7 +4,7 @@ import React, { memo, useEffect, useState } from 'react'
 import { ResponseDataType, defaultRequestBody } from '~/api/client'
 import CategoryAPI from '~/api/services/CategoryAPI'
 import GoogleDriveAPI from '~/api/services/GoogleDriveAPI'
-import SkyModalWrapper from '~/components/sky-ui/SkyModalWrapper'
+import SkyModal from '~/components/sky-ui/SkyModal'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
 import useAPIService from '~/hooks/useAPIService'
 import { Category } from '~/typing'
@@ -68,13 +68,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, openModal, setOpenModal
 
   return (
     <>
-      <SkyModalWrapper
-        loading={loading}
-        open={openModal}
-        onOk={handleOk}
-        onCancel={handleCancel}
-        title='Add new product'
-      >
+      <SkyModal loading={loading} open={openModal} onOk={handleOk} onCancel={handleCancel} title='Add new product'>
         <Form {...formProps} labelCol={{ span: 4 }} labelAlign='left' className='w-full' labelWrap form={form}>
           <Flex vertical gap={20} className='w-full'>
             <EditableFormCell
@@ -118,7 +112,7 @@ const ModalAddNewProduct: React.FC<Props> = ({ onAddNew, openModal, setOpenModal
             />
           </Flex>
         </Form>
-      </SkyModalWrapper>
+      </SkyModal>
     </>
   )
 }

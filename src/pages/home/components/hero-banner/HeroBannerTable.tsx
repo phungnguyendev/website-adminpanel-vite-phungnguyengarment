@@ -1,62 +1,61 @@
+import { UploadFile } from 'antd'
 import { ColumnsType } from 'antd/es/table'
-import HeroBannerAPI from '~/api/services/HeroBannerAPI'
-import useTable from '~/components/hooks/useTable'
 import BaseLayout from '~/components/layout/BaseLayout'
 import LazyImage from '~/components/sky-ui/LazyImage'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
-import SkyTable2 from '~/components/sky-ui/SkyTable/SkyTable'
-import SkyTableRow from '~/components/sky-ui/SkyTable/SkyTableRow'
+import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { HeroBanner } from '~/typing'
-import { textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
-import useHeroBanner from '../../hooks/useHeroBanner'
-import { HeroBannerTableDataType } from '../../type'
+import { imageValidatorDisplay, textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
+import useBannerViewModel from '../../hooks/useBannerViewModel'
+import { BannerTableDataType } from '../../type'
 import ModalAddNewHeroBanner from './ModalAddNewHeroBanner'
+import ModalUpdateHeroBanner from './ModalUpdateHeroBanner'
 
 const HeroBannerTable: React.FC = () => {
-  const table = useTable<HeroBannerTableDataType>([])
+  const { table, state, action } = useBannerViewModel()
   const {
     newRecord,
     setNewRecord,
-    openModal,
-    setOpenModal,
-    handleSaveClick,
-    handleAddNewItem,
-    handleConfirmDelete,
-    handlePageChange,
-    heroBannerService
-  } = useHeroBanner(table)
+    recorded,
+    setRecorded,
+    openModalCreate,
+    setOpenModalCreate,
+    openModalUpdate,
+    setOpenModalUpdate
+  } = state
+  const { handleCreate, handleUpdate, handleDelete, handlePageChange, handleDraggableChange } = action
+
+  console.log('Hero Banner Table')
 
   const columns = {
-    id: (record: HeroBannerTableDataType) => {
-      return <SkyTableTypography strong>{textValidatorDisplay(String(record.id))}</SkyTableTypography>
+    id: (record: BannerTableDataType) => {
+      return <SkyTableTypography strong>{textValidatorDisplay(`#${record.id}`)}</SkyTableTypography>
     },
-    image: (record: HeroBannerTableDataType) => {
+    image: (record: BannerTableDataType) => {
       return (
         <EditableStateCell
           isEditing={table.isEditing(record.key)}
-          dataIndex='imageUrl'
-          title='Image'
-          inputType='text'
-          initialValue={textValidatorInit(record.imageUrl)}
-          value={newRecord.imageUrl}
-          onValueChange={(newImage: string) => {
-            setNewRecord({ ...newRecord, imageUrl: textValidatorChange(newImage) })
+          inputType='upload'
+          uploadProps={{
+            multiple: true
+          }}
+          // defaultValue={record.imageUrl}
+          value={newRecord.images}
+          onValueChange={(info: UploadFile) => {
+            console.log(info)
+            // setNewRecord({ ...newRecord, images: ([] as UploadFile[]).push(info) })
           }}
         >
-          <LazyImage alt='banner-img' src={textValidatorDisplay(record.imageUrl)} height={120} width={120} />
+          <LazyImage alt='banner-img' src={imageValidatorDisplay(record.imageName)} height={120} width={120} />
         </EditableStateCell>
       )
     },
-    title: (record: HeroBannerTableDataType) => {
+    title: (record: BannerTableDataType) => {
       return (
         <EditableStateCell
           isEditing={table.isEditing(record.key!)}
-          dataIndex='title'
-          title='Title'
           inputType='text'
-          required={true}
-          initialValue={textValidatorInit(record.title)}
+          defaultValue={textValidatorInit(record.title)}
           value={newRecord.title}
           onValueChange={(val: string) => setNewRecord({ ...newRecord, title: textValidatorChange(val) })}
         >
@@ -68,7 +67,7 @@ const HeroBannerTable: React.FC = () => {
     }
   }
 
-  const tableColumns: ColumnsType<HeroBannerTableDataType> = [
+  const tableColumns: ColumnsType<BannerTableDataType> = [
     {
       key: 'sort',
       width: '2%'
@@ -77,7 +76,7 @@ const HeroBannerTable: React.FC = () => {
       title: 'ID',
       dataIndex: 'id',
       width: '5%',
-      render: (_value: any, record: HeroBannerTableDataType) => {
+      render: (_value: any, record: BannerTableDataType) => {
         return columns.id(record)
       }
     },
@@ -86,7 +85,7 @@ const HeroBannerTable: React.FC = () => {
       dataIndex: 'imageUrl',
       width: '10%',
       responsive: ['sm'],
-      render: (_value: any, record: HeroBannerTableDataType) => {
+      render: (_value: any, record: BannerTableDataType) => {
         return columns.image(record)
       }
     },
@@ -95,7 +94,7 @@ const HeroBannerTable: React.FC = () => {
       dataIndex: 'title',
       width: '20%',
       responsive: ['sm'],
-      render: (_value: any, record: HeroBannerTableDataType) => {
+      render: (_value: any, record: BannerTableDataType) => {
         return columns.title(record)
       }
     }
@@ -110,49 +109,29 @@ const HeroBannerTable: React.FC = () => {
           type: 'secondary'
         }}
         onAddNewClick={{
-          onClick: () => setOpenModal(true),
+          onClick: () => setOpenModalCreate(true),
           isShow: true
         }}
       >
-        <SkyTable2
-          dataSource={table.dataSource}
-          setDataSource={table.setDataSource}
-          loading={table.loading}
+        <SkyTable
+          {...table}
+          onDragEnd={handleDraggableChange}
           columns={tableColumns}
-          editingKey={table.editingKey}
-          deletingKey={table.deletingKey}
-          metaData={heroBannerService.metaData}
           onPageChange={handlePageChange}
           isShowDeleted={table.showDeleted}
-          components={{
-            body: {
-              row: SkyTableRow
-            }
-          }}
-          onDraggableChange={(_, newData) => {
-            if (newData) {
-              HeroBannerAPI.updateList(
-                newData.map((item, index) => {
-                  return { ...item, orderNumber: index } as HeroBanner
-                }) as HeroBanner[]
-              )
-                .then((res) => {
-                  if (res?.success) console.log(res?.data)
-                })
-                .catch((e) => console.log(`${e}`))
-            }
-          }}
           actionProps={{
             onEdit: {
               onClick: (_e, record) => {
-                setNewRecord({ ...record })
-                table.handleStartEditing(record!.key!)
+                setRecorded({ id: record?.id ?? -1, ...record })
+                // table.handleStartEditing(record!.key!)
+                setOpenModalUpdate((prev) => !prev)
               },
-              isShow: true
+              isShow: true,
+              disabled: openModalUpdate
             },
-            onSave: {
-              onClick: (_e, record) => handleSaveClick(record!)
-            },
+            // onSave: {
+            //   onClick: (_e, record) => onUpdate(record!)
+            // },
             onDelete: {
               onClick: (_e, record) => table.handleStartDeleting(record!.key!),
               isShow: !table.showDeleted
@@ -162,21 +141,25 @@ const HeroBannerTable: React.FC = () => {
               isShow: false
             },
             onConfirmCancelEditing: () => {
-              table.handleConfirmCancelEditing()
+              table.handleCancelEditing()
             },
-            onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
-            onConfirmDelete: (record) => handleConfirmDelete(record),
-            onConfirmCancelRestore: () => table.handleConfirmCancelRestore(),
+            onConfirmCancelDeleting: () => table.handleCancelDeleting(),
+            onConfirmDelete: (record) => handleDelete(record),
+            onConfirmCancelRestore: () => table.handleCancelRestore(),
             isShow: true
           }}
         />
       </BaseLayout>
-      {openModal && (
-        <ModalAddNewHeroBanner
-          loading={table.loading}
-          openModal={openModal}
-          setOpenModal={setOpenModal}
-          onAddNew={handleAddNewItem}
+
+      {openModalCreate && (
+        <ModalAddNewHeroBanner open={openModalCreate} setOpenModal={setOpenModalCreate} onCreate={handleCreate} />
+      )}
+      {openModalUpdate && (
+        <ModalUpdateHeroBanner
+          record={recorded}
+          open={openModalUpdate}
+          setOpenModal={setOpenModalUpdate}
+          onUpdate={handleUpdate}
         />
       )}
     </>

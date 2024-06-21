@@ -87,7 +87,7 @@ export default function useCategory(table: UseTableProps<CategoryTableDataType>)
         checkFieldToUpdate(record.imageUrl, newRecord.imageUrl)
       ) {
         console.log('Category update progressing...')
-        await categoryService.updateItemByPk(
+        await categoryService.updateItem(
           record.id!,
           { title: newRecord.title, desc: newRecord.desc, imageUrl: newRecord.imageUrl },
           setLoading,
@@ -113,7 +113,7 @@ export default function useCategory(table: UseTableProps<CategoryTableDataType>)
     try {
       console.log(formAddNew)
       setLoading(true)
-      await categoryService.createNewItem(formAddNew as Category, setLoading, (meta) => {
+      await categoryService.createItem(formAddNew as Category, setLoading, (meta) => {
         if (!meta?.success) throw new Error('Create failed!')
         message.success('Success')
       })

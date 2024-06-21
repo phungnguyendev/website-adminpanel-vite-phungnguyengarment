@@ -1,26 +1,41 @@
-export type StatusType = 'normal' | 'warn' | 'error' | 'success'
+import { Readable } from 'stream'
 
-export type SortDirection = 'asc' | 'desc'
+export interface File {
+  /** Name of the form field associated with this file. */
+  fieldname: string
+  /** Name of the file on the uploader's computer. */
+  originalname: string
+  /**
+   * Value of the `Content-Transfer-Encoding` header for this file.
+   * @deprecated since July 2015
+   * @see RFC 7578, Section 4.7
+   */
+  encoding: string
+  /** Value of the `Content-Type` header for this file. */
+  mimetype: string
+  /** Size of the file in bytes. */
+  size: number
+  /**
+   * A readable stream of this file. Only available to the `_handleFile`
+   * callback for custom `StorageEngine`s.
+   */
+  stream: Readable
+  /** `DiskStorage` only: Directory to which this file has been uploaded. */
+  destination: string
+  preview: string
+  /** `DiskStorage` only: Name of this file within `destination`. */
+  filename: string
+  /** `DiskStorage` only: Full path to the uploaded file. */
+  path: string
+  /** `MemoryStorage` only: A Buffer containing the entire file. */
+  buffer: Buffer
+}
+
+export type StatusType = 'normal' | 'warn' | 'error' | 'success'
 
 export type ItemStatusType = 'draft' | 'active' | 'closed' | 'archived' | 'deleted'
 
 export type NoteItemStatusType = 'lake' | 'enough' | 'arrived' | 'not_arrived'
-
-export type InputType =
-  | 'number'
-  | 'text'
-  | 'colorpicker'
-  | 'select'
-  | 'datepicker'
-  | 'dateTimePicker'
-  | 'colorselector'
-  | 'textarea'
-  | 'checkbox'
-  | 'multipleselect'
-  | 'password'
-  | 'email'
-  | 'uploadFile'
-  | 'htmlEditor'
 
 export type ItemWithKeyAndTitleType = {
   key?: React.Key
@@ -73,7 +88,7 @@ export interface Attachment {
 
 export interface Category {
   id?: number
-  imageUrl?: string | null
+  imageName?: string | null
   title?: string | null
   desc?: string | null
   createdAt?: string
@@ -83,7 +98,7 @@ export interface Category {
 export interface HeroBanner {
   id?: number
   title?: string | null
-  imageUrl?: string | null
+  imageName?: string | null
   orderNumber?: number | null
   createdAt?: string
   updatedAt?: string
@@ -92,7 +107,7 @@ export interface HeroBanner {
 export interface HomeProduct {
   id?: number
   title?: string | null
-  imageUrl?: string | null
+  imageName?: string | null
   orderNumber?: number | null
   createdAt?: string
   updatedAt?: string
@@ -117,7 +132,7 @@ export interface Branch {
 export interface Partner {
   id?: number
   title?: string | null
-  imageUrl?: string | null
+  imageName?: string | null
   orderNumber?: number | null
   createdAt?: string
   updatedAt?: string
@@ -138,7 +153,7 @@ export interface Post {
   id?: number
   title?: string | null
   content?: string | null
-  imageUrl?: string | null
+  imageName?: string | null
   publishedAt?: string | null
   orderNumber?: number | null
   createdAt?: string
@@ -148,7 +163,7 @@ export interface Post {
 export interface Prize {
   id?: number
   title?: string | null
-  imageUrl?: string | null
+  imageName?: string | null
   orderNumber?: number | null
   createdAt?: string
   updatedAt?: string
@@ -158,7 +173,7 @@ export interface Product {
   id?: number
   title?: string | null
   desc?: string | null
-  imageUrl?: string | null
+  imageName?: string | null
   orderNumber?: number | null
   createdAt?: string
   updatedAt?: string
@@ -176,7 +191,7 @@ export interface Project {
   id?: number
   title?: string | null
   desc?: string | null
-  imageUrl?: string | null
+  imageName?: string | null
   orderNumber?: number | null
   createdAt?: string
   updatedAt?: string

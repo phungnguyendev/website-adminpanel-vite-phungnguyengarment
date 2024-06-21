@@ -1,36 +1,44 @@
+import { DragEndEvent } from '@dnd-kit/core'
+import { arrayMove } from '@dnd-kit/sortable'
 import { useState } from 'react'
-import { ResponseDataType } from '~/api/client'
-import { RequiredDataType } from '../sky-ui/SkyTable/SkyTable'
 
-export interface UseTableProps<T extends RequiredDataType> {
+type RequiredDataType = {
+  key: string
+  id?: number
+  createdAt?: string
+  updatedAt?: string
+  orderNumber?: number | null
+}
+
+interface Props<T extends RequiredDataType> {
   loading: boolean
-  setLoading: (state: boolean) => void
+  dataSource: T[]
   scrollIndex: number
-  setScrollIndex: (index: number) => void
   editingKey: string
-  setEditingKey: (key: string) => void
-  setDeletingKey: (key: string) => void
   deletingKey: string
   showDeleted: boolean
+  setLoading: (state: boolean) => void
+  setScrollIndex: (index: number) => void
+  setEditingKey: (key: string) => void
+  setDeletingKey: (key: string) => void
   setDeletedRecordState: (enable: boolean) => void
-  dataSource: T[]
   setDataSource: (newDataSource: T[]) => void
   isEditing: (key: string) => boolean
   isDelete: (key: string) => boolean
   handleStartEditing: (key: string) => void
   handleStartDeleting: (key: string) => void
   handleStartRestore: (key: string) => void
-  handleStartSaveEditing: (key: string, itemToUpdate: T, onDataSuccess?: (updatedItem: T) => void) => void
-  handleStartAddNew: (item: T) => void
-  handleConfirmDeleting: (key: string, onDataSuccess?: (deletedItem: T) => void) => void
-  handleConfirmRestore: (key: string, onDataSuccess?: (deletedItem: T) => void) => void
-  handleConfirmCancelEditing: () => void
-  handleConfirmCancelDeleting: () => void
-  handleConfirmCancelRestore: () => void
-  handleConvertDataSource: (meta: ResponseDataType) => void
+  handleEditing: (key: string, itemToUpdate: T, onDataSuccess?: (updatedItem: T) => void) => void
+  handleAddNew: (item: T) => void
+  handleDeleting: (key: string, onDataSuccess?: (deletedItem: T) => void) => void
+  handleRestore: (key: string, onDataSuccess?: (deletedItem: T) => void) => void
+  handleCancelEditing: () => void
+  handleCancelDeleting: () => void
+  handleCancelRestore: () => void
+  handleDraggableEnd: (event: DragEndEvent, onSuccess?: (newDataSource: T[]) => void) => void
 }
 
-export default function useTable<T extends RequiredDataType>(initValue: T[]): UseTableProps<T> {
+export default function useTable<T extends RequiredDataType>(initValue: T[]): Props<T> {
   const [scrollIndex, setScrollIndex] = useState<number>(0)
   const [loading, setLoading] = useState<boolean>(false)
   const [dataSource, setDataSource] = useState<T[]>(initValue)
@@ -39,20 +47,6 @@ export default function useTable<T extends RequiredDataType>(initValue: T[]): Us
   const [showDeleted, setDeletedRecordState] = useState<boolean>(false)
   const isEditing = (key: string) => key === editingKey
   const isDelete = (key: string) => key === deletingKey
-
-  const handleConvertDataSource = (meta: ResponseDataType) => {
-    setLoading(true)
-    const items = meta.data as T[]
-    setDataSource(
-      items.map((item: T) => {
-        return {
-          ...item,
-          key: `${item.id}`
-        } as T
-      })
-    )
-    setLoading(false)
-  }
 
   const handleStartEditing = (key: string) => {
     setEditingKey(key)
@@ -66,7 +60,7 @@ export default function useTable<T extends RequiredDataType>(initValue: T[]): Us
     setDeletingKey(key)
   }
 
-  const handleConfirmDeleting = (key: string, onDataSuccess?: (deletedItem: T) => void) => {
+  const handleDeleting = (key: string, onDataSuccess?: (deletedItem: T) => void) => {
     setLoading(true)
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
@@ -77,7 +71,7 @@ export default function useTable<T extends RequiredDataType>(initValue: T[]): Us
     setLoading(false)
   }
 
-  const handleConfirmRestore = (key: string, onDataSuccess?: (deletedItem: T) => void) => {
+  const handleRestore = (key: string, onDataSuccess?: (deletedItem: T) => void) => {
     setLoading(true)
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
@@ -88,19 +82,19 @@ export default function useTable<T extends RequiredDataType>(initValue: T[]): Us
     setLoading(false)
   }
 
-  const handleConfirmCancelEditing = () => {
+  const handleCancelEditing = () => {
     setEditingKey('')
   }
 
-  const handleConfirmCancelDeleting = () => {
+  const handleCancelDeleting = () => {
     setDeletingKey('')
   }
 
-  const handleConfirmCancelRestore = () => {
+  const handleCancelRestore = () => {
     setDeletingKey('')
   }
 
-  const handleStartSaveEditing = async (key: string, itemToUpdate: T, onDataSuccess?: (updatedItem: T) => void) => {
+  const handleEditing = async (key: string, itemToUpdate: T, onDataSuccess?: (updatedItem: T) => void) => {
     try {
       setLoading(true)
       const newData = [...dataSource]
@@ -129,13 +123,23 @@ export default function useTable<T extends RequiredDataType>(initValue: T[]): Us
     }
   }
 
-  const handleStartAddNew = (item: T) => {
+  const handleAddNew = (item: T) => {
     const newDataSource = [...dataSource]
     newDataSource.unshift({
       ...item,
       key: item.key
     } as T)
     setDataSource(newDataSource)
+  }
+
+  const handleDraggableEnd = ({ active, over }: DragEndEvent, onFinish?: (newData: T[]) => void) => {
+    if (active.id !== over?.id) {
+      const activeIndex = dataSource.findIndex((i) => i.key === active.id)
+      const overIndex = dataSource.findIndex((i) => i.key === over?.id)
+      const newData = arrayMove(dataSource, activeIndex, overIndex)
+      setDataSource(newData)
+      onFinish?.(newData)
+    }
   }
 
   return {
@@ -153,16 +157,16 @@ export default function useTable<T extends RequiredDataType>(initValue: T[]): Us
     setScrollIndex,
     dataSource,
     setDataSource,
-    handleStartAddNew,
+    handleAddNew,
     handleStartEditing,
     handleStartDeleting,
     handleStartRestore,
-    handleStartSaveEditing,
-    handleConfirmCancelEditing,
-    handleConfirmCancelDeleting,
-    handleConfirmCancelRestore,
-    handleConfirmDeleting,
-    handleConfirmRestore,
-    handleConvertDataSource
+    handleEditing,
+    handleCancelEditing,
+    handleCancelDeleting,
+    handleCancelRestore,
+    handleDeleting,
+    handleRestore,
+    handleDraggableEnd
   }
 }

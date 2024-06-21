@@ -86,7 +86,7 @@ export default function useProject(table: UseTableProps<ProjectTableDataType>) {
         (newRecord.title !== record.title || newRecord.desc !== record.desc || newRecord.imageUrl !== record.imageUrl)
       ) {
         console.log('Project update progressing...')
-        await projectService.updateItemByPk(
+        await projectService.updateItem(
           record.id!,
           { title: newRecord.title, desc: newRecord.desc, imageUrl: newRecord.imageUrl },
           setLoading,
@@ -115,7 +115,7 @@ export default function useProject(table: UseTableProps<ProjectTableDataType>) {
     try {
       console.log(formAddNew)
       setLoading(true)
-      await projectService.createNewItem(formAddNew as Project, setLoading, (meta) => {
+      await projectService.createItem(formAddNew as Project, setLoading, (meta) => {
         if (!meta?.success) throw new Error('Create failed!')
         message.success('Success')
       })

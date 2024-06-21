@@ -4,7 +4,7 @@ import BaseLayout from '~/components/layout/BaseLayout'
 
 const HeroBannerTable = lazy(() => import('./components/hero-banner/HeroBannerTable'))
 const HomeProductTable = lazy(() => import('./components/home-product/HomeProductTable'))
-const PartnerTable = lazy(() => import('./components/partner/PartnerTable'))
+// const PartnerTable = lazy(() => import('./components/partner/PartnerTable'))
 
 const HomePage: React.FC = () => {
   useTitle('Home page')
@@ -14,7 +14,7 @@ const HomePage: React.FC = () => {
       <BaseLayout title='Home page'>
         <HeroBannerTable />
         <HomeProductTable />
-        <PartnerTable />
+        {/* <PartnerTable /> */}
       </BaseLayout>
     </>
   )

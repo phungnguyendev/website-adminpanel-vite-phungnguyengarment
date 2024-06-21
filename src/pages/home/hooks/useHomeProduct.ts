@@ -82,7 +82,7 @@ export default function useHomeProduct(table: UseTableProps<HomeProductTableData
       console.log(newRecord)
       if (newRecord.title && (newRecord.title !== record.title || newRecord.imageUrl !== record.imageUrl)) {
         console.log('HomeProduct update progressing...')
-        await homeProductService.updateItemByPk(
+        await homeProductService.updateItem(
           record.id!,
           { title: newRecord.title, imageUrl: newRecord.imageUrl },
           setLoading,
@@ -111,7 +111,7 @@ export default function useHomeProduct(table: UseTableProps<HomeProductTableData
     try {
       console.log(formAddNew)
       setLoading(true)
-      await homeProductService.createNewItem(formAddNew as HomeProduct, setLoading, (meta) => {
+      await homeProductService.createItem(formAddNew as HomeProduct, setLoading, (meta) => {
         if (!meta?.success) throw new Error('Create failed!')
         message.success('Success')
       })

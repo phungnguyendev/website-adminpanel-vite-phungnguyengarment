@@ -86,7 +86,7 @@ export default function usePost(table: UseTableProps<PostTableDataType>) {
         checkFieldToUpdate(record.content, newRecord.content)
       ) {
         console.log('Product update progressing...')
-        await postService.updateItemByPk(record.id!, { ...newRecord }, setLoading, async (meta) => {
+        await postService.updateItem(record.id!, { ...newRecord }, setLoading, async (meta) => {
           if (!meta?.success) {
             throw new Error('API update group failed')
           }
@@ -107,7 +107,7 @@ export default function usePost(table: UseTableProps<PostTableDataType>) {
     try {
       console.log(formAddNew)
       setLoading(true)
-      await postService.createNewItem({ ...formAddNew }, setLoading, async (meta) => {
+      await postService.createItem({ ...formAddNew }, setLoading, async (meta) => {
         if (!meta?.success) throw new Error('Create failed!')
         message.success('Success')
       })

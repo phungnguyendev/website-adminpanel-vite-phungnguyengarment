@@ -1,6 +1,6 @@
 import { HeroBanner, HomeProduct, Partner } from '~/typing'
 
-export interface HeroBannerTableDataType extends HeroBanner {
+export interface BannerTableDataType extends HeroBanner {
   key: string
 }
 

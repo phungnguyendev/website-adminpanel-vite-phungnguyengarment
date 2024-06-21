@@ -82,7 +82,7 @@ export default function usePartner(table: UseTableProps<PartnerTableDataType>) {
       console.log(newRecord)
       if (newRecord.title && (newRecord.title !== record.title || newRecord.imageUrl !== record.imageUrl)) {
         console.log('Partner update progressing...')
-        await partnerService.updateItemByPk(
+        await partnerService.updateItem(
           record.id!,
           { title: newRecord.title, imageUrl: newRecord.imageUrl },
           setLoading,
@@ -111,7 +111,7 @@ export default function usePartner(table: UseTableProps<PartnerTableDataType>) {
     try {
       console.log(formAddNew)
       setLoading(true)
-      await partnerService.createNewItem(formAddNew as Partner, setLoading, (meta) => {
+      await partnerService.createItem(formAddNew as Partner, setLoading, (meta) => {
         if (!meta?.success) throw new Error('Create failed!')
         message.success('Success')
       })

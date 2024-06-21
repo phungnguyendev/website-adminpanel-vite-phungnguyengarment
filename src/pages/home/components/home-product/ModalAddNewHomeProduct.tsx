@@ -1,59 +1,52 @@
-import type { FormProps } from 'antd'
-import { Flex, Form } from 'antd'
-import React, { memo } from 'react'
-import SkyModalWrapper from '~/components/sky-ui/SkyModalWrapper'
-import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
+import { UploadFile } from 'antd'
+import React, { memo, useState } from 'react'
+import SkyModal, { SkyModalProps } from '~/components/sky-ui/SkyModal'
+import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
+import { HomeProduct } from '~/typing'
+import { textValidatorChange } from '~/utils/helpers'
 
 export interface HomeProductAddNewProps {
   title?: string | null
   imageUrl?: string | null
 }
 
-interface Props {
-  openModal: boolean
-  loading?: boolean
-  formProps?: FormProps
-  setOpenModal: (enable: boolean) => void
-  onAddNew: (recordToAddNew: HomeProductAddNewProps) => void
+interface Props extends SkyModalProps {
+  onCreate: (newItem: HomeProduct, setLoading?: (enable: boolean) => void) => void
 }
 
-const ModalAddNewHomeProduct: React.FC<Props> = ({ loading, openModal, onAddNew, setOpenModal, formProps }) => {
-  const [form] = Form.useForm()
-
-  async function handleOk() {
-    const row = await form.validateFields()
-    onAddNew(row)
-  }
+const ModalAddNewHomeProduct: React.FC<Props> = ({ onCreate, ...props }) => {
+  const [, setLoading] = useState<boolean>(false)
+  const [newRecord, setNewRecord] = useState<HomeProduct>({})
 
   return (
     <>
-      <SkyModalWrapper
-        loading={loading}
-        open={openModal}
-        onOk={handleOk}
-        onCancel={() => setOpenModal(false)}
-        title='Add product'
-      >
-        <Form {...formProps} labelCol={{ span: 4 }} labelAlign='left' className='w-full' labelWrap form={form}>
-          <Flex vertical gap={20} className='w-full'>
-            <EditableFormCell
-              isEditing={true}
-              title='Title'
-              placeholder='Title...'
-              dataIndex='title'
-              inputType='text'
-              required
-            />
-            <EditableFormCell
-              isEditing={true}
-              title='Image'
-              placeholder='Paste image link here...'
-              dataIndex='imageUrl'
-              inputType='text'
-            />
-          </Flex>
-        </Form>
-      </SkyModalWrapper>
+      <SkyModal {...props} title='Create new' okText='Create' onOk={() => onCreate(newRecord, setLoading)}>
+        <EditableStateCell
+          isEditing
+          label='Title'
+          inputType='text'
+          value={newRecord.title}
+          onValueChange={(val: string) => setNewRecord({ ...newRecord, title: textValidatorChange(val) })}
+        />
+        <EditableStateCell
+          isEditing
+          label='Images'
+          inputType='upload'
+          uploadProps={{
+            name: 'images',
+            uploadType: 'images',
+            maxCount: 1
+          }}
+          value={newRecord.imageName}
+          onValueChange={(fileList: UploadFile[]) => {
+            console.log(fileList)
+            setNewRecord({
+              ...newRecord,
+              imageName: fileList[0].name
+            })
+          }}
+        />
+      </SkyModal>
     </>
   )
 }

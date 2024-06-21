@@ -1,7 +1,7 @@
 import {
-  Button,
   Checkbox,
   CheckboxProps,
+  Col,
   ColorPicker,
   ColorPickerProps,
   DatePicker,
@@ -9,6 +9,7 @@ import {
   Input,
   InputNumber,
   InputNumberProps,
+  Row,
   Select,
   Table,
   Typography
@@ -16,51 +17,53 @@ import {
 import { InputProps, TextAreaProps } from 'antd/es/input'
 import { SelectProps } from 'antd/es/select'
 import { DatePickerProps } from 'antd/lib'
-import { Eye, EyeOff } from 'lucide-react'
-import { HTMLAttributes, memo, useState } from 'react'
+import { HTMLAttributes, memo } from 'react'
 import ReactQuill, { ReactQuillProps } from 'react-quill'
-import { InputType } from '~/typing'
-import { cn } from '~/utils/helpers'
-import FileDragger, { FileUploaderProps } from '../FileUploader'
+import Uploader2, { Uploader2Props } from '../Uploader2'
+
+export type InputType =
+  | 'number'
+  | 'text'
+  | 'colorPicker'
+  | 'select'
+  | 'datePicker'
+  | 'dateTimePicker'
+  | 'colorSelector'
+  | 'textArea'
+  | 'checkbox'
+  | 'multipleSelects'
+  | 'upload'
+  | 'contentEditor'
 
 export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
   isEditing: boolean
-  dataIndex?: string
+  inputType?: InputType
+  defaultValue?: any
   value?: any
-  setLoading?: (enable: boolean) => void
-  initialValue?: any
-  onValueChange?: (value: any, option?: any) => void
+  onValueChange?: (value?: any, option?: any) => void
+  label?: string
   selectProps?: SelectProps
-  uploadProps?: FileUploaderProps
+  uploadProps?: Uploader2Props
   colorPickerProps?: ColorPickerProps
   checkboxProps?: CheckboxProps
   inputNumberProps?: InputNumberProps
   textAreaProps?: TextAreaProps
   inputProps?: InputProps
   datePickerProps?: DatePickerProps
-  htmlEditorProps?: ReactQuillProps
-  inputType?: InputType
-  required?: boolean
-  allowClear?: boolean
-  title?: string
-  placeholder?: string
-  disabled?: boolean
-  subtitle?: string
-  readonly?: boolean
-  editableRender?: React.ReactNode
+  contentEditorProps?: ReactQuillProps
 }
 
 export type EditableTableProps = Parameters<typeof Table>[0]
 
-function EditableStateCell({
+const EditableStateCell: React.FC<EditableStateCellProps> = ({
+  label,
   isEditing,
-  dataIndex,
-  title,
-  placeholder,
-  allowClear,
+  inputType,
+  defaultValue,
   value,
-  htmlEditorProps,
+  onValueChange,
   uploadProps,
+  contentEditorProps,
   colorPickerProps,
   datePickerProps,
   checkboxProps,
@@ -68,33 +71,27 @@ function EditableStateCell({
   textAreaProps,
   selectProps,
   inputProps,
-  initialValue,
-  onValueChange,
-  required,
-  inputType,
-  disabled,
-  readonly,
-  editableRender,
-  ...restProps
-}: EditableStateCellProps) {
-  const [visible, setVisible] = useState<boolean>(false)
-
+  ...props
+}) => {
   const inputNode = ((): React.ReactNode => {
     switch (inputType) {
-      case 'uploadFile':
+      case 'upload':
         return (
-          <FileDragger
-            name={dataIndex}
-            disabled={disabled}
-            {...uploadProps}
-            className={restProps.className}
-            onFinish={(val) => onValueChange?.(val)}
-          />
+          <Uploader2 {...uploadProps} defaultFileList={defaultValue} fileList={value} onValueChange={onValueChange} />
         )
-      case 'htmlEditor':
+      case 'contentEditor':
         return (
           <ReactQuill
-            {...htmlEditorProps}
+            {...contentEditorProps}
+            defaultValue={defaultValue}
+            value={value}
+            onChange={(value: string, delta, source, editor) =>
+              onValueChange?.(value, {
+                delta,
+                source,
+                editor
+              })
+            }
             modules={{
               toolbar: [
                 ['bold', 'italic', 'underline', 'strike'], // toggled buttons
@@ -120,107 +117,70 @@ function EditableStateCell({
             theme='snow'
           />
         )
-      case 'colorpicker':
+      case 'colorPicker':
         return (
           <ColorPicker
             {...colorPickerProps}
-            onChange={(val, hex) => onValueChange?.(val, hex)}
-            defaultFormat='hex'
-            defaultValue={initialValue ?? colorPickerProps?.defaultValue ?? ''}
-            value={value ?? colorPickerProps?.value ?? ''}
             showText
-            disabled={disabled}
-            className={cn('w-full', restProps.className)}
+            defaultFormat='hex'
+            defaultValue={defaultValue}
+            value={value}
+            onChange={(val, hex) => onValueChange?.(val, hex)}
           />
         )
       case 'checkbox':
         return (
           <Checkbox
             {...checkboxProps}
-            required={required}
-            title={title}
-            name={dataIndex}
-            // defaultChecked={initialValue ?? checkboxProps?.defaultChecked ?? undefined}
-            checked={value ?? checkboxProps?.value ?? initialValue ?? checkboxProps?.defaultChecked ?? undefined}
-            disabled={disabled}
+            defaultChecked={defaultValue}
+            checked={value}
             onChange={(val) => onValueChange?.(val.target.checked)}
-            className={cn('w-full', restProps.className)}
           />
         )
       case 'number':
         return (
           <InputNumber
             {...inputNumberProps}
-            name={dataIndex}
-            title={title}
-            type='number'
-            required={required}
-            placeholder={placeholder}
-            value={value ?? inputNumberProps?.value ?? ''}
-            disabled={disabled}
-            readOnly={readonly}
+            defaultValue={defaultValue}
+            value={value}
             onChange={(val) => onValueChange?.(val)}
-            defaultValue={initialValue ?? inputNumberProps?.defaultValue ?? ''}
-            className={cn('w-full', restProps.className)}
           />
         )
-      case 'textarea':
+      case 'textArea':
         return (
           <Input.TextArea
             {...textAreaProps}
-            title={title}
-            placeholder={`${placeholder}`}
-            name={dataIndex}
-            value={value ?? textAreaProps?.value ?? ''}
-            disabled={disabled}
-            readOnly={readonly}
-            required={required}
+            defaultValue={defaultValue}
+            value={value}
             onChange={(val) => onValueChange?.(val.target.value)}
-            defaultValue={initialValue ?? textAreaProps?.defaultValue ?? ''}
-            className={cn('w-full', restProps.className)}
           />
         )
       case 'select':
         return (
           <Select
             {...selectProps}
-            title={title}
-            placeholder={placeholder}
-            defaultValue={initialValue ?? selectProps?.defaultValue}
-            // value={value ?? selectProps?.value ?? ''}
+            defaultValue={defaultValue}
+            value={value}
             onChange={(val, option) => onValueChange?.(val, option)}
-            disabled={disabled}
             virtual={false}
-            className={cn('w-full', restProps.className)}
           />
         )
-      case 'multipleselect':
+      case 'multipleSelects':
         return (
           <Select
             {...selectProps}
-            title={title}
-            placeholder={placeholder}
-            mode='multiple'
-            virtual={false}
-            defaultValue={initialValue ?? selectProps?.defaultValue}
-            // value={value ?? selectProps?.value ?? ''}
-            disabled={disabled}
+            defaultValue={defaultValue ?? selectProps?.defaultValue}
+            value={value ?? selectProps?.value ?? ''}
             onChange={(val: number[], option) => onValueChange?.(val, option)}
-            className='w-full'
           />
         )
-      case 'colorselector':
+      case 'colorSelector':
         return (
           <Select
             {...selectProps}
-            title={title}
-            placeholder={placeholder}
-            defaultValue={initialValue ?? selectProps?.defaultValue ?? ''}
-            // value={value ?? selectProps?.value ?? ''}
+            defaultValue={defaultValue}
+            value={value}
             onChange={(val, option) => onValueChange?.(val, option)}
-            disabled={disabled}
-            virtual={false}
-            className={cn('w-full', restProps.className)}
             optionRender={(ori, info) => {
               return (
                 <>
@@ -238,20 +198,14 @@ function EditableStateCell({
             }}
           />
         )
-      case 'datepicker':
+      case 'datePicker':
         return (
           <DatePicker
             {...datePickerProps}
-            title={title}
-            placeholder={placeholder}
-            name={dataIndex}
-            required={required}
-            onChange={(val) => onValueChange?.(val)}
-            disabled={disabled}
+            defaultValue={defaultValue}
             value={value}
-            defaultValue={initialValue}
+            onChange={(date, dateString) => onValueChange?.(date, dateString)}
             format={datePickerProps?.format ?? 'DD/MM/YYYY'}
-            className={cn('w-full', restProps.className)}
           />
         )
       case 'dateTimePicker':
@@ -259,83 +213,47 @@ function EditableStateCell({
           <DatePicker
             {...datePickerProps}
             showTime
-            title={title}
-            placeholder={placeholder}
-            name={dataIndex}
-            required={required}
-            onChange={(val) => onValueChange?.(val)}
-            disabled={disabled}
+            defaultValue={defaultValue}
             value={value}
-            defaultValue={initialValue}
-            // format={datePickerProps?.format ?? 'DD/MM/YYYY'}
-            className={cn('w-full', restProps.className)}
-          />
-        )
-      case 'password':
-        return (
-          <Input
-            {...inputProps}
-            required
-            placeholder={placeholder ?? 'Enter password'}
-            name={dataIndex}
-            type={visible ? 'text' : 'password'}
-            onChange={(event) => onValueChange?.(event.target.value)}
-            defaultValue={initialValue ?? inputProps?.defaultValue ?? ''}
-            value={value ?? inputProps?.value ?? ''}
-            disabled={disabled}
-            readOnly={readonly}
-            autoComplete='give-text'
-            allowClear={allowClear}
-            suffix={
-              <Button onClick={() => setVisible((prev) => !prev)} type='link' className='p-2'>
-                {visible ? <Eye color='var(--foreground)' size={16} /> : <EyeOff size={16} color='var(--foreground)' />}
-              </Button>
-            }
-            className={cn('w-full', restProps.className)}
-          />
-        )
-
-      case 'email':
-        return (
-          <Input
-            {...inputProps}
-            required
-            title={title}
-            placeholder={placeholder}
-            name={dataIndex}
-            type='email'
-            autoComplete='give-text'
-            allowClear={allowClear}
-            onChange={(event) => onValueChange?.(event.target.value)}
-            defaultValue={initialValue ?? inputProps?.defaultValue ?? ''}
-            value={value ?? inputProps?.value ?? ''}
-            disabled={disabled}
-            readOnly={readonly}
-            className={cn('w-full', restProps.className)}
+            onChange={(date, dateString) => onValueChange?.(date, dateString)}
           />
         )
       default:
         return (
           <Input
             {...inputProps}
-            required={required}
-            title={title}
-            placeholder={placeholder}
-            name={dataIndex}
             autoComplete='give-text'
-            allowClear={allowClear}
             onChange={(event) => onValueChange?.(event.target.value)}
-            defaultValue={initialValue ?? inputProps?.defaultValue ?? ''}
-            value={value ?? inputProps?.value ?? ''}
-            disabled={disabled}
-            readOnly={readonly}
-            className={cn('w-full', restProps.className)}
+            defaultValue={defaultValue}
+            value={value}
+            className='w-full'
           />
         )
     }
   })()
 
-  return <>{isEditing ? (editableRender ? editableRender : inputNode) : restProps.children}</>
+  return (
+    <>
+      {isEditing ? (
+        <>
+          {label ? (
+            <Row gutter={[10, 10]} className='flex-col lg:flex-row'>
+              <Col xs={24} lg={4}>
+                <Typography.Text className='w-full'>{label}</Typography.Text>
+              </Col>
+              <Col xs={24} lg={20}>
+                {inputNode}
+              </Col>
+            </Row>
+          ) : (
+            inputNode
+          )}
+        </>
+      ) : (
+        props.children
+      )}
+    </>
+  )
 }
 
 export default memo(EditableStateCell)

@@ -3,7 +3,7 @@ import { Flex, Form } from 'antd'
 import React, { memo, useState } from 'react'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
-import SkyModalWrapper from '~/components/sky-ui/SkyModalWrapper'
+import SkyModal from '~/components/sky-ui/SkyModal'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
 
 export interface PostAddNewProps {
@@ -31,7 +31,7 @@ const ModalAddNewPost: React.FC<Props> = ({ onAddNew, openModal, setOpenModal, f
 
   return (
     <>
-      <SkyModalWrapper
+      <SkyModal
         loading={false}
         open={openModal}
         onOk={handleOk}
@@ -105,7 +105,7 @@ const ModalAddNewPost: React.FC<Props> = ({ onAddNew, openModal, setOpenModal, f
             />
           </Flex>
         </Form>
-      </SkyModalWrapper>
+      </SkyModal>
     </>
   )
 }

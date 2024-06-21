@@ -1,16 +1,15 @@
-import type { DragEndEvent } from '@dnd-kit/core'
+import type { DragCancelEvent, DragEndEvent, DragMoveEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core'
 import { DndContext } from '@dnd-kit/core'
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
-import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import type { TableProps } from 'antd'
 import { Table } from 'antd'
-import { ColumnsType, ColumnType } from 'antd/es/table'
+import { ColumnType, ColumnsType } from 'antd/es/table'
 import { useState } from 'react'
-import { defaultRequestBody, ResponseDataType } from '~/api/client'
 import ActionRow, { ActionProps } from '../ActionRow'
-import SkyTableRow2 from './SkyTableRow'
+import SkyTableRow from './SkyTableRow'
 
-export type RequiredDataType = {
+export type SkyTableRequiredDataType = {
   key: string
   id?: number
   createdAt?: string
@@ -18,20 +17,21 @@ export type RequiredDataType = {
   orderNumber?: number | null
 }
 
-export interface SkyTableProps<T extends RequiredDataType> extends TableProps {
+export interface SkyTableProps<T extends SkyTableRequiredDataType> extends TableProps {
   dataSource: T[]
-  setDataSource: (dataSource: T[]) => void
-  metaData: ResponseDataType | undefined
   onPageChange?: (page: number, pageSize: number) => void
   actionProps?: ActionProps<T>
   isShowDeleted?: boolean
   editingKey?: string
   deletingKey?: string
-  pageSize?: number
-  onDraggableChange?: (oldData?: T[], newData?: T[]) => void
+  onDragStart?(event: DragStartEvent): void
+  onDragMove?(event: DragMoveEvent): void
+  onDragOver?(event: DragOverEvent): void
+  onDragEnd?(event: DragEndEvent): void
+  onDragCancel?(event: DragCancelEvent): void
 }
 
-const SkyTable = <T extends RequiredDataType>({ ...props }: SkyTableProps<T>) => {
+const SkyTable = <T extends SkyTableRequiredDataType>({ ...props }: SkyTableProps<T>) => {
   const [editKey, setEditKey] = useState<string>('-1')
   const isEditing = (key: string): boolean => {
     return props.editingKey === key
@@ -97,18 +97,8 @@ const SkyTable = <T extends RequiredDataType>({ ...props }: SkyTableProps<T>) =>
     return showAction ? [...props.columns!, actionsCol] : [...props.columns!]
   }
 
-  const onDragEnd = ({ active, over }: DragEndEvent) => {
-    if (active.id !== over?.id) {
-      const activeIndex = props.dataSource.findIndex((i) => i.key === active.id)
-      const overIndex = props.dataSource.findIndex((i) => i.key === over?.id)
-      const newData = arrayMove(props.dataSource, activeIndex, overIndex)
-      props.onDraggableChange?.(props.dataSource, newData)
-      props.setDataSource(newData)
-    }
-  }
-
   return (
-    <DndContext modifiers={[restrictToVerticalAxis]} onDragEnd={onDragEnd}>
+    <DndContext modifiers={[restrictToVerticalAxis]} {...props}>
       <SortableContext
         // rowKey array
         items={props.dataSource.map((i) => `${i.key}`)}
@@ -119,20 +109,12 @@ const SkyTable = <T extends RequiredDataType>({ ...props }: SkyTableProps<T>) =>
           columns={getColumn(props.actionProps?.isShow ?? false)}
           components={{
             body: {
-              row: SkyTableRow2
+              row: SkyTableRow
             }
           }}
           className='z-0'
           rowKey='key'
           dataSource={props.dataSource}
-          pagination={
-            props.pagination ?? {
-              onChange: props.onPageChange,
-              current: props.metaData?.page,
-              pageSize: props.pageSize ?? defaultRequestBody.paginator?.pageSize,
-              total: props.metaData?.total
-            }
-          }
         />
       </SortableContext>
     </DndContext>

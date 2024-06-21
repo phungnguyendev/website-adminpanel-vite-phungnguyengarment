@@ -151,7 +151,7 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
         checkFieldToUpdate(record.category?.id, newRecord.categoryID)
       ) {
         console.log('Product update progressing...')
-        await productService.updateItemByPk(
+        await productService.updateItem(
           record.id!,
           { title: newRecord.title, desc: newRecord.desc, imageUrl: newRecord.imageUrl },
           setLoading,
@@ -187,10 +187,10 @@ export default function useProduct(table: UseTableProps<ProductTableDataType>) {
     try {
       console.log(formAddNew)
       setLoading(true)
-      await productService.createNewItem({ ...formAddNew } as Product, setLoading, async (meta) => {
+      await productService.createItem({ ...formAddNew } as Product, setLoading, async (meta) => {
         if (!meta?.success) throw new Error('Create failed!')
         const productNew = meta.data as Product
-        await productCategoryService.createNewItem(
+        await productCategoryService.createItem(
           { categoryID: formAddNew.categoryID, productID: productNew.id },
           setLoading,
           (meta2) => {

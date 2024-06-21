@@ -5,7 +5,7 @@ import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatt
 const NAMESPACE = 'users'
 
 export default {
-  createNewItem: async (user: User): Promise<ResponseDataType | undefined> => {
+  createItem: async (user: User): Promise<ResponseDataType | undefined> => {
     return await client
       .post(`${NAMESPACE}`, {
         ...user
@@ -17,7 +17,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItemByPk: async (id: number): Promise<ResponseDataType | undefined> => {
+  getItem: async (id: number): Promise<ResponseDataType | undefined> => {
     return client
       .get(`${NAMESPACE}/${id}`)
       .then((res) => {
@@ -49,7 +49,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItemByPk: async (id: number, item: User): Promise<ResponseDataType | undefined> => {
+  updateItem: async (id: number, item: User): Promise<ResponseDataType | undefined> => {
     return await client
       .put(`${NAMESPACE}/${id}`, item)
       .then((res) => {

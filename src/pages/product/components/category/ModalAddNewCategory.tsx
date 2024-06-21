@@ -1,7 +1,7 @@
 import type { FormProps } from 'antd'
 import { Flex, Form } from 'antd'
 import React, { memo } from 'react'
-import SkyModalWrapper from '~/components/sky-ui/SkyModalWrapper'
+import SkyModal from '~/components/sky-ui/SkyModal'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
 
 export interface CategoryAddNewProps {
@@ -27,7 +27,7 @@ const ModalAddNewCategory: React.FC<Props> = ({ onAddNew, openModal, setOpenModa
 
   return (
     <>
-      <SkyModalWrapper
+      <SkyModal
         loading={false}
         open={openModal}
         onOk={handleOk}
@@ -61,7 +61,7 @@ const ModalAddNewCategory: React.FC<Props> = ({ onAddNew, openModal, setOpenModa
             />
           </Flex>
         </Form>
-      </SkyModalWrapper>
+      </SkyModal>
     </>
   )
 }

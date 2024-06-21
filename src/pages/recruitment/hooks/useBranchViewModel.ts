@@ -65,7 +65,7 @@ const useBranchViewModel = () => {
     try {
       console.log(itemNew)
       setLoading(true)
-      await branchService.createNewItem(itemNew, setLoading, (meta) => {
+      await branchService.createItem(itemNew, setLoading, (meta) => {
         if (!meta?.success) throw new Error(meta?.message)
         message.success('Success')
       })

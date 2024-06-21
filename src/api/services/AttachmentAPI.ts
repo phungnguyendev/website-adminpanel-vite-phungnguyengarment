@@ -5,7 +5,7 @@ import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatt
 const NAMESPACE = 'attachments'
 
 export default {
-  createNewItem: async (item: Prize, accessToken: string): Promise<ResponseDataType | undefined> => {
+  createItem: async (item: Prize, accessToken: string): Promise<ResponseDataType | undefined> => {
     return await client
       .post(
         `${NAMESPACE}`,
@@ -25,7 +25,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
+  getItem: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
     return client
       .get(`${NAMESPACE}/${id}`, {
         headers: {
@@ -86,13 +86,23 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItemByPk: async (
-    id: number,
-    itemToUpdate: Prize,
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
+  updateItem: async (id: number, itemToUpdate: Prize, accessToken: string): Promise<ResponseDataType | undefined> => {
     return client
       .put(`${NAMESPACE}/${id}`, itemToUpdate, {
+        headers: {
+          authorization: accessToken
+        }
+      })
+      .then((res) => {
+        return responseFormatter(res)
+      })
+      .catch(function (error) {
+        throwErrorFormatter(error)
+      })
+  },
+  updateItems: async (itemsToUpdate: Prize[], accessToken: string): Promise<ResponseDataType | undefined> => {
+    return client
+      .put(`${NAMESPACE}`, itemsToUpdate, {
         headers: {
           authorization: accessToken
         }

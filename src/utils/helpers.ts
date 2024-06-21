@@ -2,6 +2,7 @@ import type { GetProp, UploadProps } from 'antd'
 import { clsx, type ClassValue } from 'clsx'
 import dayjs from 'dayjs'
 import { twMerge } from 'tailwind-merge'
+import appConfig from '~/config/app.config'
 import { dateFormatter } from './date-formatter'
 
 export function cn(...inputs: ClassValue[]) {
@@ -77,8 +78,8 @@ export const dateValidatorInit = (
   return date ? dayjs(date) : undefined
 }
 
-export const textValidatorInit = (text?: string | null): string | undefined => {
-  return text ? text : undefined
+export const textValidatorInit = (text?: string | null | undefined): string => {
+  return text ?? ''
 }
 
 export const numberValidatorInit = (number?: number | null): number | undefined => {
@@ -105,7 +106,7 @@ export const dateComparator = (
 }
 
 export const textValidator = (text?: string | null): boolean => {
-  return text ? text !== '' : false
+  return text ? text.length > 0 : false
 }
 
 export const textComparator = (text1?: string | null, text2?: string | null): boolean => {
@@ -132,6 +133,11 @@ export const extractEmailName = (email: string): string => {
 
   // Trả về phần username
   return username
+}
+
+// Image
+export const imageValidatorDisplay = (imageName?: string | null): string => {
+  return appConfig.public.imageURL + (imageName ?? '')
 }
 
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0]

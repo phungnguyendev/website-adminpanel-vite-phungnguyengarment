@@ -1,7 +1,7 @@
 import type { FormProps } from 'antd'
 import { Flex, Form } from 'antd'
 import React, { memo } from 'react'
-import SkyModalWrapper from '~/components/sky-ui/SkyModalWrapper'
+import SkyModal from '~/components/sky-ui/SkyModal'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
 
 export interface HeroBannerAddNewProps {
@@ -28,7 +28,7 @@ const ModalAddNewHeroBanner: React.FC<Props> = ({ loading, onAddNew, openModal, 
 
   return (
     <>
-      <SkyModalWrapper
+      <SkyModal
         loading={loading}
         open={openModal}
         onOk={handleOk}
@@ -63,7 +63,7 @@ const ModalAddNewHeroBanner: React.FC<Props> = ({ loading, onAddNew, openModal, 
             />
           </Flex>
         </Form>
-      </SkyModalWrapper>
+      </SkyModal>
     </>
   )
 }
