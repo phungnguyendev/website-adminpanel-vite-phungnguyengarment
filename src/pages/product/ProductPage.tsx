@@ -8,8 +8,8 @@ const ProductPage = () => {
   return (
     <>
       <BaseLayout title='Product page'>
-        <CategoryTable />
-        <ProductTable />
+        {/* <CategoryTable />
+        <ProductTable /> */}
       </BaseLayout>
     </>
   )

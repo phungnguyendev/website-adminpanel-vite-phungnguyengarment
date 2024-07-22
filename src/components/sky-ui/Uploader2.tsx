@@ -1,7 +1,7 @@
 import { UploadOutlined } from '@ant-design/icons'
 import type { UploadFile, UploadProps } from 'antd'
 import { App as AntApp, Button, Flex, Upload } from 'antd'
-import { ImageUp } from 'lucide-react'
+import { Image } from 'lucide-react'
 import React, { useState } from 'react'
 import PublicAPI from '~/api/services/PublicAPI'
 import appConfig from '~/config/app.config'
@@ -68,7 +68,7 @@ const Uploader2: React.FC<Uploader2Props> = ({ uploadType, onValueChange, ...pro
         ) : (
           <Flex vertical className='text-muted group-open:text-primary group-hover:text-primary'>
             <p className='transition-colors duration-300'>
-              <ImageUp size={46} />
+              <Image size={46} />
             </p>
             <p className='ant-upload-text'>Click or drag file to this area to upload</p>
             <p className='ant-upload-hint'>

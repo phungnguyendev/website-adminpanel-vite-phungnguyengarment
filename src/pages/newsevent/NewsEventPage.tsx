@@ -8,7 +8,7 @@ const NewsEventPage = () => {
     <>
       <BaseLayout title='News and page' breadcrumb>
         {/* <PostTable /> */}
-        <PostList />
+        {/* <PostList /> */}
         {/* <Outlet /> */}
       </BaseLayout>
     </>

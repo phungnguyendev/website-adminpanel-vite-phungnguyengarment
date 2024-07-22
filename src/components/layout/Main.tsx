@@ -1,33 +1,34 @@
-import { Layout } from 'antd'
+import type { MenuProps } from 'antd'
+import { Flex, Layout, Menu } from 'antd'
 import React, { useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Link, Outlet } from 'react-router-dom'
+import logo from '~/assets/logo.svg'
+import routes from '~/config/route.config'
 import { cn } from '~/utils/helpers'
 import Footer from './Footer'
 import Header from './Header'
-import SideNav from './sidenav/SideNav'
 
 const { Sider, Content } = Layout
 
 const Main: React.FC = () => {
   const [openDrawer, setOpenDrawer] = useState(false)
+  const [selectedKey, setSelectedKey] = useState<string>(routes[0].key)
+
+  const items: MenuProps['items'] = routes.map((route) => {
+    return {
+      key: route.key,
+      label: <Link to={route.path}>{openDrawer ? route.name : undefined}</Link>,
+      icon: <route.icon size={24} />
+    }
+  })
+
+  const handleClick: MenuProps['onClick'] = (e) => {
+    setSelectedKey(e.key)
+    if (openDrawer) setOpenDrawer(false)
+  }
 
   return (
     <Layout className='w-full bg-background' hasSider>
-      {/* <Drawer
-        title={false}
-        placement='left'
-        closable={true}
-        onClose={() => setOpenDrawer(false)}
-        open={openDrawer}
-        width={250}
-        className='m-0'
-      >
-        <Layout>
-          <Sider trigger={null}>
-            <SideNav openDrawer={openDrawer} setOpenDrawer={setOpenDrawer} />
-          </Sider>
-        </Layout>
-      </Drawer> */}
       <Sider
         breakpoint='lg'
         collapsedWidth={0}
@@ -44,14 +45,20 @@ const Main: React.FC = () => {
           zIndex: 10
         }}
       >
-        <SideNav openDrawer={openDrawer} setOpenDrawer={setOpenDrawer} />
+        <Flex vertical gap={20} className='my-5 bg-white'>
+          <Flex align='center' justify='center' gap={8}>
+            <img src={logo} alt='logo' className='h-16 w-16 object-contain lg:h-10 lg:w-10' />
+          </Flex>
+          <Menu
+            onClick={handleClick}
+            selectedKeys={[selectedKey]}
+            defaultSelectedKeys={[selectedKey]}
+            mode='inline'
+            items={items}
+          />
+        </Flex>
       </Sider>
-      <Layout
-        className={cn({
-          '250px': openDrawer,
-          '80px': !openDrawer
-        })}
-      >
+      <Layout>
         <Header
           collapsed={openDrawer}
           setCollapsed={setOpenDrawer}
@@ -67,7 +74,7 @@ const Main: React.FC = () => {
         >
           <Outlet />
         </Content>
-        <Footer className=''>Ant Design ©2023 Created by Ant UED</Footer>
+        <Footer className='bg-white'>Ant Design ©2023 Created by Ant UED</Footer>
       </Layout>
     </Layout>
   )

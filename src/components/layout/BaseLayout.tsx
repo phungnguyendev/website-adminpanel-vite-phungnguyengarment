@@ -2,11 +2,10 @@ import { Breadcrumb, Button, Flex, Input, Switch, Typography } from 'antd'
 import { SwitchChangeEventHandler } from 'antd/es/switch'
 import { TitleProps } from 'antd/es/typography/Title'
 import { Plus } from 'lucide-react'
-import React, { useEffect } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import React from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import useBreadcrumbs from 'use-react-router-breadcrumbs'
-import useLocalStorage from '~/hooks/useLocalStorage'
-import { routes } from '~/types/routes'
+import routes from '~/config/route.config'
 import { cn } from '~/utils/helpers'
 
 interface ActionProps {
@@ -55,29 +54,12 @@ const BaseLayout: React.FC<Props> = ({
   onResetClick,
   onAddNewClick,
   children,
-  onLoading,
   titleProps,
   breadcrumb,
   ...props
 }) => {
-  const [accessTokenStored] = useLocalStorage<string>('accessToken', '')
-  const navigate = useNavigate()
   const { pathname } = useLocation()
   const breadcrumbs = useBreadcrumbs(routes)
-
-  useEffect(() => {
-    const callApi = async () => {
-      try {
-        onLoading?.(true)
-        if (!accessTokenStored) navigate('/login')
-      } catch (error) {
-        console.error(error)
-      } finally {
-        onLoading?.(false)
-      }
-    }
-    callApi()
-  }, [])
 
   return (
     <div {...props} className={cn('w-full', props.className)}>

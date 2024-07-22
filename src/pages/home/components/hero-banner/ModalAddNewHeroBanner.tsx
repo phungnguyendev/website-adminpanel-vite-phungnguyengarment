@@ -1,5 +1,5 @@
 import { UploadFile } from 'antd'
-import React, { memo, useEffect, useState } from 'react'
+import React, { memo, useState } from 'react'
 import SkyModal, { SkyModalProps } from '~/components/sky-ui/SkyModal'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import { HeroBanner } from '~/typing'
@@ -17,10 +17,6 @@ interface Props extends SkyModalProps {
 const ModalAddNewHeroBanner: React.FC<Props> = ({ onCreate, ...props }) => {
   const [loading, setLoading] = useState<boolean>(false)
   const [newRecord, setNewRecord] = useState<HeroBanner>({})
-
-  useEffect(() => {
-    console.log(loading)
-  }, [loading])
 
   return (
     <>

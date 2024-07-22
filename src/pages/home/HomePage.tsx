@@ -6,7 +6,7 @@ const HeroBannerTable = lazy(() => import('./components/hero-banner/HeroBannerTa
 const HomeProductTable = lazy(() => import('./components/home-product/HomeProductTable'))
 // const PartnerTable = lazy(() => import('./components/partner/PartnerTable'))
 
-const HomePage: React.FC = () => {
+const HomePage = () => {
   useTitle('Home page')
 
   return (

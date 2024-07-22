@@ -25,8 +25,6 @@ const HeroBannerTable: React.FC = () => {
   } = state
   const { handleCreate, handleUpdate, handleDelete, handlePageChange, handleDraggableChange } = action
 
-  console.log('Hero Banner Table')
-
   const columns = {
     id: (record: BannerTableDataType) => {
       return <SkyTableTypography strong>{textValidatorDisplay(`#${record.id}`)}</SkyTableTypography>

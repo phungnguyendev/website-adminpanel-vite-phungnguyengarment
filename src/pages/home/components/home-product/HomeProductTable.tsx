@@ -25,8 +25,6 @@ const HomeProductTable: React.FC = () => {
   } = state
   const { handleCreate, handleUpdate, handleDelete, handlePageChange, handleDraggableChange } = action
 
-  console.log('Home Product Table')
-
   const columns = {
     id: (record: HomeProductTableDataType) => {
       return <SkyTableTypography strong>{textValidatorDisplay(`#${record.id}`)}</SkyTableTypography>

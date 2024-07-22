@@ -6,9 +6,7 @@ const ProjectTable = lazy(() => import('./components/ProjectTable'))
 const ServicePage = () => {
   return (
     <>
-      <BaseLayout title='Service page'>
-        <ProjectTable />
-      </BaseLayout>
+      <BaseLayout title='Service page'>{/* <ProjectTable /> */}</BaseLayout>
     </>
   )
 }
