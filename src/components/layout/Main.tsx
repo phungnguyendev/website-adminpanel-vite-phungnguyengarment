@@ -67,7 +67,7 @@ const Main: React.FC = () => {
           }}
         />
         <Content
-          className={cn('min-h-screen bg-background p-5 transition-all duration-200', {
+          className={cn('min-h-screen bg-white p-5 transition-all duration-200', {
             'ml-[250px]': openDrawer,
             'ml-[80px]': !openDrawer
           })}

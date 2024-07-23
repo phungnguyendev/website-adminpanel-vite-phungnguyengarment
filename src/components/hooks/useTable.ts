@@ -1,52 +1,80 @@
 import { DragEndEvent } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
 import { useState } from 'react'
+import { Paginator } from '~/api/client'
 
 type RequiredDataType = {
   key: string
-  id?: number
   createdAt?: string
   updatedAt?: string
-  orderNumber?: number | null
+  orderNumber?: number
 }
 
-interface Props<T extends RequiredDataType> {
+export interface UseTableProps<T extends RequiredDataType> {
   loading: boolean
   dataSource: T[]
   scrollIndex: number
+  addingKey: { key: string; payload?: T }
+  expandingKeys: string[]
   editingKey: string
   deletingKey: string
-  showDeleted: boolean
-  setLoading: (state: boolean) => void
-  setScrollIndex: (index: number) => void
-  setEditingKey: (key: string) => void
-  setDeletingKey: (key: string) => void
-  setDeletedRecordState: (enable: boolean) => void
-  setDataSource: (newDataSource: T[]) => void
+  paginator: Paginator
+  setPaginator: React.Dispatch<React.SetStateAction<Paginator>>
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
+  setScrollIndex: React.Dispatch<React.SetStateAction<number>>
+  setEditingKey: React.Dispatch<React.SetStateAction<string>>
+  setDeletingKey: React.Dispatch<React.SetStateAction<string>>
+  setDataSource: React.Dispatch<React.SetStateAction<T[]>>
+  isAdding: (key: string) => boolean
   isEditing: (key: string) => boolean
   isDelete: (key: string) => boolean
+  handleStartExpanding: (expanded: boolean, key: string) => void
+  handleStartAdding: (key: string, payload?: T) => void
   handleStartEditing: (key: string) => void
   handleStartDeleting: (key: string) => void
   handleStartRestore: (key: string) => void
-  handleEditing: (key: string, itemToUpdate: T, onDataSuccess?: (updatedItem: T) => void) => void
+  handleUpdate: (key: string, itemToUpdate: T) => void
   handleAddNew: (item: T) => void
-  handleDeleting: (key: string, onDataSuccess?: (deletedItem: T) => void) => void
-  handleRestore: (key: string, onDataSuccess?: (deletedItem: T) => void) => void
+  handleDeleting: (key: string) => void
+  handleRestore: (key: string) => void
+  handleCloseExpanding: () => void
+  handleCancelAdding: () => void
   handleCancelEditing: () => void
   handleCancelDeleting: () => void
   handleCancelRestore: () => void
   handleDraggableEnd: (event: DragEndEvent, onSuccess?: (newDataSource: T[]) => void) => void
 }
 
-export default function useTable<T extends RequiredDataType>(initValue: T[]): Props<T> {
+export default function useTable<T extends RequiredDataType>(initValue: T[]): UseTableProps<T> {
   const [scrollIndex, setScrollIndex] = useState<number>(0)
   const [loading, setLoading] = useState<boolean>(false)
   const [dataSource, setDataSource] = useState<T[]>(initValue)
+  const [expandingKeys, setExpandingKeys] = useState<string[]>([])
+  const [addingKey, setAddingKey] = useState<{ key: string; payload?: T }>({ key: '' })
   const [editingKey, setEditingKey] = useState<string>('')
   const [deletingKey, setDeletingKey] = useState<string>('')
-  const [showDeleted, setDeletedRecordState] = useState<boolean>(false)
+  const [paginator, setPaginator] = useState<Paginator>({ page: 1, pageSize: 10 })
+
+  const isAdding = (key: string) => key === addingKey.key
   const isEditing = (key: string) => key === editingKey
   const isDelete = (key: string) => key === deletingKey
+
+  const handleStartExpanding = (expanded: boolean, key: string) => {
+    const newExpandingKeys = [...expandingKeys]
+    if (expanded) {
+      // Adding new item
+      newExpandingKeys.unshift(key)
+    } else {
+      // Removing item
+      const removeIndexKey = newExpandingKeys.findIndex((_key) => _key === key)
+      if (removeIndexKey !== -1) newExpandingKeys.splice(removeIndexKey, 1)
+    }
+    setExpandingKeys(newExpandingKeys)
+  }
+
+  const handleStartAdding = (key: string, payload?: T) => {
+    setAddingKey({ key, payload })
+  }
 
   const handleStartEditing = (key: string) => {
     setEditingKey(key)
@@ -60,26 +88,32 @@ export default function useTable<T extends RequiredDataType>(initValue: T[]): Pr
     setDeletingKey(key)
   }
 
-  const handleDeleting = (key: string, onDataSuccess?: (deletedItem: T) => void) => {
+  const handleDeleting = (key: string) => {
     setLoading(true)
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
       const dataSourceRemovedItem = dataSource.filter((item) => item.key !== key)
       setDataSource(dataSourceRemovedItem)
-      onDataSuccess?.(itemFound)
     }
     setLoading(false)
   }
 
-  const handleRestore = (key: string, onDataSuccess?: (deletedItem: T) => void) => {
+  const handleRestore = (key: string) => {
     setLoading(true)
     const itemFound = dataSource.find((item) => item.key === key)
     if (itemFound) {
       const dataSourceRemovedItem = dataSource.filter((item) => item.key !== key)
       setDataSource(dataSourceRemovedItem)
-      onDataSuccess?.(itemFound)
     }
     setLoading(false)
+  }
+
+  const handleCloseExpanding = () => {
+    setExpandingKeys([])
+  }
+
+  const handleCancelAdding = () => {
+    setAddingKey({ key: '' })
   }
 
   const handleCancelEditing = () => {
@@ -94,7 +128,7 @@ export default function useTable<T extends RequiredDataType>(initValue: T[]): Pr
     setDeletingKey('')
   }
 
-  const handleEditing = async (key: string, itemToUpdate: T, onDataSuccess?: (updatedItem: T) => void) => {
+  const handleUpdate = async (key: string, itemToUpdate: T) => {
     try {
       setLoading(true)
       const newData = [...dataSource]
@@ -105,20 +139,16 @@ export default function useTable<T extends RequiredDataType>(initValue: T[]): Pr
           ...item,
           ...itemToUpdate
         })
-        setDataSource(newData)
-        setEditingKey('')
-        onDataSuccess?.(itemToUpdate)
         // After updated local data
         // We need to update on database
       } else {
         newData.push(itemToUpdate)
-        setDataSource(newData)
-        setEditingKey('')
-        onDataSuccess?.(itemToUpdate)
       }
+      setDataSource(newData)
     } catch (errInfo) {
-      console.log('Validate Failed:', errInfo)
+      throw errInfo
     } finally {
+      setEditingKey('')
       setLoading(false)
     }
   }
@@ -145,10 +175,13 @@ export default function useTable<T extends RequiredDataType>(initValue: T[]): Pr
   return {
     loading,
     setLoading,
-    showDeleted,
-    setDeletedRecordState,
-    isDelete,
+    isAdding,
     isEditing,
+    isDelete,
+    paginator,
+    setPaginator,
+    expandingKeys,
+    addingKey,
     editingKey,
     deletingKey,
     setEditingKey,
@@ -158,10 +191,14 @@ export default function useTable<T extends RequiredDataType>(initValue: T[]): Pr
     dataSource,
     setDataSource,
     handleAddNew,
+    handleStartExpanding,
+    handleStartAdding,
     handleStartEditing,
     handleStartDeleting,
     handleStartRestore,
-    handleEditing,
+    handleUpdate,
+    handleCloseExpanding,
+    handleCancelAdding,
     handleCancelEditing,
     handleCancelDeleting,
     handleCancelRestore,

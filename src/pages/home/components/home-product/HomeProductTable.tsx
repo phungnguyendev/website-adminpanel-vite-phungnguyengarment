@@ -44,7 +44,7 @@ const HomeProductTable: React.FC = () => {
             // setNewRecord({ ...newRecord, images: ([] as UploadFile[]).push(info) })
           }}
         >
-          <LazyImage alt='banner-img' src={imageValidatorDisplay(record.imageName)} height={120} width={120} />
+          <LazyImage alt='banner-img' src={imageValidatorDisplay(record.imageUrl)} height={120} width={120} />
         </EditableStateCell>
       )
     },

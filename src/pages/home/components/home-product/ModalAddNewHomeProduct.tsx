@@ -37,12 +37,12 @@ const ModalAddNewHomeProduct: React.FC<Props> = ({ onCreate, ...props }) => {
             uploadType: 'images',
             maxCount: 1
           }}
-          value={newRecord.imageName}
+          value={newRecord.imageUrl}
           onValueChange={(fileList: UploadFile[]) => {
             console.log(fileList)
             setNewRecord({
               ...newRecord,
-              imageName: fileList[0].name
+              imageUrl: fileList[0].name
             })
           }}
         />

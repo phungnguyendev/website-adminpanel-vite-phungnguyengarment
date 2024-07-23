@@ -13,7 +13,7 @@ const HomePage = () => {
     <>
       <BaseLayout title='Home page'>
         <HeroBannerTable />
-        <HomeProductTable />
+        {/* <HomeProductTable /> */}
         {/* <PartnerTable /> */}
       </BaseLayout>
     </>

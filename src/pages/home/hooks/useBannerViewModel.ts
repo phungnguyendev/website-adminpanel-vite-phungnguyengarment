@@ -1,37 +1,30 @@
-import { DragEndEvent } from '@dnd-kit/core'
-import { App as AntApp, UploadFile } from 'antd'
-import { useCallback, useEffect, useState } from 'react'
+import { App as AntApp } from 'antd'
+import { useEffect, useState } from 'react'
 import HeroBannerAPI from '~/api/services/HeroBannerAPI'
 import useTable from '~/components/hooks/useTable'
-import useAPIService2 from '~/hooks/useAPIService2'
+import define from '~/constants/define'
+import useAPIService from '~/hooks/useAPIService'
 import { HeroBanner } from '~/typing'
-import { textValidator } from '~/utils/helpers'
-import { BannerTableDataType } from '../type'
-
-interface NewRecord {
-  title?: string | null
-  images?: UploadFile[] | null
-}
+import { BannerTableDataType, NewRecordHeroBanner } from '../type'
 
 const useBannerViewModel = () => {
   const { message } = AntApp.useApp()
   const table = useTable<BannerTableDataType>([])
-  const { setLoading, setDataSource, handleAddNew, handleDeleting, handleEditing, handleDraggableEnd } = table
-  const service = useAPIService2<HeroBanner>(HeroBannerAPI)
+
+  const service = useAPIService<HeroBanner>(HeroBannerAPI)
+
   const [openModalCreate, setOpenModalCreate] = useState<boolean>(false)
   const [openModalUpdate, setOpenModalUpdate] = useState<boolean>(false)
-  const [searchText, setSearchText] = useState<string>('')
   const [recorded, setRecorded] = useState<HeroBanner>({ id: 0 })
-  const [newRecord, setNewRecord] = useState<NewRecord>({})
+  const [newRecord, setNewRecord] = useState<NewRecordHeroBanner | null>(null)
   const [branches, setHeroBanners] = useState<HeroBanner[]>([])
 
   useEffect(() => {
-    loadData()
+    initialize()
   }, [])
 
-  const loadData = useCallback(async () => {
+  const initialize = async () => {
     try {
-      setLoading(true)
       await service.getItemsSync(
         {
           paginator: { page: 1, pageSize: -1 },
@@ -40,108 +33,101 @@ const useBannerViewModel = () => {
             direction: 'asc'
           }
         },
-        setLoading,
-        (meta) => {
-          if (!meta?.success) throw new Error(`${meta?.message}`)
-          const data = meta.data as HeroBanner[]
+        table.setLoading,
+        (res) => {
+          if (!res?.success) throw new Error(`${res?.message}`)
+          const data = res.data as HeroBanner[]
           setHeroBanners(data)
           const newDataSource = data.map((item) => {
             return { ...item, key: `${item.id}` }
           })
-          setDataSource(newDataSource)
+          table.setDataSource(newDataSource)
         }
       )
     } catch (error) {
       message.error(`${error}`)
     } finally {
-      setLoading(false)
+      table.setLoading(false)
     }
-  }, [])
+  }
 
-  const handleCreate = async (itemNew: HeroBanner, setLoading?: (enable: boolean) => void) => {
+  const handleCreate = async (itemNew: NewRecordHeroBanner) => {
     try {
-      console.log(itemNew)
-      setLoading?.(true)
-      if (textValidator(itemNew.title) && textValidator(itemNew.imageName)) {
-        await service.createItemSync(itemNew, setLoading, (res) => {
-          if (!res?.success) throw new Error(res?.message)
-          const newItem = res.data as HeroBanner
-          handleAddNew({ ...newItem, key: `${newItem.id}` })
-          message.success('Success')
-        })
-      }
-    } catch (error) {
-      message.error(`${error}`)
+      await service.createItemSync({ ...itemNew } as HeroBanner, table.setLoading, (res) => {
+        if (!res.success) throw new Error(define('create_failed'))
+        const newItem = res.data as HeroBanner
+        table.handleAddNew({ key: `${newItem.id}`, ...newItem })
+      })
+      message.success(define('created_success'))
+    } catch (error: any) {
+      message.error(`${error.message}`)
     } finally {
-      setLoading?.(false)
+      table.setLoading?.(false)
       setOpenModalCreate(false)
     }
   }
 
-  const handleUpdate = async (id: number, itemUpdate: HeroBanner, setLoading?: (enable: boolean) => void) => {
+  const handleUpdate = async (record: BannerTableDataType) => {
     try {
-      setLoading?.(true)
-      service.updateItemSync(id, itemUpdate, setLoading, (res) => {
-        if (!res.success) throw new Error(`${res.message}`)
-        handleEditing(`${id}`, { ...itemUpdate, key: `${id}` })
-        message.success(`${res.message}`)
+      table.setLoading?.(true)
+      await service.updateItemByPkSync(record.id!, { ...newRecord }, table.setLoading, (res) => {
+        if (!res.success) throw new Error(define('update_failed'))
+        const updatedItem = res.data as HeroBanner
+        table.handleUpdate(record.key, { ...updatedItem, key: record.key })
       })
+      message.success(define('updated_success'))
     } catch (error) {
       message.error(`${error}`)
     } finally {
-      setLoading?.(false)
+      table.setLoading?.(false)
       setOpenModalUpdate(false)
     }
   }
 
-  const handleDelete = (itemDelete: HeroBanner, setLoading?: (enable: boolean) => void) => {
+  const handleDelete = async (record: BannerTableDataType) => {
     try {
-      setLoading?.(true)
-      service.deleteItemSync(itemDelete.id ?? -1, setLoading, (res) => {
-        if (!res.success) throw new Error(`${res.message}`)
-        handleDeleting(`${itemDelete.id}`)
-        message.success(`${res.message}`)
+      table.setLoading?.(true)
+      await service.deleteItemSync(record.id!, table.setLoading, (res) => {
+        if (!res.success) throw new Error(define('delete_failed'))
+        table.handleDeleting(record.key)
       })
+      message.success(define('deleted_success'))
     } catch (error) {
       message.error(`${error}`)
     } finally {
-      setLoading?.(false)
+      table.setLoading?.(false)
       setOpenModalUpdate(false)
     }
   }
 
-  const handleSearch = () => {}
+  /**
+   * Function query paginator (page and pageSize)
+   */
+  const handlePageChange = async (page: number, pageSize: number) => {
+    table.setPaginator({ page, pageSize })
+  }
 
-  const handleSortChange = () => {}
-
-  const handlePageChange = () => {}
-
-  const handleDraggableChange = async (e: DragEndEvent) => {
+  const handleDraggableEnd = async (newArr: BannerTableDataType[]) => {
     try {
-      setLoading(true)
-      handleDraggableEnd(e, (newData) => {
-        service.updateItemsSync(
-          newData.map((item, index) => {
-            return { ...item, orderNumber: index }
-          }),
-          setLoading,
-          (res) => {
-            if (!res.success) throw new Error(`${res.message}`)
-            message.success(`${res.message}`)
-          }
-        )
-      })
+      await service.updateItemsSync(
+        newArr.map((item, index) => {
+          return { id: item.id, orderNumber: index + 1 }
+        }),
+        table.setLoading,
+        (res) => {
+          if (!res.success) throw new Error(`${res.message}`)
+          message.success(`${res.message}`)
+        }
+      )
     } catch (error) {
       message.error(`${error}`)
     } finally {
-      setLoading(false)
+      table.setLoading(false)
     }
   }
 
   return {
     state: {
-      searchText,
-      setSearchText,
       openModalCreate,
       setOpenModalCreate,
       newRecord,
@@ -154,14 +140,11 @@ const useBannerViewModel = () => {
     },
     service,
     action: {
-      loadData,
       handleCreate,
       handleUpdate,
       handleDelete,
-      handleSearch,
-      handleSortChange,
       handlePageChange,
-      handleDraggableChange
+      handleDraggableEnd
     },
     table
   }

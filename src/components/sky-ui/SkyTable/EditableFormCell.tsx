@@ -1,12 +1,12 @@
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons'
-import { Checkbox, ColorPicker, DatePicker, Flex, Form, Input, InputNumber, Select, Table, Typography } from 'antd'
+import { Checkbox, DatePicker, Flex, Form, Input, InputNumber, Select, Switch, Table, Typography } from 'antd'
+import dayjs from 'dayjs'
 import { memo } from 'react'
 import ReactQuill from 'react-quill'
 import { cn } from '~/utils/helpers'
-import FileDragger from '../FileUploader'
 import { EditableStateCellProps } from './EditableStateCell'
 
-export type EditableCellRequiredType = { key?: React.Key; name?: string; id?: number }
+export type EditableCellRequiredType = { key: string; name?: string; id?: number }
 
 export interface EditableFormCellProps extends EditableStateCellProps {}
 
@@ -20,16 +20,14 @@ function EditableFormCell({
   placeholder,
   allowClear,
   value,
-  htmlEditorProps,
-  uploadProps,
-  colorPickerProps,
   checkboxProps,
   inputNumberProps,
+  contentEditorProps,
   textAreaProps,
-  datePickerProps,
   inputProps,
+  switchProps,
   selectProps,
-  initialValue,
+  defaultValue,
   onValueChange,
   required,
   inputType,
@@ -39,12 +37,32 @@ function EditableFormCell({
 }: EditableFormCellProps) {
   const inputNode = ((): React.ReactNode => {
     switch (inputType) {
-      case 'uploadFile':
-        return <FileDragger name={dataIndex} disabled={disabled} {...uploadProps} className={restProps.className} />
-      case 'htmlEditor':
+      case 'number':
+        return (
+          <InputNumber
+            {...inputNumberProps}
+            name={dataIndex}
+            title={title}
+            required={required}
+            placeholder={placeholder}
+            value={value}
+            disabled={disabled}
+            className={cn('w-full', restProps.className)}
+          />
+        )
+      case 'contentEditor':
         return (
           <ReactQuill
-            {...htmlEditorProps}
+            {...contentEditorProps}
+            defaultValue={defaultValue}
+            value={value}
+            onChange={(value: string, delta, source, editor) =>
+              onValueChange?.(value, {
+                delta,
+                source,
+                editor
+              })
+            }
             modules={{
               toolbar: [
                 ['bold', 'italic', 'underline', 'strike'], // toggled buttons
@@ -69,56 +87,9 @@ function EditableFormCell({
             }}
             theme='snow'
           />
-          // <ContentEditor {...htmlEditorProps} />
         )
-      case 'colorpicker':
-        return (
-          <ColorPicker
-            {...colorPickerProps}
-            defaultFormat='hex'
-            value={value ? value : colorPickerProps?.value}
-            showText
-            disabled={disabled}
-            className={cn('w-full', restProps.className)}
-          />
-        )
-      case 'colorselector':
-        return (
-          <Select
-            {...selectProps}
-            title={title}
-            placeholder={placeholder}
-            virtual={false}
-            disabled={disabled}
-            optionRender={(ori, info) => {
-              return (
-                <Flex justify='space-between' align='center' key={info.index}>
-                  <Typography.Text>{ori.label}</Typography.Text>
-                  <div
-                    className='h-6 w-6 rounded-sm'
-                    style={{
-                      backgroundColor: `${ori.key}`
-                    }}
-                  />
-                </Flex>
-              )
-            }}
-            className={cn('w-full', restProps.className)}
-          />
-        )
-      case 'number':
-        return (
-          <InputNumber
-            {...inputNumberProps}
-            name={dataIndex}
-            title={title}
-            required={required}
-            placeholder={placeholder}
-            value={value}
-            disabled={disabled}
-            className={cn('w-full', restProps.className)}
-          />
-        )
+      case 'switch':
+        return <Switch {...switchProps} />
       case 'checkbox':
         return (
           <Checkbox
@@ -174,7 +145,7 @@ function EditableFormCell({
             className={cn('w-full', restProps.className)}
           />
         )
-      case 'multipleselect':
+      case 'multipleSelect':
         return (
           <Select
             {...selectProps}
@@ -190,7 +161,6 @@ function EditableFormCell({
       case 'datepicker':
         return (
           <DatePicker
-            {...datePickerProps}
             name={dataIndex}
             title={title}
             placeholder={placeholder}
@@ -205,16 +175,15 @@ function EditableFormCell({
       case 'dateTimePicker':
         return (
           <DatePicker
-            {...datePickerProps}
-            showTime
             name={dataIndex}
             title={title}
             placeholder={placeholder}
             value={value}
             required={required}
-            format='DD/MM/YYYY HH:mm:ss'
             onChange={(_val, dateString) => onValueChange?.(dateString)}
             disabled={disabled}
+            showTime={{ defaultOpenValue: dayjs('00:00:00', 'HH:mm:ss') }}
+            format='DD/MM/YYYY - HH:mm A'
             className={cn('w-full', restProps.className)}
           />
         )
@@ -256,15 +225,14 @@ function EditableFormCell({
         <Form.Item
           name={dataIndex}
           className={cn('w-full', restProps.className)}
-          initialValue={initialValue}
+          initialValue={defaultValue}
           required={required}
           label={title}
           validateTrigger='onBlur'
-          style={{ margin: 0 }}
           rules={[
             {
               required: required,
-              message: subtitle
+              message: `Vui lòng nhập "${subtitle ?? title}"`
             }
           ]}
         >

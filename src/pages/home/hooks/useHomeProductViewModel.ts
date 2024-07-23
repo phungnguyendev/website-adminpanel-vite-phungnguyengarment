@@ -62,7 +62,7 @@ const useHomeProductViewModel = () => {
     try {
       console.log(itemNew)
       setLoading?.(true)
-      if (textValidator(itemNew.title) && textValidator(itemNew.imageName)) {
+      if (textValidator(itemNew.title) && textValidator(itemNew.imageUrl)) {
         await service.createItemSync(itemNew, setLoading, (res) => {
           if (!res?.success) throw new Error(res?.message)
           const newItem = res.data as HomeProduct

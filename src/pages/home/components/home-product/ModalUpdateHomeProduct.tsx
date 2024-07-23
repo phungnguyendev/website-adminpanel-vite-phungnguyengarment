@@ -39,7 +39,7 @@ const ModalUpdateHeroBanner: React.FC<SkyModalUpdateProps> = ({ record, onUpdate
           onUpdate(
             record.id ?? -1,
             recordUpdate.imageFile
-              ? { ...recordUpdate, imageName: recordUpdate.imageFile?.filename }
+              ? { ...recordUpdate, imageUrl: recordUpdate.imageFile?.filename }
               : { ...recordUpdate },
             setLoading
           )

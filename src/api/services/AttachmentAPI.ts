@@ -7,17 +7,11 @@ const NAMESPACE = 'attachments'
 export default {
   createItem: async (item: Prize, accessToken: string): Promise<ResponseDataType | undefined> => {
     return await client
-      .post(
-        `${NAMESPACE}`,
-        {
-          ...item
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
+      .post(`${NAMESPACE}`, item, {
+        headers: {
+          authorization: accessToken
         }
-      )
+      })
       .then((res) => {
         return responseFormatter(res)
       })
@@ -40,11 +34,11 @@ export default {
       })
   },
   getItemBy: async (
-    query: { field: string; key: React.Key },
+    query: { field: string; id: number },
     accessToken: string
   ): Promise<ResponseDataType | undefined> => {
     return client
-      .get(`${NAMESPACE}/${query.field}/${query.key}`, {
+      .get(`${NAMESPACE}/${query.field}/${query.id}`, {
         headers: {
           authorization: accessToken
         }
@@ -69,16 +63,6 @@ export default {
           }
         }
       )
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  updateList: async (itemsToUpdate: Prize[]): Promise<ResponseDataType | undefined> => {
-    return client
-      .post(`${NAMESPACE}/all`, itemsToUpdate)
       .then((res) => {
         return responseFormatter(res)
       })

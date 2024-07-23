@@ -1,404 +1,395 @@
-import { useState } from 'react'
-import { RequestBodyType, ResponseDataType, defaultRequestBody } from '~/api/client'
-import { ItemStatusType } from '~/typing'
-import { SortedDirection } from './useAPIService2'
+import { RequestBodyType, ResponseDataType } from '~/api/client'
 import useLocalStorage from './useLocalStorage'
 
-export interface ItemWithId {
+export const defaultRequestBody: RequestBodyType = {
+  filter: {
+    status: ['active'],
+    items: [-1]
+  },
+  paginator: {
+    page: 1,
+    pageSize: 10
+  },
+  search: {
+    field: 'id',
+    term: ''
+  },
+  sorting: {
+    column: 'id',
+    direction: 'asc'
+  }
+}
+
+interface RequiredDataType {
   id?: number
-  status?: ItemStatusType
-  // ... other common properties
 }
 
-export interface APIService<T extends ItemWithId> {
-  createItem: (itemNew: Partial<T>, accessToken: string) => Promise<ResponseDataType | undefined>
-  createItems?: (itemsNew: Partial<T>[], accessToken: string) => Promise<ResponseDataType | undefined>
-  createOrUpdateItem?: (id: number, item: Partial<T>, accessToken: string) => Promise<ResponseDataType | undefined>
-  createOrUpdateItemBy?: (
-    query: { field: string; key: React.Key },
-    item: Partial<T>,
-    accessToken: string
-  ) => Promise<ResponseDataType | undefined>
-  getItem: (id: number, accessToken: string) => Promise<ResponseDataType | undefined>
-  getItemBy?: (query: { field: string; key: React.Key }, accessToken: string) => Promise<ResponseDataType | undefined>
-  getItems: (params: RequestBodyType, accessToken: string) => Promise<ResponseDataType | undefined>
-  updateItem: (id: number, itemToUpdate: Partial<T>, accessToken: string) => Promise<ResponseDataType | undefined>
-  updateItemsBy?: (
-    query: { field: string; key: React.Key },
-    recordsToUpdate: Partial<T>[],
-    accessToken: string
-  ) => Promise<ResponseDataType | undefined>
+export type SortedDirection = 'asc' | 'desc'
+
+export interface APIService<T extends RequiredDataType> {
+  createItem: (newItem: T, accessToken: string) => Promise<ResponseDataType>
+  getItemByPk: (id: number, accessToken: string) => Promise<ResponseDataType>
+  getItemBy?: (query: { field: string; id: number }, accessToken: string) => Promise<ResponseDataType>
+  getItems: (params: RequestBodyType, accessToken: string) => Promise<ResponseDataType>
+  updateItemByPk: (id: number, itemToUpdate: T, accessToken: string) => Promise<ResponseDataType>
   updateItemBy?: (
-    query: {
-      field: string
-      key: React.Key
-    },
-    itemToUpdate: Partial<T>,
+    query: { field: string; id: number },
+    itemToUpdate: T,
     accessToken: string
-  ) => Promise<ResponseDataType | undefined>
-  deleteItemByPk: (id: number, accessToken: string) => Promise<ResponseDataType | undefined>
-  deleteItemBy?: (
-    query: { field: string; key: React.Key },
+  ) => Promise<ResponseDataType>
+  updateItemsBy?: (
+    query: { field: string; id: number },
+    itemsToUpdate: T[],
     accessToken: string
-  ) => Promise<ResponseDataType | undefined>
+  ) => Promise<ResponseDataType>
+  updateItems?: (itemsToUpdate: T[], accessToken: string) => Promise<ResponseDataType>
+  deleteItemByPk: (id: number, accessToken: string) => Promise<ResponseDataType>
+  deleteItemBy?: (query: { field: string; id: number }, accessToken: string) => Promise<ResponseDataType>
 }
 
-export default function useAPIService<T extends { id?: number }>(apiService: APIService<ItemWithId>) {
-  const [accessTokenStored] = useLocalStorage<string>('accessToken', '')
-  const [metaData, setMetaData] = useState<ResponseDataType | undefined>(undefined)
-  const [page, setPage] = useState<number>(1)
+export default function useAPIService<T extends RequiredDataType>(apiService: APIService<T>) {
+  const [tokenStored] = useLocalStorage<string>('accessToken', '')
+  const accessTokenStored = tokenStored ?? ''
 
-  const createItem = async (
+  const createItem = async (itemNew: T, setLoading?: (enable: boolean) => void): Promise<ResponseDataType> => {
+    try {
+      setLoading?.(true)
+      return await apiService.createItem(itemNew, accessTokenStored)
+    } catch (err) {
+      throw err
+    } finally {
+      setLoading?.(false)
+    }
+  }
+
+  const createItemSync = async (
     itemNew: T,
     setLoading?: (enable: boolean) => void,
-    onDataSuccess?: (meta: ResponseDataType | undefined, message?: string) => void
+    onDataSuccess?: (res: ResponseDataType) => void
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.createItem(itemNew, accessTokenStored ?? '')
-      if (meta?.success) {
-        onDataSuccess?.(meta, 'Created!')
-      } else {
-        onDataSuccess?.(undefined, 'Failed!')
-      }
-      setMetaData(meta)
+      await apiService.createItem(itemNew, accessTokenStored).then((res) => {
+        if (!res?.success) throw new Error(`${res?.message}`)
+        onDataSuccess?.(res)
+      })
     } catch (err) {
-      console.error(err)
-      onDataSuccess?.(undefined, 'Error!')
+      throw err
     } finally {
       setLoading?.(false)
     }
   }
 
-  const createItems = async (
-    itemsNew: T[],
-    setLoading?: (enable: boolean) => void,
-    onDataSuccess?: (meta: ResponseDataType | undefined, message?: string) => void
-  ) => {
+  const getItemByPk = async (id: number, setLoading?: (enable: boolean) => void): Promise<ResponseDataType> => {
     try {
       setLoading?.(true)
-      const meta = await apiService.createItems?.(itemsNew, accessTokenStored ?? '')
-      if (meta?.success) {
-        onDataSuccess?.(meta, 'Created!')
-      } else {
-        onDataSuccess?.(undefined, 'Failed!')
-      }
-      setMetaData(meta)
+      return await apiService.getItemByPk(id, accessTokenStored)
     } catch (err) {
-      console.error(err)
-      onDataSuccess?.(undefined, 'Error!')
+      throw err
     } finally {
       setLoading?.(false)
     }
   }
 
-  const getItem = async (
+  const getItemByPkSync = async (
     id: number,
     setLoading?: (enable: boolean) => void,
-    onDataSuccess?: (data: ResponseDataType | undefined, message?: string) => void
+    onDataSuccess?: (res: ResponseDataType) => void
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.getItem(id, accessTokenStored ?? '')
-      if (meta?.success) {
-        onDataSuccess?.(meta, 'Success!')
-      } else {
-        onDataSuccess?.(undefined, 'Failed!')
-      }
-      setMetaData(meta)
+      const res = await apiService.getItemByPk(id, accessTokenStored)
+      if (!res?.success) throw new Error(`${res?.message}`)
+      onDataSuccess?.(res)
     } catch (err) {
-      console.error(err)
-      onDataSuccess?.(undefined, 'Error!')
+      throw err
     } finally {
       setLoading?.(false)
     }
   }
 
   const getItemBy = async (
-    query: {
-      field: string
-      key: React.Key
-    },
-    setLoading?: (enable: boolean) => void,
-    onDataSuccess?: (data: ResponseDataType | undefined, message?: string) => void
-  ) => {
+    query: { field: string; id: number },
+    setLoading?: (enable: boolean) => void
+  ): Promise<ResponseDataType> => {
     try {
       setLoading?.(true)
-      const meta = await apiService.getItemBy?.(query, accessTokenStored ?? '')
-      if (meta?.success) {
-        onDataSuccess?.(meta, 'Success!')
-      } else {
-        onDataSuccess?.(undefined, 'Failed!')
-      }
-      setMetaData(meta)
+      const res = await apiService.getItemBy?.(query, accessTokenStored)
+      if (!res?.success) throw new Error(`${res?.message}`)
+      return res
     } catch (err) {
-      console.error(err)
-      onDataSuccess?.(undefined, 'Error!')
+      throw err
     } finally {
       setLoading?.(false)
     }
   }
 
-  const getListItems = async (
+  const getItemBySync = async (
+    query: { field: string; id: number },
+    setLoading?: (enable: boolean) => void,
+    onDataSuccess?: (res: ResponseDataType) => void
+  ) => {
+    try {
+      setLoading?.(true)
+      const res = await apiService.getItemBy?.(query, accessTokenStored)
+      if (!res?.success) throw new Error(`${res?.message}`)
+      onDataSuccess?.(res)
+    } catch (err) {
+      throw err
+    } finally {
+      setLoading?.(false)
+    }
+  }
+
+  const getItems = async (
     params: RequestBodyType,
-    setLoading?: (enable: boolean) => void,
-    onDataSuccess?: (data: ResponseDataType | undefined, message?: string) => void
-  ) => {
+    setLoading?: (enable: boolean) => void
+  ): Promise<ResponseDataType> => {
     try {
       setLoading?.(true)
-      const meta = await apiService.getItems({ ...defaultRequestBody, ...params }, accessTokenStored ?? '')
-      if (meta?.success) {
-        onDataSuccess?.(meta, 'Success!')
-      } else {
-        onDataSuccess?.(undefined, 'Failed!')
-      }
-      setMetaData(meta)
-    } catch (err) {
-      console.error(err)
-      onDataSuccess?.(undefined, 'Error!')
-    } finally {
-      setLoading?.(false)
-    }
-  }
-
-  const sortedListItems = async (
-    direction: SortedDirection,
-    setLoading?: (enable: boolean) => void,
-    onDataSuccess?: (data: ResponseDataType | undefined, message?: string) => void,
-    search?: {
-      field: string
-      term: string
-    }
-  ) => {
-    try {
-      const body: RequestBodyType = {
-        ...defaultRequestBody,
-        paginator: {
-          page: page,
-          pageSize: 5
-        },
-        sorting: {
-          column: 'id',
-          direction: direction
-        },
-        search: search
-      }
-      await getListItems(body, setLoading, onDataSuccess)
+      const res = await apiService.getItems({ ...defaultRequestBody, ...params }, accessTokenStored)
+      return res
     } catch (err) {
       console.log(err)
+      throw err
     } finally {
       setLoading?.(false)
     }
   }
 
-  const pageChange = async (
-    _page: number,
+  const getItemsSync = async (
+    params: RequestBodyType,
     setLoading?: (enable: boolean) => void,
-    onDataSuccess?: (data: ResponseDataType | undefined, message?: string) => void,
-    search?: {
-      field: string
-      term: string
-    }
+    onDataSuccess?: (res: ResponseDataType) => void
   ) => {
     try {
-      setPage(_page)
-      const body: RequestBodyType = {
-        ...defaultRequestBody,
-        paginator: {
-          page: _page,
-          pageSize: 5
-        },
-        sorting: { ...defaultRequestBody.sorting, column: 'orderNumber', direction: 'asc' },
-        search: search
-      }
-      await getListItems(body, setLoading, onDataSuccess)
+      setLoading?.(true)
+      const res = await apiService.getItems({ ...defaultRequestBody, ...params }, accessTokenStored)
+      if (!res?.message) throw new Error(`${res}`)
+      onDataSuccess?.(res)
     } catch (err) {
-      console.error(err)
+      throw err
     } finally {
       setLoading?.(false)
     }
   }
 
-  const updateItem = async (
+  const updateItemByPk = async (
+    id: number,
+    itemToUpdate: T,
+    setLoading?: (enable: boolean) => void
+  ): Promise<ResponseDataType> => {
+    try {
+      setLoading?.(true)
+      const meta = await apiService.updateItemByPk(id, itemToUpdate, accessTokenStored)
+      return meta
+    } catch (err) {
+      throw err
+    } finally {
+      setLoading?.(false)
+    }
+  }
+
+  const updateItemByPkSync = async (
     id: number,
     itemToUpdate: T,
     setLoading?: (enable: boolean) => void,
-    onDataSuccess?: (data: ResponseDataType | undefined, message?: string) => void
+    onDataSuccess?: (data: ResponseDataType) => void
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.updateItem(id, itemToUpdate, accessTokenStored ?? '')
-      if (meta?.success) {
-        onDataSuccess?.(meta, 'Updated!')
-      } else {
-        onDataSuccess?.(undefined, 'Failed!')
-      }
-      setMetaData(meta)
+      const res = await apiService.updateItemByPk(id, itemToUpdate, accessTokenStored)
+      if (!res?.success) throw new Error(`${res?.message}`)
+      onDataSuccess?.(res)
     } catch (err) {
-      console.error(err)
-      onDataSuccess?.(undefined, 'Error!')
-    } finally {
-      setLoading?.(false)
-    }
-  }
-
-  const updateItemsBy = async (
-    query: {
-      field: string
-      key: React.Key
-    },
-    recordsToUpdate: T[],
-    setLoading?: (enable: boolean) => void,
-    onDataSuccess?: (data: ResponseDataType | undefined, message?: string) => void
-  ) => {
-    try {
-      setLoading?.(true)
-      const meta = await apiService.updateItemsBy?.(query, recordsToUpdate, accessTokenStored ?? '')
-      if (meta?.success) {
-        onDataSuccess?.(meta, 'Updated!')
-      } else {
-        onDataSuccess?.(undefined, 'Failed!')
-      }
-      setMetaData(meta)
-    } catch (err) {
-      console.error(err)
-      onDataSuccess?.(undefined, 'Error!')
+      throw err
     } finally {
       setLoading?.(false)
     }
   }
 
   const updateItemBy = async (
-    query: {
-      field: string
-      key: React.Key
-    },
+    query: { field: string; id: number },
     itemToUpdate: T,
-    setLoading?: (enable: boolean) => void,
-    onDataSuccess?: (data: ResponseDataType | undefined, message?: string) => void
-  ) => {
+    setLoading?: (enable: boolean) => void
+  ): Promise<ResponseDataType> => {
     try {
       setLoading?.(true)
-      const meta = await apiService.updateItemBy?.(query, itemToUpdate, accessTokenStored ?? '')
-      if (meta?.success) {
-        onDataSuccess?.(meta, 'Updated!')
-      } else {
-        onDataSuccess?.(undefined, 'Failed!')
-      }
-      setMetaData(meta)
+      const res = await apiService.updateItemBy?.(query, itemToUpdate, accessTokenStored)
+      if (!res?.success) throw new Error(`${res?.message}`)
+      return res
     } catch (err) {
-      console.error(err)
-      onDataSuccess?.(undefined, 'Error!')
+      throw err
     } finally {
       setLoading?.(false)
     }
   }
 
-  const deleteItemByPk = async (
-    id: number,
+  const updateItemBySync = async (
+    query: { field: string; id: number },
+    itemToUpdate: T,
     setLoading?: (enable: boolean) => void,
-    onDataSuccess?: (data: ResponseDataType | undefined, message?: string) => void
+    onDataSuccess?: (data: ResponseDataType) => void
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.deleteItemByPk(id, accessTokenStored ?? '')
-      if (meta?.success) {
-        onDataSuccess?.(meta, 'Deleted!')
-      } else {
-        onDataSuccess?.(undefined, 'Failed!')
-      }
-      setMetaData(meta)
+      const res = await apiService.updateItemBy?.(query, itemToUpdate, accessTokenStored)
+      if (!res?.success) throw new Error(`${res?.message}`)
+      onDataSuccess?.(res)
     } catch (err) {
-      console.error(err)
-      onDataSuccess?.(undefined, 'Error!')
+      throw err
+    } finally {
+      setLoading?.(false)
+    }
+  }
+
+  const updateItemsBy = async (
+    query: { field: string; id: number },
+    itemsToUpdate: T[],
+    setLoading?: (enable: boolean) => void
+  ): Promise<ResponseDataType> => {
+    try {
+      setLoading?.(true)
+      const res = await apiService.updateItemsBy?.(query, itemsToUpdate, accessTokenStored)
+      if (!res?.success) throw new Error(`${res?.message}`)
+      return res
+    } catch (err) {
+      throw err
+    } finally {
+      setLoading?.(false)
+    }
+  }
+
+  const updateItemsBySync = async (
+    query: { field: string; id: number },
+    itemsToUpdate: T[],
+    setLoading?: (enable: boolean) => void,
+    onDataSuccess?: (data: ResponseDataType) => void
+  ) => {
+    try {
+      setLoading?.(true)
+      const res = await apiService.updateItemsBy?.(query, itemsToUpdate, accessTokenStored)
+      if (!res?.success) throw new Error(`${res?.message}`)
+      onDataSuccess?.(res)
+    } catch (err) {
+      throw err
+    } finally {
+      setLoading?.(false)
+    }
+  }
+
+  const updateItems = async (itemsToUpdate: T[], setLoading?: (enable: boolean) => void) => {
+    try {
+      setLoading?.(true)
+      const res = await apiService.updateItems?.(itemsToUpdate, accessTokenStored)
+      if (!res?.success) throw new Error(`${res?.message}`)
+      return res
+    } catch (err) {
+      throw err
+    } finally {
+      setLoading?.(false)
+    }
+  }
+
+  const updateItemsSync = async (
+    itemsToUpdate: T[],
+    setLoading?: (enable: boolean) => void,
+    onDataSuccess?: (data: ResponseDataType) => void
+  ) => {
+    try {
+      setLoading?.(true)
+      const res = await apiService.updateItems?.(itemsToUpdate, accessTokenStored)
+      if (!res?.success) throw new Error(`${res?.message}`)
+      onDataSuccess?.(res)
+    } catch (err) {
+      throw err
+    } finally {
+      setLoading?.(false)
+    }
+  }
+
+  const deleteItem = async (id: number, setLoading?: (enable: boolean) => void): Promise<ResponseDataType> => {
+    try {
+      setLoading?.(true)
+      const res = await apiService.deleteItemByPk(id, accessTokenStored)
+      return res
+    } catch (err) {
+      throw err
+    } finally {
+      setLoading?.(false)
+    }
+  }
+
+  const deleteItemSync = async (
+    id: number,
+    setLoading?: (enable: boolean) => void,
+    onDataSuccess?: (data: ResponseDataType) => void
+  ) => {
+    try {
+      setLoading?.(true)
+      const res = await apiService.deleteItemByPk(id, accessTokenStored)
+      if (!res?.success) throw new Error(`${res?.message}`)
+      onDataSuccess?.(res)
+    } catch (err) {
+      throw err
     } finally {
       setLoading?.(false)
     }
   }
 
   const deleteItemBy = async (
-    query: {
-      field: string
-      key: React.Key
-    },
-    setLoading?: (enable: boolean) => void,
-    onDataSuccess?: (data: ResponseDataType | undefined, message?: string) => void
-  ) => {
+    query: { field: string; id: number },
+    setLoading?: (enable: boolean) => void
+  ): Promise<ResponseDataType> => {
     try {
       setLoading?.(true)
-      const meta = await apiService.deleteItemBy?.(query, accessTokenStored ?? '')
-      if (meta?.success) {
-        onDataSuccess?.(meta, 'Deleted!')
-      } else {
-        onDataSuccess?.(undefined, 'Failed!')
-      }
-      setMetaData(meta)
+      const res = await apiService.deleteItemBy?.(query, accessTokenStored)
+      if (!res?.success) throw new Error(`${res?.message}`)
+      return res
     } catch (err) {
-      console.error(err)
-      onDataSuccess?.(undefined, 'Error!')
+      throw err
     } finally {
       setLoading?.(false)
     }
   }
 
-  const createOrUpdateItem = async (
-    id: number,
-    item: Partial<T>,
+  const deleteItemBySync = async (
+    query: { field: string; id: number },
     setLoading?: (enable: boolean) => void,
-    onDataSuccess?: (data: ResponseDataType | undefined, message?: string) => void
+    onDataSuccess?: (data: ResponseDataType) => void
   ) => {
     try {
       setLoading?.(true)
-      const meta = await apiService.createOrUpdateItem?.(id, item, accessTokenStored ?? '')
-      onDataSuccess?.(meta, meta?.message)
-      setMetaData(meta)
+      const res = await apiService.deleteItemBy?.(query, accessTokenStored)
+      if (!res?.success) throw new Error(`${res?.message}`)
+      onDataSuccess?.(res)
     } catch (err) {
-      console.error(err)
-      onDataSuccess?.(undefined, 'Error!')
-    } finally {
-      setLoading?.(false)
-    }
-  }
-
-  const createOrUpdateItemBy = async (
-    query: {
-      field: string
-      key: React.Key
-    },
-    item: Partial<T>,
-    setLoading?: (enable: boolean) => void,
-    onDataSuccess?: (data: ResponseDataType | undefined, message?: string) => void
-  ) => {
-    try {
-      setLoading?.(true)
-      const meta = await apiService.createOrUpdateItemBy?.(query, item, accessTokenStored ?? '')
-      onDataSuccess?.(meta, meta?.message)
-      setMetaData(meta)
-    } catch (err) {
-      console.error(err)
-      onDataSuccess?.(undefined, 'Error!')
+      throw err
     } finally {
       setLoading?.(false)
     }
   }
 
   return {
-    metaData,
-    page,
-    setPage,
     createItem,
-    createItems,
-    getItem,
+    createItemSync,
+    getItemByPk,
+    getItemByPkSync,
     getItemBy,
-    getListItems,
-    updateItem,
+    getItemBySync,
+    getItems,
+    getItemsSync,
+    updateItemByPk,
+    updateItemByPkSync,
     updateItemBy,
+    updateItemBySync,
     updateItemsBy,
-    deleteItemByPk,
+    updateItemsBySync,
+    updateItems,
+    updateItemsSync,
+    deleteItem,
+    deleteItemSync,
     deleteItemBy,
-    sortedListItems,
-    pageChange,
-    createOrUpdateItemBy,
-    createOrUpdateItem
+    deleteItemBySync
   }
 }

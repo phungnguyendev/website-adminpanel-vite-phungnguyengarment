@@ -4,6 +4,11 @@ export interface BannerTableDataType extends HeroBanner {
   key: string
 }
 
+export interface NewRecordHeroBanner {
+  title?: string
+  imageUrl?: string
+}
+
 export interface HomeProductTableDataType extends HomeProduct {
   key: string
 }

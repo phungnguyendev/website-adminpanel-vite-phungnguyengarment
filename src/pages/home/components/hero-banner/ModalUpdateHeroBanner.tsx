@@ -1,74 +1,46 @@
-import { UploadFile } from 'antd'
-import { memo, useEffect, useState } from 'react'
+import { App, Form } from 'antd'
+import { memo } from 'react'
 import SkyModal, { SkyModalProps } from '~/components/sky-ui/SkyModal'
-import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
-import { File, HeroBanner } from '~/typing'
-import { textValidatorChange, textValidatorInit } from '~/utils/helpers'
-
-interface NewModel {
-  title?: string | null
-  imageFile?: File | null
-}
+import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
+import { HeroBanner } from '~/typing'
+import { textValidatorInit } from '~/utils/helpers'
 
 interface SkyModalUpdateProps extends SkyModalProps {
   record: HeroBanner
-  onUpdate: (id: number, itemUpdate: HeroBanner, setLoading?: (enable: boolean) => void) => void
+  onUpdate: (data: any) => void
 }
 
 const ModalUpdateHeroBanner: React.FC<SkyModalUpdateProps> = ({ record, onUpdate, ...props }) => {
-  const [, setLoading] = useState<boolean>(false)
-  const [recordUpdate, setRecordUpdate] = useState<NewModel>({})
+  const { message } = App.useApp()
+  const [form] = Form.useForm()
 
-  console.log('Modal update..')
-
-  useEffect(() => {
-    if (record) loadData()
-  }, [record])
-
-  const loadData = () => {
-    setRecordUpdate({ title: record.title })
+  async function handleOk() {
+    await form
+      .validateFields()
+      .then((values) => {
+        onUpdate(values)
+      })
+      .catch(() => {
+        message.error('Error validate form!')
+      })
   }
 
   return (
     <>
-      <SkyModal
-        {...props}
-        okText='Save'
-        title={`Update #${record.id}`}
-        onOk={() =>
-          onUpdate(
-            record.id ?? -1,
-            recordUpdate.imageFile
-              ? { ...recordUpdate, imageName: recordUpdate.imageFile?.filename }
-              : { ...recordUpdate },
-            setLoading
-          )
-        }
-      >
-        <EditableStateCell
+      <SkyModal {...props} okText='Save' title={`Update #${record.id}`} onOk={handleOk}>
+        <EditableFormCell
           isEditing
-          label='Title'
+          title='Title'
+          dataIndex='title'
           inputType='text'
           defaultValue={textValidatorInit(record.title)}
-          value={recordUpdate.title}
-          onValueChange={(val: string) => setRecordUpdate({ ...recordUpdate, title: textValidatorChange(val) })}
         />
-        <EditableStateCell
+        <EditableFormCell
           isEditing
-          label='Images'
-          inputType='upload'
-          uploadProps={{
-            name: 'images',
-            uploadType: 'images',
-            maxCount: 1
-          }}
-          value={recordUpdate.imageFile}
-          onValueChange={(fileList: UploadFile[]) => {
-            setRecordUpdate({
-              ...recordUpdate,
-              imageFile: (fileList[0].response.data as File[])[0]
-            })
-          }}
+          title='Images'
+          dataIndex='imageUrl'
+          inputType='text'
+          defaultValue={textValidatorInit(record.imageUrl)}
         />
       </SkyModal>
     </>
