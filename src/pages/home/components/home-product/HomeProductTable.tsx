@@ -1,29 +1,19 @@
-import { UploadFile } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
+import { Flex, Typography } from 'antd'
+import type { ColumnsType, ColumnType } from 'antd/es/table'
 import BaseLayout from '~/components/layout/BaseLayout'
 import LazyImage from '~/components/sky-ui/LazyImage'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
 import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
+import SkyTableWrapperLayout from '~/components/sky-ui/SkyTable/SkyTableWrapperLayout'
 import { imageValidatorDisplay, textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
 import useHomeProductViewModel from '../../hooks/useHomeProductViewModel'
 import { HomeProductTableDataType } from '../../type'
 import ModalAddNewHomeProduct from './ModalAddNewHomeProduct'
-import ModalUpdateHomeProduct from './ModalUpdateHomeProduct'
 
 const HomeProductTable: React.FC = () => {
-  const { table, state, action } = useHomeProductViewModel()
-  const {
-    newRecord,
-    setNewRecord,
-    recorded,
-    setRecorded,
-    openModalCreate,
-    setOpenModalCreate,
-    openModalUpdate,
-    setOpenModalUpdate
-  } = state
-  const { handleCreate, handleUpdate, handleDelete, handlePageChange, handleDraggableChange } = action
+  const viewModel = useHomeProductViewModel()
 
   const columns = {
     id: (record: HomeProductTableDataType) => {
@@ -32,16 +22,14 @@ const HomeProductTable: React.FC = () => {
     image: (record: HomeProductTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key)}
-          inputType='upload'
-          uploadProps={{
-            multiple: true
-          }}
-          // defaultValue={record.imageUrl}
-          value={newRecord.images}
-          onValueChange={(info: UploadFile) => {
-            console.log(info)
-            // setNewRecord({ ...newRecord, images: ([] as UploadFile[]).push(info) })
+          isEditing={viewModel.table.isEditing(record.key)}
+          inputType='textarea'
+          defaultValue={record.imageUrl}
+          value={viewModel.state.newRecord?.imageUrl}
+          onValueChange={(value: string) => {
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, imageUrl: textValidatorChange(value) }
+            })
           }}
         >
           <LazyImage alt='banner-img' src={imageValidatorDisplay(record.imageUrl)} height={120} width={120} />
@@ -51,16 +39,50 @@ const HomeProductTable: React.FC = () => {
     title: (record: HomeProductTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
+          isEditing={viewModel.table.isEditing(record.key!)}
           inputType='text'
           defaultValue={textValidatorInit(record.title)}
-          value={newRecord.title}
-          onValueChange={(val: string) => setNewRecord({ ...newRecord, title: textValidatorChange(val) })}
+          value={viewModel.state.newRecord?.title}
+          onValueChange={(val: string) =>
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, title: textValidatorChange(val) }
+            })
+          }
         >
-          <SkyTableTypography placeholder='asd' status={'active'}>
-            {textValidatorDisplay(record.title)}
-          </SkyTableTypography>
+          <SkyTableTypography>{textValidatorDisplay(record.title)}</SkyTableTypography>
         </EditableStateCell>
+      )
+    },
+    actionCol: (record: HomeProductTableDataType) => {
+      return (
+        <SkyTableActionRow
+          record={record}
+          editingKey={viewModel.table.editingKey}
+          deletingKey={viewModel.table.deletingKey}
+          buttonEdit={{
+            onClick: () => {
+              viewModel.state.setNewRecord({
+                title: record.title,
+                imageUrl: record.imageUrl
+              })
+              viewModel.table.handleStartEditing(record.key)
+            }
+          }}
+          buttonSave={{
+            // Save
+            onClick: () => viewModel.action.handleUpdate(record)
+          }}
+          // Start delete
+          buttonDelete={{
+            onClick: () => viewModel.table.handleStartDeleting(record.key)
+          }}
+          // Cancel editing
+          onConfirmCancelEditing={() => viewModel.table.handleCancelEditing()}
+          // Cancel delete
+          onConfirmCancelDeleting={() => viewModel.table.handleCancelDeleting()}
+          // Delete (update status record => 'deleted')
+          onConfirmDelete={() => viewModel.action.handleDelete(record)}
+        />
       )
     }
   }
@@ -81,7 +103,7 @@ const HomeProductTable: React.FC = () => {
     {
       title: 'Image',
       dataIndex: 'imageUrl',
-      width: '10%',
+      width: '20%',
       responsive: ['sm'],
       render: (_value: any, record: HomeProductTableDataType) => {
         return columns.image(record)
@@ -98,66 +120,55 @@ const HomeProductTable: React.FC = () => {
     }
   ]
 
+  const actionCol: ColumnType<HomeProductTableDataType> = {
+    title: 'Operation',
+    width: '0.001%',
+    render: (_value: any, record: HomeProductTableDataType) => {
+      return columns.actionCol(record)
+    }
+  }
+
   return (
     <>
-      <BaseLayout
-        title='Hero banners'
-        titleProps={{
-          level: 5,
-          type: 'secondary'
-        }}
-        onAddNewClick={{
-          onClick: () => setOpenModalCreate(true),
-          isShow: true
-        }}
-      >
-        <SkyTable
-          {...table}
-          onDragEnd={handleDraggableChange}
-          columns={tableColumns}
-          onPageChange={handlePageChange}
-          isShowDeleted={table.showDeleted}
-          actionProps={{
-            onEdit: {
-              onClick: (_e, record) => {
-                setRecorded({ id: record?.id ?? -1, ...record })
-                // table.handleStartEditing(record!.key!)
-                setOpenModalUpdate((prev) => !prev)
-              },
-              isShow: true,
-              disabled: openModalUpdate
-            },
-            // onSave: {
-            //   onClick: (_e, record) => onUpdate(record!)
-            // },
-            onDelete: {
-              onClick: (_e, record) => table.handleStartDeleting(record!.key!),
-              isShow: !table.showDeleted
-            },
-            onRestore: {
-              onClick: (_e, record) => table.handleStartRestore(record!.key!),
-              isShow: false
-            },
-            onConfirmCancelEditing: () => {
-              table.handleCancelEditing()
-            },
-            onConfirmCancelDeleting: () => table.handleCancelDeleting(),
-            onConfirmDelete: (record) => handleDelete(record),
-            onConfirmCancelRestore: () => table.handleCancelRestore(),
-            isShow: true
+      <BaseLayout>
+        <SkyTableWrapperLayout
+          before={
+            <>
+              <Flex className='w-full'>
+                <Typography.Text type='secondary' className='text-xl font-semibold'>
+                  Home products ({viewModel.table.dataSource.length})
+                </Typography.Text>
+              </Flex>
+            </>
+          }
+          addNewProps={{
+            onClick: () => viewModel.state.setOpenModalCreate(true)
           }}
-        />
+        >
+          <SkyTable
+            loading={viewModel.table.loading}
+            tableColumns={{
+              columns: tableColumns,
+              actionColumn: actionCol
+              // showAction: isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)
+            }}
+            dataSource={viewModel.table.dataSource}
+            setDataSource={viewModel.table.setDataSource}
+            pagination={{
+              pageSize: viewModel.table.paginator.pageSize,
+              current: viewModel.table.paginator.page,
+              onChange: viewModel.action.handlePageChange
+            }}
+            onDragEnd={viewModel.action.handleDraggableEnd}
+          />
+        </SkyTableWrapperLayout>
       </BaseLayout>
 
-      {openModalCreate && (
-        <ModalAddNewHomeProduct open={openModalCreate} setOpenModal={setOpenModalCreate} onCreate={handleCreate} />
-      )}
-      {openModalUpdate && (
-        <ModalUpdateHomeProduct
-          record={recorded}
-          open={openModalUpdate}
-          setOpenModal={setOpenModalUpdate}
-          onUpdate={handleUpdate}
+      {viewModel.state.openModalCreate && (
+        <ModalAddNewHomeProduct
+          open={viewModel.state.openModalCreate}
+          setOpenModal={viewModel.state.setOpenModalCreate}
+          onCreate={viewModel.action.handleCreate}
         />
       )}
     </>

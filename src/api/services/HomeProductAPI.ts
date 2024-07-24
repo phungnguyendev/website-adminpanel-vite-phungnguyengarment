@@ -5,9 +5,9 @@ import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatt
 const NAMESPACE = 'home-products'
 
 export default {
-  createItem: async (itemNew: HomeProduct, accessToken: string): Promise<ResponseDataType | undefined> => {
+  createItem: async (newItem: HomeProduct, accessToken: string): Promise<ResponseDataType> => {
     return await client
-      .post(`${NAMESPACE}`, itemNew, {
+      .post(`${NAMESPACE}`, newItem, {
         headers: {
           authorization: accessToken
         }
@@ -19,7 +19,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItem: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
+  getItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType> => {
     return client
       .get(`${NAMESPACE}/${id}`, {
         headers: {
@@ -33,9 +33,9 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItems: async (params: RequestBodyType, accessToken: string): Promise<ResponseDataType | undefined> => {
+  getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType> => {
     return await client
-      .post(`${NAMESPACE}/find`, params, {
+      .post(`${NAMESPACE}/find`, bodyRequest, {
         headers: {
           authorization: accessToken
         }
@@ -47,11 +47,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItem: async (
-    id: number,
-    itemToUpdate: HomeProduct,
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
+  updateItemByPk: async (id: number, itemToUpdate: HomeProduct, accessToken: string): Promise<ResponseDataType> => {
     return client
       .patch(`${NAMESPACE}/${id}`, itemToUpdate, {
         headers: {
@@ -65,7 +61,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItems: async (itemsToUpdate: HomeProduct[], accessToken: string): Promise<ResponseDataType | undefined> => {
+  updateItems: async (itemsToUpdate: HomeProduct[], accessToken: string): Promise<ResponseDataType> => {
     return client
       .put(`${NAMESPACE}`, itemsToUpdate, {
         headers: {
@@ -79,7 +75,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  deleteItem: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
+  deleteItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType> => {
     return client
       .delete(`${NAMESPACE}/${id}`, {
         headers: {

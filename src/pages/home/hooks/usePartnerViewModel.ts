@@ -1,22 +1,22 @@
 import { App as AntApp } from 'antd'
 import { useEffect, useState } from 'react'
-import HeroBannerAPI from '~/api/services/HeroBannerAPI'
+import PartnerAPI from '~/api/services/PartnerAPI'
 import useTable from '~/components/hooks/useTable'
 import define from '~/constants/define'
 import useAPIService from '~/hooks/useAPIService'
-import { HeroBanner } from '~/typing'
-import { BannerTableDataType, NewRecordHeroBanner } from '../type'
+import { Partner } from '~/typing'
+import { NewRecordPartner, PartnerTableDataType } from '../type'
 
-const useBannerViewModel = () => {
+const usePartnerViewModel = () => {
   const { message } = AntApp.useApp()
-  const table = useTable<BannerTableDataType>([])
+  const table = useTable<PartnerTableDataType>([])
 
-  const service = useAPIService<HeroBanner>(HeroBannerAPI)
+  const service = useAPIService<Partner>(PartnerAPI)
 
   const [openModalCreate, setOpenModalCreate] = useState<boolean>(false)
-  const [recorded, setRecorded] = useState<HeroBanner>({ id: 0 })
-  const [newRecord, setNewRecord] = useState<NewRecordHeroBanner | null>(null)
-  const [branches, setHeroBanners] = useState<HeroBanner[]>([])
+  const [recorded, setRecorded] = useState<Partner>({ id: 0 })
+  const [newRecord, setNewRecord] = useState<NewRecordPartner | null>(null)
+  const [branches, setPartners] = useState<Partner[]>([])
 
   useEffect(() => {
     initialize()
@@ -35,8 +35,8 @@ const useBannerViewModel = () => {
         table.setLoading,
         (res) => {
           if (!res?.success) throw new Error(`${res?.message}`)
-          const data = res.data as HeroBanner[]
-          setHeroBanners(data)
+          const data = res.data as Partner[]
+          setPartners(data)
           const newDataSource = data.map((item) => {
             return { ...item, key: `${item.id}` }
           })
@@ -50,11 +50,11 @@ const useBannerViewModel = () => {
     }
   }
 
-  const handleCreate = async (itemNew: NewRecordHeroBanner) => {
+  const handleCreate = async (itemNew: NewRecordPartner) => {
     try {
-      await service.createItemSync({ ...itemNew } as HeroBanner, table.setLoading, (res) => {
+      await service.createItemSync({ ...itemNew } as Partner, table.setLoading, (res) => {
         if (!res.success) throw new Error(define('create_failed'))
-        const newItem = res.data as HeroBanner
+        const newItem = res.data as Partner
         table.handleAddNew({ key: `${newItem.id}`, ...newItem })
       })
       message.success(define('created_success'))
@@ -66,12 +66,12 @@ const useBannerViewModel = () => {
     }
   }
 
-  const handleUpdate = async (record: BannerTableDataType) => {
+  const handleUpdate = async (record: PartnerTableDataType) => {
     try {
       table.setLoading?.(true)
       await service.updateItemByPkSync(record.id!, { ...newRecord }, table.setLoading, (res) => {
         if (!res.success) throw new Error(define('update_failed'))
-        const updatedItem = res.data as HeroBanner
+        const updatedItem = res.data as Partner
         table.handleUpdate(record.key, { ...updatedItem, key: record.key })
       })
       message.success(define('updated_success'))
@@ -83,7 +83,7 @@ const useBannerViewModel = () => {
     }
   }
 
-  const handleDelete = async (record: BannerTableDataType) => {
+  const handleDelete = async (record: PartnerTableDataType) => {
     try {
       table.setLoading?.(true)
       await service.deleteItemSync(record.id!, table.setLoading, (res) => {
@@ -105,7 +105,7 @@ const useBannerViewModel = () => {
     table.setPaginator({ page, pageSize })
   }
 
-  const handleDraggableEnd = async (newArr: BannerTableDataType[]) => {
+  const handleDraggableEnd = async (newArr: PartnerTableDataType[]) => {
     try {
       await service.updateItemsSync(
         newArr.map((item, index) => {
@@ -146,4 +146,4 @@ const useBannerViewModel = () => {
   }
 }
 
-export default useBannerViewModel
+export default usePartnerViewModel

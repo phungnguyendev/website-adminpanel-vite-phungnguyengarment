@@ -1,167 +1,144 @@
-import { DragEndEvent } from '@dnd-kit/core'
-import { App as AntApp, UploadFile } from 'antd'
-import { useCallback, useEffect, useState } from 'react'
+import { App as AntApp } from 'antd'
+import { useEffect, useState } from 'react'
 import HomeProductAPI from '~/api/services/HomeProductAPI'
 import useTable from '~/components/hooks/useTable'
-import useAPIService2 from '~/hooks/useAPIService2'
+import define from '~/constants/define'
+import useAPIService from '~/hooks/useAPIService'
 import { HomeProduct } from '~/typing'
-import { textValidator } from '~/utils/helpers'
-import { HomeProductTableDataType } from '../type'
-
-interface NewRecord {
-  title?: string | null
-  images?: UploadFile[] | null
-}
+import { HomeProductTableDataType, NewRecordHomeProduct } from '../type'
 
 const useHomeProductViewModel = () => {
   const { message } = AntApp.useApp()
   const table = useTable<HomeProductTableDataType>([])
-  const { setLoading, setDataSource, handleAddNew, handleDeleting, handleEditing, handleDraggableEnd } = table
-  const service = useAPIService2<HomeProduct>(HomeProductAPI)
+
+  const service = useAPIService<HomeProduct>(HomeProductAPI)
+
   const [openModalCreate, setOpenModalCreate] = useState<boolean>(false)
-  const [openModalUpdate, setOpenModalUpdate] = useState<boolean>(false)
-  const [searchText, setSearchText] = useState<string>('')
-  const [recorded, setRecorded] = useState<HomeProduct>({ id: 0 })
-  const [newRecord, setNewRecord] = useState<NewRecord>({})
+  const [newRecord, setNewRecord] = useState<NewRecordHomeProduct | null>(null)
   const [branches, setHomeProducts] = useState<HomeProduct[]>([])
 
   useEffect(() => {
-    loadData()
+    initialize()
   }, [])
 
-  const loadData = useCallback(async () => {
+  const initialize = async () => {
     try {
-      setLoading(true)
       await service.getItemsSync(
         {
           paginator: { page: 1, pageSize: -1 },
           sorting: {
             column: 'orderNumber',
-            direction: 'asc'
+            direction: 'desc'
           }
         },
-        setLoading,
-        (meta) => {
-          if (!meta?.success) throw new Error(`${meta?.message}`)
-          const data = meta.data as HomeProduct[]
+        table.setLoading,
+        (res) => {
+          if (!res?.success) throw new Error(`${res?.message}`)
+          const data = res.data as HomeProduct[]
           setHomeProducts(data)
           const newDataSource = data.map((item) => {
             return { ...item, key: `${item.id}` }
           })
-          setDataSource(newDataSource)
+          table.setDataSource(newDataSource)
         }
       )
     } catch (error) {
       message.error(`${error}`)
     } finally {
-      setLoading(false)
+      table.setLoading(false)
     }
-  }, [])
+  }
 
-  const handleCreate = async (itemNew: HomeProduct, setLoading?: (enable: boolean) => void) => {
+  const handleCreate = async (itemNew: NewRecordHomeProduct) => {
     try {
-      console.log(itemNew)
-      setLoading?.(true)
-      if (textValidator(itemNew.title) && textValidator(itemNew.imageUrl)) {
-        await service.createItemSync(itemNew, setLoading, (res) => {
-          if (!res?.success) throw new Error(res?.message)
-          const newItem = res.data as HomeProduct
-          handleAddNew({ ...newItem, key: `${newItem.id}` })
-          message.success('Success')
-        })
-      }
-    } catch (error) {
-      message.error(`${error}`)
+      await service.createItemSync({ ...itemNew } as HomeProduct, table.setLoading, (res) => {
+        if (!res.success) throw new Error(define('create_failed'))
+        const newItem = res.data as HomeProduct
+        table.handleAddNew({ key: `${newItem.id}`, ...newItem })
+      })
+      message.success(define('created_success'))
+    } catch (error: any) {
+      message.error(`${error.message}`)
     } finally {
-      setLoading?.(false)
+      table.setLoading?.(false)
       setOpenModalCreate(false)
     }
   }
 
-  const handleUpdate = async (id: number, itemUpdate: HomeProduct, setLoading?: (enable: boolean) => void) => {
+  const handleUpdate = async (record: HomeProductTableDataType) => {
     try {
-      setLoading?.(true)
-      service.updateItemSync(id, itemUpdate, setLoading, (res) => {
-        if (!res.success) throw new Error(`${res.message}`)
-        handleEditing(`${id}`, { ...itemUpdate, key: `${id}` })
-        message.success(`${res.message}`)
+      table.setLoading?.(true)
+      await service.updateItemByPkSync(record.id!, { ...newRecord }, table.setLoading, (res) => {
+        if (!res.success) throw new Error(define('update_failed'))
+        const updatedItem = res.data as HomeProduct
+        table.handleUpdate(record.key, { ...updatedItem, key: record.key })
       })
+      message.success(define('updated_success'))
     } catch (error) {
       message.error(`${error}`)
     } finally {
-      setLoading?.(false)
-      setOpenModalUpdate(false)
+      table.setLoading?.(false)
+      setNewRecord(null)
     }
   }
 
-  const handleDelete = (itemDelete: HomeProduct, setLoading?: (enable: boolean) => void) => {
+  const handleDelete = async (record: HomeProductTableDataType) => {
     try {
-      setLoading?.(true)
-      service.deleteItemSync(itemDelete.id ?? -1, setLoading, (res) => {
-        if (!res.success) throw new Error(`${res.message}`)
-        handleDeleting(`${itemDelete.id}`)
-        message.success(`${res.message}`)
+      table.setLoading?.(true)
+      await service.deleteItemSync(record.id!, table.setLoading, (res) => {
+        if (!res.success) throw new Error(define('delete_failed'))
+        table.handleDeleting(record.key)
       })
+      message.success(define('deleted_success'))
     } catch (error) {
       message.error(`${error}`)
     } finally {
-      setLoading?.(false)
-      setOpenModalUpdate(false)
+      table.setLoading?.(false)
     }
   }
 
-  const handleSearch = () => {}
+  /**
+   * Function query paginator (page and pageSize)
+   */
+  const handlePageChange = async (page: number, pageSize: number) => {
+    table.setPaginator({ page, pageSize })
+  }
 
-  const handleSortChange = () => {}
-
-  const handlePageChange = () => {}
-
-  const handleDraggableChange = async (e: DragEndEvent) => {
+  const handleDraggableEnd = async (newArr: HomeProductTableDataType[]) => {
     try {
-      setLoading(true)
-      handleDraggableEnd(e, (newData) => {
-        service.updateItemsSync(
-          newData.map((item, index) => {
-            return { ...item, orderNumber: index }
-          }),
-          setLoading,
-          (res) => {
-            if (!res.success) throw new Error(`${res.message}`)
-            message.success(`${res.message}`)
-          }
-        )
-      })
+      await service.updateItemsSync(
+        newArr.map((item, index) => {
+          return { id: item.id, orderNumber: index + 1 }
+        }),
+        table.setLoading,
+        (res) => {
+          if (!res.success) throw new Error(`${res.message}`)
+          console.log(res.data)
+          message.success(`${res.message}`)
+        }
+      )
     } catch (error) {
       message.error(`${error}`)
     } finally {
-      setLoading(false)
+      table.setLoading(false)
     }
   }
 
   return {
     state: {
-      searchText,
-      setSearchText,
       openModalCreate,
       setOpenModalCreate,
       newRecord,
       setNewRecord,
-      recorded,
-      setRecorded,
-      openModalUpdate,
-      setOpenModalUpdate,
       branches
     },
     service,
     action: {
-      loadData,
       handleCreate,
       handleUpdate,
       handleDelete,
-      handleSearch,
-      handleSortChange,
       handlePageChange,
-      handleDraggableChange
+      handleDraggableEnd
     },
     table
   }

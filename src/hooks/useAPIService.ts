@@ -15,8 +15,8 @@ export const defaultRequestBody: RequestBodyType = {
     term: ''
   },
   sorting: {
-    column: 'id',
-    direction: 'asc'
+    column: 'orderNumber',
+    direction: 'desc'
   }
 }
 

@@ -7,12 +7,10 @@ import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
 import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
 import SkyTableWrapperLayout from '~/components/sky-ui/SkyTable/SkyTableWrapperLayout'
-import { HeroBanner } from '~/typing'
 import { imageValidatorDisplay, textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
 import useBannerViewModel from '../../hooks/useBannerViewModel'
 import { BannerTableDataType } from '../../type'
 import ModalAddNewHeroBanner from './ModalAddNewHeroBanner'
-import ModalUpdateHeroBanner from './ModalUpdateHeroBanner'
 
 const HeroBannerTable: React.FC = () => {
   const viewModel = useBannerViewModel()
@@ -34,7 +32,13 @@ const HeroBannerTable: React.FC = () => {
             })
           }}
         >
-          <LazyImage alt='banner-img' src={imageValidatorDisplay(record.imageUrl)} height={120} width={120} />
+          <LazyImage
+            alt='banner-img'
+            src={imageValidatorDisplay(record.imageUrl)}
+            height={120}
+            width={120}
+            className='object-cover'
+          />
         </EditableStateCell>
       )
     },
@@ -140,7 +144,7 @@ const HeroBannerTable: React.FC = () => {
             <>
               <Flex className='w-full'>
                 <Typography.Text type='secondary' className='text-xl font-semibold'>
-                  Hero banner ({viewModel.table.dataSource.length})
+                  Hero banners ({viewModel.table.dataSource.length})
                 </Typography.Text>
               </Flex>
             </>
@@ -173,14 +177,6 @@ const HeroBannerTable: React.FC = () => {
           open={viewModel.state.openModalCreate}
           setOpenModal={viewModel.state.setOpenModalCreate}
           onCreate={viewModel.action.handleCreate}
-        />
-      )}
-      {viewModel.state.openModalUpdate && (
-        <ModalUpdateHeroBanner
-          record={{ ...viewModel.state.newRecord } as HeroBanner}
-          open={viewModel.state.openModalUpdate}
-          setOpenModal={viewModel.state.setOpenModalUpdate}
-          onUpdate={viewModel.action.handleUpdate}
         />
       )}
     </>

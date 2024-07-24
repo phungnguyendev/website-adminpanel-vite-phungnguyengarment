@@ -12,7 +12,7 @@ const LazyImage: React.FC<LazyImageProps> = ({ ...props }) => {
         alt='banner-img'
         height={120}
         width={120}
-        className={cn('object-cover', props.className)}
+        className={cn('object-contain', props.className)}
         placeholder={<Skeleton.Avatar active={true} size={120} shape='square' />}
       />
     </>

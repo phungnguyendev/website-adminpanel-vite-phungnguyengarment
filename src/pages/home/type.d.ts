@@ -13,6 +13,16 @@ export interface HomeProductTableDataType extends HomeProduct {
   key: string
 }
 
+export interface NewRecordHomeProduct {
+  title?: string
+  imageUrl?: string
+}
+
 export interface PartnerTableDataType extends Partner {
   key: string
+}
+
+export interface NewRecordPartner {
+  title?: string
+  imageUrl?: string
 }
