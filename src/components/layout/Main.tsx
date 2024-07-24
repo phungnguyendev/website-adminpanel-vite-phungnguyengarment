@@ -1,7 +1,7 @@
 import type { MenuProps } from 'antd'
 import { Flex, Layout, Menu } from 'antd'
-import React, { useState } from 'react'
-import { Link, Outlet } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { Link, Outlet, useLocation } from 'react-router-dom'
 import logo from '~/assets/logo.svg'
 import routes from '~/config/route.config'
 import { cn } from '~/utils/helpers'
@@ -11,8 +11,16 @@ import Header from './Header'
 const { Sider, Content } = Layout
 
 const Main: React.FC = () => {
+  const { pathname } = useLocation()
   const [openDrawer, setOpenDrawer] = useState(false)
   const [selectedKey, setSelectedKey] = useState<string>(routes[0].key)
+
+  useEffect(() => {
+    const keyFound = routes.find((route) => route.path === pathname)
+    if (keyFound) {
+      setSelectedKey(keyFound.key)
+    }
+  }, [pathname])
 
   const items: MenuProps['items'] = routes.map((route) => {
     return {

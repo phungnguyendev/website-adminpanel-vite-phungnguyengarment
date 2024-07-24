@@ -4,14 +4,10 @@ import SkyModal, { SkyModalProps } from '~/components/sky-ui/SkyModal'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
 import { HeroBanner } from '~/typing'
 import { textValidatorChange } from '~/utils/helpers'
-
-export interface HeroBannerAddNewProps {
-  title?: string | null
-  imageUrl?: string | null
-}
+import { NewRecordHeroBanner } from '../../type'
 
 interface Props extends SkyModalProps {
-  onCreate: (data: any) => void
+  onCreate: (data: NewRecordHeroBanner) => void
 }
 
 const ModalAddNewHeroBanner: React.FC<Props> = ({ onCreate, ...props }) => {

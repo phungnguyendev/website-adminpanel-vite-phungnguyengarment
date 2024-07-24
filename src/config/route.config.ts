@@ -1,4 +1,5 @@
 import { lazy } from 'react'
+import { GrStatusInfo } from 'react-icons/gr'
 import { IconType } from 'react-icons/lib'
 import { TbSmartHome } from 'react-icons/tb'
 
@@ -30,7 +31,7 @@ const routes: SideType[] = [
     name: 'Giới thiệu',
     path: '/about',
     component: AboutPage,
-    icon: TbSmartHome
+    icon: GrStatusInfo
   },
   {
     key: '2',

@@ -1,61 +1,57 @@
-import type { FormProps } from 'antd'
-import { Flex, Form } from 'antd'
-import React, { memo } from 'react'
-import SkyModal from '~/components/sky-ui/SkyModal'
+import { App, Form } from 'antd'
+import React, { memo, useState } from 'react'
+import SkyModal, { SkyModalProps } from '~/components/sky-ui/SkyModal'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
+import { HeroBanner } from '~/typing'
+import { textValidatorChange } from '~/utils/helpers'
+import { NewRecordPrize } from '../type'
 
-export interface HeroBannerAddNewProps {
-  title?: string | null
-  imageUrl?: string | null
+interface Props extends SkyModalProps {
+  onCreate: (data: NewRecordPrize) => void
 }
 
-interface Props {
-  openModal: boolean
-  loading?: boolean
-  formProps?: FormProps
-  setOpenModal: (enable: boolean) => void
-  onAddNew: (recordToAddNew: HeroBannerAddNewProps) => void
-}
-
-const ModalAddNewHeroBanner: React.FC<Props> = ({ loading, onAddNew, openModal, setOpenModal, formProps }) => {
+const ModalAddNewPrize: React.FC<Props> = ({ onCreate, ...props }) => {
+  const { message } = App.useApp()
   const [form] = Form.useForm()
+  const [newRecord, setNewRecord] = useState<HeroBanner>({})
+
   async function handleOk() {
-    const row = await form.validateFields()
-    onAddNew(row)
+    await form
+      .validateFields()
+      .then((values) => {
+        onCreate(values)
+      })
+      .catch(() => {
+        message.error('Error validate form!')
+      })
   }
 
   return (
     <>
-      <SkyModal
-        loading={loading}
-        open={openModal}
-        onOk={handleOk}
-        onCancel={() => setOpenModal(false)}
-        title='Add new prize'
-      >
-        <Form {...formProps} labelCol={{ span: 4 }} labelAlign='left' className='w-full' labelWrap form={form}>
-          <Flex vertical gap={20} className='w-full'>
-            <EditableFormCell
-              isEditing={true}
-              title='Title'
-              placeholder='Title..'
-              dataIndex='title'
-              inputType='text'
-              required
-            />
-            <EditableFormCell
-              isEditing={true}
-              title='Image'
-              placeholder='Paste your image link..'
-              dataIndex='imageUrl'
-              inputType='text'
-              required
-            />
-          </Flex>
+      <SkyModal {...props} title='Add new prize' okText='Create' onOk={handleOk}>
+        <Form form={form} labelCol={{ span: 4 }}>
+          <EditableFormCell
+            isEditing
+            required
+            dataIndex='title'
+            title='Title'
+            inputType='text'
+            value={newRecord.title}
+            onValueChange={(val: string) => setNewRecord({ ...newRecord, title: textValidatorChange(val) })}
+          />
+          <EditableFormCell
+            isEditing
+            required
+            dataIndex='imageUrl'
+            title='Image link:'
+            inputType='text'
+            value={newRecord.imageUrl}
+            onValueChange={(value: string) => setNewRecord({ ...newRecord, imageUrl: textValidatorChange(value) })}
+          />
         </Form>
       </SkyModal>
     </>
   )
 }
 
-export default memo(ModalAddNewHeroBanner)
+export default memo(ModalAddNewPrize)
