@@ -52,9 +52,7 @@ const RecruitmentTable: React.FC = () => {
               setNewRecord({ ...newRecord, industrySectorID: numberValidatorChange(industrySectorID) })
             }}
           >
-            <SkyTableTypography placeholder='asd' status={'active'}>
-              {textValidatorDisplay(record.vacancies)}
-            </SkyTableTypography>
+            <SkyTableTypography status={'active'}>{textValidatorDisplay(record.vacancies)}</SkyTableTypography>
           </EditableStateCell>
         )
       }
@@ -77,9 +75,7 @@ const RecruitmentTable: React.FC = () => {
               setNewRecord({ ...newRecord, quantity: textValidatorChange(quantity) })
             }}
           >
-            <SkyTableTypography placeholder='asd' status={'active'}>
-              {textValidatorDisplay(record.quantity)}
-            </SkyTableTypography>
+            <SkyTableTypography status={'active'}>{textValidatorDisplay(record.quantity)}</SkyTableTypography>
           </EditableStateCell>
         )
       }
@@ -102,9 +98,7 @@ const RecruitmentTable: React.FC = () => {
               setNewRecord({ ...newRecord, wage: textValidatorChange(wage) })
             }}
           >
-            <SkyTableTypography placeholder='asd' status={'active'}>
-              {textValidatorDisplay(record.wage)}
-            </SkyTableTypography>
+            <SkyTableTypography status={'active'}>{textValidatorDisplay(record.wage)}</SkyTableTypography>
           </EditableStateCell>
         )
       }
@@ -127,9 +121,7 @@ const RecruitmentTable: React.FC = () => {
               setNewRecord({ ...newRecord, workingTime: textValidatorChange(workingTime) })
             }}
           >
-            <SkyTableTypography placeholder='asd' status={'active'}>
-              {textValidatorDisplay(record.workingTime)}
-            </SkyTableTypography>
+            <SkyTableTypography status={'active'}>{textValidatorDisplay(record.workingTime)}</SkyTableTypography>
           </EditableStateCell>
         )
       }
@@ -152,9 +144,7 @@ const RecruitmentTable: React.FC = () => {
               setNewRecord({ ...newRecord, workingPlace: textValidatorChange(workingPlace) })
             }}
           >
-            <SkyTableTypography placeholder='asd' status={'active'}>
-              {textValidatorDisplay(record.workingPlace)}
-            </SkyTableTypography>
+            <SkyTableTypography status={'active'}>{textValidatorDisplay(record.workingPlace)}</SkyTableTypography>
           </EditableStateCell>
         )
       }
@@ -177,9 +167,7 @@ const RecruitmentTable: React.FC = () => {
               setNewRecord({ ...newRecord, expirationDate: textValidatorChange(expirationDate) })
             }}
           >
-            <SkyTableTypography placeholder='asd' status={'active'}>
-              {textValidatorDisplay(record.expirationDate)}
-            </SkyTableTypography>
+            <SkyTableTypography status={'active'}>{textValidatorDisplay(record.expirationDate)}</SkyTableTypography>
           </EditableStateCell>
         )
       }

@@ -39,9 +39,7 @@ const BranchTable: React.FC = () => {
               setNewRecord({ ...newRecord, title: textValidatorChange(title) })
             }}
           >
-            <SkyTableTypography placeholder='asd' status={'active'}>
-              {textValidatorDisplay(record.title)}
-            </SkyTableTypography>
+            <SkyTableTypography status={'active'}>{textValidatorDisplay(record.title)}</SkyTableTypography>
           </EditableStateCell>
         )
       }

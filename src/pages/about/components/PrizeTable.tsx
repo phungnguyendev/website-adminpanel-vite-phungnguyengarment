@@ -61,9 +61,7 @@ const PrizeTable: React.FC = () => {
           value={newRecord.title}
           onValueChange={(val: string) => setNewRecord({ ...newRecord, title: textValidatorChange(val) })}
         >
-          <SkyTableTypography placeholder='asd' status={'active'}>
-            {textValidatorDisplay(record.title)}
-          </SkyTableTypography>
+          <SkyTableTypography status={'active'}>{textValidatorDisplay(record.title)}</SkyTableTypography>
         </EditableStateCell>
       )
     }

@@ -113,9 +113,7 @@ const ProductTable: React.FC = () => {
           value={newRecord.title}
           onValueChange={(val: string) => setNewRecord({ ...newRecord, title: textValidatorChange(val) })}
         >
-          <SkyTableTypography placeholder='asd' status={'active'}>
-            {textValidatorDisplay(record.title)}
-          </SkyTableTypography>
+          <SkyTableTypography status={'active'}>{textValidatorDisplay(record.title)}</SkyTableTypography>
         </EditableStateCell>
       )
     },
@@ -131,9 +129,7 @@ const ProductTable: React.FC = () => {
           value={newRecord.desc}
           onValueChange={(val: string) => setNewRecord({ ...newRecord, desc: textValidatorChange(val) })}
         >
-          <SkyTableTypography placeholder='asd' status={'active'}>
-            {textValidatorDisplay(record.desc)}
-          </SkyTableTypography>
+          <SkyTableTypography status={'active'}>{textValidatorDisplay(record.desc)}</SkyTableTypography>
         </EditableStateCell>
       )
     }

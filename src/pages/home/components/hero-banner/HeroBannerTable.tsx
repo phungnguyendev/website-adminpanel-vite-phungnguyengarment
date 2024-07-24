@@ -55,9 +55,7 @@ const HeroBannerTable: React.FC = () => {
             })
           }
         >
-          <SkyTableTypography placeholder='asd' status={'active'}>
-            {textValidatorDisplay(record.title)}
-          </SkyTableTypography>
+          <SkyTableTypography>{textValidatorDisplay(record.title)}</SkyTableTypography>
         </EditableStateCell>
       )
     },
