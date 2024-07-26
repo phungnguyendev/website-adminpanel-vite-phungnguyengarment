@@ -138,6 +138,7 @@ export interface Prize {
 
 export interface Product {
   id?: number
+  categoryID?: number
   title?: string
   desc?: string
   imageUrl?: string

@@ -1,93 +1,88 @@
-import { ColumnsType } from 'antd/es/table'
-import CategoryAPI from '~/api/services/CategoryAPI'
-import useTable from '~/components/hooks/useTable'
+import { Flex, Typography } from 'antd'
+import { ColumnsType, ColumnType } from 'antd/es/table'
 import BaseLayout from '~/components/layout/BaseLayout'
 import LazyImage from '~/components/sky-ui/LazyImage'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
-import SkyTable2 from '~/components/sky-ui/SkyTable/SkyTable'
-import SkyTableRow from '~/components/sky-ui/SkyTable/SkyTableRow'
+import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { Category } from '~/typing'
-import { textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
-import useCategory from '../../hooks/useCategory'
+import SkyTableWrapperLayout from '~/components/sky-ui/SkyTable/SkyTableWrapperLayout'
+import { imageValidatorDisplay, textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
+import useCategoryViewModel from '../../hooks/useCategoryViewModel'
 import { CategoryTableDataType } from '../../type'
 import ModalAddNewCategory from './ModalAddNewCategory'
 
 const CategoryTable: React.FC = () => {
-  const table = useTable<CategoryTableDataType>([])
-  const {
-    newRecord,
-    setNewRecord,
-    openModal,
-    setOpenModal,
-    handleSaveClick,
-    handleAddNewItem,
-    handleConfirmDelete,
-    handlePageChange,
-    categoryService
-  } = useCategory(table)
+  const viewModel = useCategoryViewModel()
 
   const columns = {
     id: (record: CategoryTableDataType) => {
-      return <SkyTableTypography strong>{textValidatorDisplay(String(record.id))}</SkyTableTypography>
+      return <SkyTableTypography strong>{textValidatorDisplay(`#${record.id}`)}</SkyTableTypography>
     },
-    imageUrl: (record: CategoryTableDataType) => {
+    image: (record: CategoryTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key)}
-          dataIndex='imageUrl'
-          title='Image'
-          inputType='text'
-          initialValue={textValidatorInit(record.imageUrl)}
-          value={newRecord.imageUrl}
-          onValueChange={(val: string) => {
-            setNewRecord({ ...newRecord, imageUrl: textValidatorChange(val) })
+          isEditing={viewModel.table.isEditing(record.key)}
+          inputType='textarea'
+          defaultValue={record.imageUrl}
+          value={viewModel.state.newRecord?.imageUrl}
+          onValueChange={(value: string) => {
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, imageUrl: textValidatorChange(value) }
+            })
           }}
         >
-          <LazyImage
-            alt='banner-img'
-            className='object-contain'
-            src={textValidatorDisplay(record.imageUrl)}
-            height={120}
-            width={120}
-          />
+          <LazyImage src={imageValidatorDisplay(record.imageUrl)} height={120} width={120} className='object-cover' />
         </EditableStateCell>
       )
     },
     title: (record: CategoryTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
-          dataIndex='title'
-          title='Title'
+          isEditing={viewModel.table.isEditing(record.key)}
           inputType='text'
-          required={true}
-          initialValue={textValidatorInit(record.title)}
-          value={newRecord.title}
-          onValueChange={(val: string) => setNewRecord({ ...newRecord, title: textValidatorChange(val) })}
+          defaultValue={textValidatorInit(record.title)}
+          value={viewModel.state.newRecord?.title}
+          onValueChange={(val: string) =>
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, title: textValidatorChange(val) }
+            })
+          }
         >
-          <SkyTableTypography placeholder='Input your title..' status={'active'}>
-            {textValidatorDisplay(record.title)}
-          </SkyTableTypography>
+          <SkyTableTypography>{textValidatorDisplay(record.title)}</SkyTableTypography>
         </EditableStateCell>
       )
     },
-    desc: (record: CategoryTableDataType) => {
+    actionCol: (record: CategoryTableDataType) => {
       return (
-        <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
-          dataIndex='desc'
-          title='Description'
-          inputType='text'
-          required={true}
-          initialValue={textValidatorInit(record.desc)}
-          value={newRecord.desc}
-          onValueChange={(val: string) => setNewRecord({ ...newRecord, desc: textValidatorChange(val) })}
-        >
-          <SkyTableTypography placeholder='Input your description..' status={'active'}>
-            {textValidatorDisplay(record.desc)}
-          </SkyTableTypography>
-        </EditableStateCell>
+        <SkyTableActionRow
+          record={record}
+          editingKey={viewModel.table.editingKey}
+          deletingKey={viewModel.table.deletingKey}
+          buttonEdit={{
+            onClick: () => {
+              viewModel.state.setNewRecord({
+                title: record.title,
+                imageUrl: record.imageUrl
+              })
+              viewModel.table.handleStartEditing(record.key)
+            }
+          }}
+          buttonSave={{
+            // Save
+            onClick: () => viewModel.action.handleUpdate(record)
+          }}
+          // Start delete
+          buttonDelete={{
+            onClick: () => viewModel.table.handleStartDeleting(record.key)
+          }}
+          // Cancel editing
+          onConfirmCancelEditing={() => viewModel.table.handleCancelEditing()}
+          // Cancel delete
+          onConfirmCancelDeleting={() => viewModel.table.handleCancelDeleting()}
+          // Delete (update status record => 'deleted')
+          onConfirmDelete={() => viewModel.action.handleDelete(record)}
+        />
       )
     }
   }
@@ -108,10 +103,10 @@ const CategoryTable: React.FC = () => {
     {
       title: 'Image',
       dataIndex: 'imageUrl',
-      width: '10%',
+      width: '20%',
       responsive: ['sm'],
       render: (_value: any, record: CategoryTableDataType) => {
-        return columns.imageUrl(record)
+        return columns.image(record)
       }
     },
     {
@@ -122,92 +117,59 @@ const CategoryTable: React.FC = () => {
       render: (_value: any, record: CategoryTableDataType) => {
         return columns.title(record)
       }
-    },
-    {
-      title: 'Description',
-      dataIndex: 'desc',
-      width: '20%',
-      responsive: ['sm'],
-      render: (_value: any, record: CategoryTableDataType) => {
-        return columns.desc(record)
-      }
     }
   ]
 
+  const actionCol: ColumnType<CategoryTableDataType> = {
+    title: 'Operation',
+    width: '0.001%',
+    render: (_value: any, record: CategoryTableDataType) => {
+      return columns.actionCol(record)
+    }
+  }
+
   return (
     <>
-      <BaseLayout
-        title='Categories'
-        titleProps={{
-          level: 5,
-          type: 'secondary'
-        }}
-        onAddNewClick={{
-          onClick: () => setOpenModal(true),
-          isShow: true
-        }}
-      >
-        <SkyTable2
-          dataSource={table.dataSource}
-          setDataSource={table.setDataSource}
-          loading={table.loading}
-          columns={tableColumns}
-          editingKey={table.editingKey}
-          deletingKey={table.deletingKey}
-          metaData={categoryService.metaData}
-          onPageChange={handlePageChange}
-          isShowDeleted={table.showDeleted}
-          components={{
-            body: {
-              row: SkyTableRow
-            }
+      <BaseLayout>
+        <SkyTableWrapperLayout
+          before={
+            <>
+              <Flex className='w-full'>
+                <Typography.Text type='secondary' className='text-xl font-semibold'>
+                  Categories ({viewModel.table.dataSource.length})
+                </Typography.Text>
+              </Flex>
+            </>
+          }
+          addNewProps={{
+            onClick: () => viewModel.state.setOpenModalCreate(true)
           }}
-          onDraggableChange={(_, newData) => {
-            if (newData) {
-              CategoryAPI.updateList(
-                newData.map((item, index) => {
-                  return { ...item, orderNumber: index } as Category
-                }) as Category[]
-              )
-                .then((res) => {
-                  if (!res?.success) {
-                    throw new Error(`${res?.message}`)
-                  }
-                })
-                .catch((e) => console.log(`${e}`))
-            }
-          }}
-          actionProps={{
-            onEdit: {
-              onClick: (_e, record) => {
-                setNewRecord({ ...record })
-                table.handleStartEditing(record!.key!)
-              },
-              isShow: true
-            },
-            onSave: {
-              onClick: (_e, record) => handleSaveClick(record!)
-            },
-            onDelete: {
-              onClick: (_e, record) => table.handleStartDeleting(record!.key!),
-              isShow: !table.showDeleted
-            },
-            onRestore: {
-              onClick: (_e, record) => table.handleStartRestore(record!.key!),
-              isShow: false
-            },
-            onConfirmCancelEditing: () => {
-              table.handleConfirmCancelEditing()
-            },
-            onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
-            onConfirmDelete: (record) => handleConfirmDelete(record),
-            onConfirmCancelRestore: () => table.handleConfirmCancelRestore(),
-            isShow: true
-          }}
-        />
+        >
+          <SkyTable
+            loading={viewModel.table.loading}
+            tableColumns={{
+              columns: tableColumns,
+              actionColumn: actionCol
+              // showAction: isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)
+            }}
+            dataSource={viewModel.table.dataSource}
+            setDataSource={viewModel.table.setDataSource}
+            pagination={{
+              pageSize: viewModel.table.paginator.pageSize,
+              current: viewModel.table.paginator.page,
+              onChange: viewModel.action.handlePageChange
+            }}
+            onDragEnd={viewModel.action.handleDraggableEnd}
+          />
+        </SkyTableWrapperLayout>
       </BaseLayout>
-      {openModal && (
-        <ModalAddNewCategory openModal={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNewItem} />
+
+      {viewModel.state.openModalCreate && (
+        <ModalAddNewCategory
+          open={viewModel.state.openModalCreate}
+          setOpenModal={viewModel.state.setOpenModalCreate}
+          onCreate={viewModel.action.handleCreate}
+        />
       )}
     </>
   )

@@ -1,65 +1,53 @@
-import type { FormProps } from 'antd'
-import { Flex, Form } from 'antd'
-import React, { memo } from 'react'
-import SkyModal from '~/components/sky-ui/SkyModal'
+import { App, Form } from 'antd'
+import React, { memo, useState } from 'react'
+import SkyModal, { SkyModalProps } from '~/components/sky-ui/SkyModal'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
+import { HeroBanner } from '~/typing'
+import { textValidatorChange } from '~/utils/helpers'
+import { NewRecordCategory } from '../../type'
 
-export interface CategoryAddNewProps {
-  title?: string | null
-  desc?: string | null
-  icon?: string | null
+interface Props extends SkyModalProps {
+  onCreate: (data: NewRecordCategory) => void
 }
 
-interface Props {
-  openModal: boolean
-  formProps?: FormProps
-  setOpenModal: (enable: boolean) => void
-  onAddNew: (recordToAddNew: CategoryAddNewProps) => void
-}
-
-const ModalAddNewCategory: React.FC<Props> = ({ onAddNew, openModal, setOpenModal, formProps }) => {
+const ModalAddNewCategory: React.FC<Props> = ({ onCreate, ...props }) => {
+  const { message } = App.useApp()
   const [form] = Form.useForm()
+  const [newRecord, setNewRecord] = useState<HeroBanner>({})
 
   async function handleOk() {
-    const row = await form.validateFields()
-    onAddNew(row)
+    await form
+      .validateFields()
+      .then((values) => {
+        onCreate(values)
+      })
+      .catch(() => {
+        message.error('Error validate form!')
+      })
   }
 
   return (
     <>
-      <SkyModal
-        loading={false}
-        open={openModal}
-        onOk={handleOk}
-        onCancel={() => setOpenModal(false)}
-        title='Add new category'
-      >
-        <Form {...formProps} labelCol={{ span: 4 }} labelAlign='left' className='w-full' labelWrap form={form}>
-          <Flex vertical gap={20} className='w-full'>
-            <EditableFormCell
-              isEditing={true}
-              title='Title'
-              placeholder='Title...'
-              dataIndex='title'
-              inputType='text'
-              required
-            />
-            <EditableFormCell
-              isEditing={true}
-              title='Description'
-              placeholder='Desc...'
-              dataIndex='desc'
-              inputType='text'
-            />
-            <EditableFormCell
-              isEditing={true}
-              title='Image'
-              dataIndex='imageUrl'
-              inputType='text'
-              placeholder='Paste your image link..'
-              required
-            />
-          </Flex>
+      <SkyModal {...props} title='Add new category' okText='Create' onOk={handleOk}>
+        <Form form={form} labelCol={{ span: 4 }}>
+          <EditableFormCell
+            isEditing
+            required
+            dataIndex='title'
+            title='Title'
+            inputType='text'
+            value={newRecord.title}
+            onValueChange={(val: string) => setNewRecord({ ...newRecord, title: textValidatorChange(val) })}
+          />
+          <EditableFormCell
+            isEditing
+            required
+            dataIndex='imageUrl'
+            title='Image link:'
+            inputType='text'
+            value={newRecord.imageUrl}
+            onValueChange={(value: string) => setNewRecord({ ...newRecord, imageUrl: textValidatorChange(value) })}
+          />
         </Form>
       </SkyModal>
     </>

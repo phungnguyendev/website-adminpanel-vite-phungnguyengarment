@@ -5,19 +5,13 @@ import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatt
 const NAMESPACE = 'categories'
 
 export default {
-  createItem: async (item: Category, accessToken: string): Promise<ResponseDataType | undefined> => {
+  createItem: async (newItem: Category, accessToken: string): Promise<ResponseDataType> => {
     return await client
-      .post(
-        `${NAMESPACE}`,
-        {
-          ...item
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
+      .post(`${NAMESPACE}`, newItem, {
+        headers: {
+          authorization: accessToken
         }
-      )
+      })
       .then((res) => {
         return responseFormatter(res)
       })
@@ -25,7 +19,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItem: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
+  getItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType> => {
     return client
       .get(`${NAMESPACE}/${id}`, {
         headers: {
@@ -39,50 +33,9 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  getItemBy: async (
-    query: { field: string; key: React.Key },
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
-    return client
-      .get(`${NAMESPACE}/${query.field}/${query.key}`, {
-        headers: {
-          authorization: accessToken
-        }
-      })
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType | undefined> => {
+  getItems: async (bodyRequest: RequestBodyType, accessToken: string): Promise<ResponseDataType> => {
     return await client
-      .post(
-        `${NAMESPACE}/find`,
-        {
-          ...bodyRequest
-        },
-        {
-          headers: {
-            authorization: accessToken
-          }
-        }
-      )
-      .then((res) => {
-        return responseFormatter(res)
-      })
-      .catch(function (error) {
-        throwErrorFormatter(error)
-      })
-  },
-  updateItem: async (
-    id: number,
-    itemToUpdate: Category,
-    accessToken: string
-  ): Promise<ResponseDataType | undefined> => {
-    return client
-      .put(`${NAMESPACE}/${id}`, itemToUpdate, {
+      .post(`${NAMESPACE}/find`, bodyRequest, {
         headers: {
           authorization: accessToken
         }
@@ -94,7 +47,21 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItems: async (itemsToUpdate: Category[], accessToken: string): Promise<ResponseDataType | undefined> => {
+  updateItemByPk: async (id: number, itemToUpdate: Category, accessToken: string): Promise<ResponseDataType> => {
+    return client
+      .patch(`${NAMESPACE}/${id}`, itemToUpdate, {
+        headers: {
+          authorization: accessToken
+        }
+      })
+      .then((res) => {
+        return responseFormatter(res)
+      })
+      .catch(function (error) {
+        throwErrorFormatter(error)
+      })
+  },
+  updateItems: async (itemsToUpdate: Category[], accessToken: string): Promise<ResponseDataType> => {
     return client
       .put(`${NAMESPACE}`, itemsToUpdate, {
         headers: {
@@ -108,7 +75,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  deleteItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType | undefined> => {
+  deleteItemByPk: async (id: number, accessToken: string): Promise<ResponseDataType> => {
     return client
       .delete(`${NAMESPACE}/${id}`, {
         headers: {

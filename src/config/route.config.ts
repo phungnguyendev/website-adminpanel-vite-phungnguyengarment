@@ -1,6 +1,8 @@
 import { lazy } from 'react'
-import { GrStatusInfo } from 'react-icons/gr'
+import { AiOutlineProduct } from 'react-icons/ai'
+import { GoInfo } from 'react-icons/go'
 import { IconType } from 'react-icons/lib'
+import { MdOutlineMiscellaneousServices } from 'react-icons/md'
 import { TbSmartHome } from 'react-icons/tb'
 
 const HomePage = lazy(() => import('~/pages/home/HomePage'))
@@ -31,21 +33,21 @@ const routes: SideType[] = [
     name: 'Giới thiệu',
     path: '/about',
     component: AboutPage,
-    icon: GrStatusInfo
+    icon: GoInfo
   },
   {
     key: '2',
     name: 'Dịch vụ',
     path: '/service',
     component: ServicePage,
-    icon: TbSmartHome
+    icon: MdOutlineMiscellaneousServices
   },
   {
     key: '3',
     name: 'Sản phẩm',
     path: '/product',
     component: ProductPage,
-    icon: TbSmartHome
+    icon: AiOutlineProduct
   },
   {
     key: '4',
