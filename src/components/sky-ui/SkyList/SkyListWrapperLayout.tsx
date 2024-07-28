@@ -2,7 +2,7 @@ import { Button, ButtonProps, Flex, Spin } from 'antd'
 import { Plus } from 'lucide-react'
 import React from 'react'
 
-export interface SkyTableWrapperLayoutProps extends React.HTMLAttributes<HTMLElement> {
+export interface SkyListWrapperLayoutProps extends React.HTMLAttributes<HTMLElement> {
   loading?: boolean
   onLoading?: (enable: boolean) => void
   addNewProps?: ButtonProps
@@ -10,7 +10,7 @@ export interface SkyTableWrapperLayoutProps extends React.HTMLAttributes<HTMLEle
   after?: React.ReactNode
 }
 
-const SkyTableWrapperLayout: React.FC<SkyTableWrapperLayoutProps> = ({ addNewProps, children, loading, ...props }) => {
+const SkyListWrapperLayout: React.FC<SkyListWrapperLayoutProps> = ({ loading, addNewProps, children, ...props }) => {
   return (
     <>
       <Flex {...props} vertical gap={20} className='w-full rounded-md'>
@@ -33,4 +33,4 @@ const SkyTableWrapperLayout: React.FC<SkyTableWrapperLayoutProps> = ({ addNewPro
   )
 }
 
-export default SkyTableWrapperLayout
+export default SkyListWrapperLayout

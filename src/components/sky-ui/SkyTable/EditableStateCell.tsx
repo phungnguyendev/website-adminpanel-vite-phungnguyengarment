@@ -16,9 +16,9 @@ import { SelectProps } from 'antd/es/select'
 import { DatePickerProps } from 'antd/lib'
 import { Eye, EyeOff } from 'lucide-react'
 import { HTMLAttributes, memo, useState } from 'react'
-import ReactQuill, { ReactQuillProps } from 'react-quill'
 import dayjs, { dateFormatter } from '~/utils/date-formatter'
 import { cn } from '~/utils/helpers'
+import HTMLEditor, { HTMLEditorProps } from '../HTMLEditor'
 
 export type InputType =
   | 'number'
@@ -48,7 +48,7 @@ export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
   inputProps?: InputProps
   switchProps?: SwitchProps
   datePickerProps?: DatePickerProps
-  contentEditorProps?: ReactQuillProps
+  contentEditorProps?: HTMLEditorProps
   inputType?: InputType
   required?: boolean
   allowClear?: boolean
@@ -107,43 +107,7 @@ function EditableStateCell({
           />
         )
       case 'contentEditor':
-        return (
-          <ReactQuill
-            {...contentEditorProps}
-            defaultValue={defaultValue}
-            value={value}
-            onChange={(value: string, delta, source, editor) =>
-              onValueChange?.(value, {
-                delta,
-                source,
-                editor
-              })
-            }
-            modules={{
-              toolbar: [
-                ['bold', 'italic', 'underline', 'strike'], // toggled buttons
-                ['blockquote', 'code-block'],
-                ['link', 'image', 'video', 'formula'],
-
-                [{ header: 1 }, { header: 2 }], // custom button values
-                [{ list: 'ordered' }, { list: 'bullet' }, { list: 'check' }],
-                [{ script: 'sub' }, { script: 'super' }], // superscript/subscript
-                [{ indent: '-1' }, { indent: '+1' }], // outdent/indent
-                [{ direction: 'rtl' }], // text direction
-
-                [{ size: ['small', false, 'large', 'huge'] }], // custom dropdown
-                [{ header: [1, 2, 3, 4, 5, 6, false] }],
-
-                [{ color: [] }, { background: [] }], // dropdown with defaults from theme
-                [{ font: [] }],
-                [{ align: [] }],
-
-                ['clean'] // remove formatting button
-              ]
-            }}
-            theme='snow'
-          />
-        )
+        return <HTMLEditor {...contentEditorProps!} />
       case 'number':
         return (
           <InputNumber

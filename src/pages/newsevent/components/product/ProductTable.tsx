@@ -16,7 +16,7 @@ import {
   textValidatorDisplay,
   textValidatorInit
 } from '~/utils/helpers'
-import useProduct from '../../hooks/usePost'
+import useProduct from '../../hooks/usePostViewModel'
 import { ProductTableDataType } from '../../type'
 import ModalAddNewProduct from './ModalAddNewProduct'
 

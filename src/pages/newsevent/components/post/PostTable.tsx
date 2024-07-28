@@ -1,70 +1,95 @@
-import { ColumnsType } from 'antd/es/table'
-import FroalaEditorView from 'react-froala-wysiwyg/FroalaEditorView'
-import PostAPI from '~/api/services/PostAPI'
-import useTable from '~/components/hooks/useTable'
+import { Flex, Typography } from 'antd'
+import { ColumnsType, ColumnType } from 'antd/es/table'
+import React from 'react'
 import BaseLayout from '~/components/layout/BaseLayout'
+import LazyImage from '~/components/sky-ui/LazyImage'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
-import SkyTable2 from '~/components/sky-ui/SkyTable/SkyTable'
-import SkyTableRow from '~/components/sky-ui/SkyTable/SkyTableRow'
+import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { Post } from '~/typing'
-import { textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
-import usePost from '../../hooks/usePost'
+import SkyTableWrapperLayout from '~/components/sky-ui/SkyTable/SkyTableWrapperLayout'
+import { imageValidatorDisplay, textValidatorChange, textValidatorDisplay, textValidatorInit } from '~/utils/helpers'
+import usePostViewModel from '../../hooks/usePostViewModel'
 import { PostTableDataType } from '../../type'
 import ModalAddNewPost from './ModalAddNewPost'
 
 const PostTable: React.FC = () => {
-  const table = useTable<PostTableDataType>([])
-  const {
-    newRecord,
-    setNewRecord,
-    openModal,
-    setOpenModal,
-    handleSaveClick,
-    handleAddNewItem,
-    handleConfirmDelete,
-    handlePageChange,
-    postService
-  } = usePost(table)
+  const viewModel = usePostViewModel()
 
   const columns = {
     id: (record: PostTableDataType) => {
-      return <SkyTableTypography strong>{textValidatorDisplay(String(record.id))}</SkyTableTypography>
+      return <SkyTableTypography strong>{textValidatorDisplay(`#${record.id}`)}</SkyTableTypography>
+    },
+    image: (record: PostTableDataType) => {
+      return (
+        <EditableStateCell
+          isEditing={viewModel.table.isEditing(record.key)}
+          inputType='textarea'
+          defaultValue={record.imageUrl}
+          value={viewModel.state.newRecord?.imageUrl}
+          onValueChange={(value: string) => {
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, imageUrl: textValidatorChange(value) }
+            })
+          }}
+        >
+          <LazyImage
+            alt='img'
+            src={imageValidatorDisplay(record.imageUrl)}
+            height={120}
+            width={120}
+            className='object-cover'
+          />
+        </EditableStateCell>
+      )
     },
     title: (record: PostTableDataType) => {
       return (
         <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
-          dataIndex='title'
-          title='Title'
+          isEditing={viewModel.table.isEditing(record.key!)}
           inputType='text'
-          required={true}
-          initialValue={textValidatorInit(record.title)}
-          value={newRecord.title}
-          onValueChange={(val: string) => setNewRecord({ ...newRecord, title: textValidatorChange(val) })}
+          defaultValue={textValidatorInit(record.title)}
+          value={viewModel.state.newRecord?.title}
+          onValueChange={(val: string) =>
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, title: textValidatorChange(val) }
+            })
+          }
         >
-          <SkyTableTypography status={'active'}>{textValidatorDisplay(record.title)}</SkyTableTypography>
+          <SkyTableTypography>{textValidatorDisplay(record.title)}</SkyTableTypography>
         </EditableStateCell>
       )
     },
-    content: (record: PostTableDataType) => {
+    actionCol: (record: PostTableDataType) => {
       return (
-        <EditableStateCell
-          isEditing={table.isEditing(record.key!)}
-          dataIndex='content'
-          title='Description'
-          inputType='htmlEditor'
-          required={true}
-          initialValue={textValidatorInit(record.content)}
-          htmlEditorProps={{
-            model: newRecord.content,
-            onModelChange: (model: string) => {
-              setNewRecord({ ...newRecord, content: textValidatorChange(model) })
+        <SkyTableActionRow
+          record={record}
+          editingKey={viewModel.table.editingKey}
+          deletingKey={viewModel.table.deletingKey}
+          buttonEdit={{
+            onClick: () => {
+              viewModel.state.setNewRecord({
+                title: record.title,
+                imageUrl: record.imageUrl
+              })
+              viewModel.table.handleStartEditing(record.key)
             }
           }}
-        >
-          <FroalaEditorView model={textValidatorDisplay(record.content)} />
-        </EditableStateCell>
+          buttonSave={{
+            // Save
+            onClick: () => viewModel.action.handleUpdate(record)
+          }}
+          // Start delete
+          buttonDelete={{
+            onClick: () => viewModel.table.handleStartDeleting(record.key)
+          }}
+          // Cancel editing
+          onConfirmCancelEditing={() => viewModel.table.handleCancelEditing()}
+          // Cancel delete
+          onConfirmCancelDeleting={() => viewModel.table.handleCancelDeleting()}
+          // Delete (update status record => 'deleted')
+          onConfirmDelete={() => viewModel.action.handleDelete(record)}
+        />
       )
     }
   }
@@ -83,6 +108,15 @@ const PostTable: React.FC = () => {
       }
     },
     {
+      title: 'Image',
+      dataIndex: 'imageUrl',
+      width: '20%',
+      responsive: ['sm'],
+      render: (_value: any, record: PostTableDataType) => {
+        return columns.image(record)
+      }
+    },
+    {
       title: 'Title',
       dataIndex: 'title',
       width: '20%',
@@ -91,93 +125,59 @@ const PostTable: React.FC = () => {
         return columns.title(record)
       }
     }
-    // {
-    //   title: 'Content',
-    //   dataIndex: 'content',
-    //   width: '20%',
-    //   responsive: ['sm'],
-    //   render: (_value: any, record: PostTableDataType) => {
-    //     return columns.content(record)
-    //   }
-    // }
   ]
+
+  const actionCol: ColumnType<PostTableDataType> = {
+    title: 'Operation',
+    width: '0.001%',
+    render: (_value: any, record: PostTableDataType) => {
+      return columns.actionCol(record)
+    }
+  }
 
   return (
     <>
-      <BaseLayout
-        title='Categories'
-        titleProps={{
-          level: 5,
-          type: 'secondary'
-        }}
-        onAddNewClick={{
-          onClick: () => setOpenModal(true),
-          isShow: true
-        }}
-      >
-        <SkyTable2
-          dataSource={table.dataSource}
-          setDataSource={table.setDataSource}
-          loading={table.loading}
-          columns={tableColumns}
-          editingKey={table.editingKey}
-          deletingKey={table.deletingKey}
-          metaData={postService.metaData}
-          onPageChange={handlePageChange}
-          isShowDeleted={table.showDeleted}
-          components={{
-            body: {
-              row: SkyTableRow
-            }
+      <BaseLayout>
+        <SkyTableWrapperLayout
+          before={
+            <>
+              <Flex className='w-full'>
+                <Typography.Text type='secondary' className='text-xl font-semibold'>
+                  Posts ({viewModel.table.dataSource.length})
+                </Typography.Text>
+              </Flex>
+            </>
+          }
+          addNewProps={{
+            onClick: () => viewModel.state.setOpenModalCreate(true)
           }}
-          onDraggableChange={(oldData, newData) => {
-            if (newData) {
-              console.log({
-                oldData,
-                newData
-              })
-              PostAPI.updateList(
-                newData.map((item, index) => {
-                  return { ...item, orderNumber: index } as Post
-                }) as Post[]
-              )
-                .then((res) => {
-                  if (res?.success) console.log(res?.data)
-                })
-                .catch((e) => console.log(`${e}`))
-            }
-          }}
-          actionProps={{
-            onEdit: {
-              onClick: (_e, record) => {
-                console.table(record)
-                setNewRecord({ ...record })
-                table.handleStartEditing(record!.key!)
-              },
-              isShow: true
-            },
-            onSave: {
-              onClick: (_e, record) => handleSaveClick(record!)
-            },
-            onDelete: {
-              onClick: (_e, record) => table.handleStartDeleting(record!.key!),
-              isShow: !table.showDeleted
-            },
-            onRestore: {
-              onClick: (_e, record) => table.handleStartRestore(record!.key!),
-              isShow: false
-            },
-            onConfirmCancelEditing: () => {
-              table.handleConfirmCancelEditing()
-            },
-            onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
-            onConfirmDelete: (record) => handleConfirmDelete(record),
-            onConfirmCancelRestore: () => table.handleConfirmCancelRestore(),
-            isShow: true
-          }}
-        />
+        >
+          <SkyTable
+            loading={viewModel.table.loading}
+            tableColumns={{
+              columns: tableColumns,
+              actionColumn: actionCol
+              // showAction: isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)
+            }}
+            dataSource={viewModel.table.dataSource}
+            setDataSource={viewModel.table.setDataSource}
+            pagination={{
+              pageSize: viewModel.table.paginator.pageSize,
+              current: viewModel.table.paginator.page,
+              onChange: viewModel.action.handlePageChange
+            }}
+            onDragEnd={viewModel.action.handleDraggableEnd}
+          />
+        </SkyTableWrapperLayout>
       </BaseLayout>
-      {openModal && <ModalAddNewPost openModal={openModal} setOpenModal={setOpenModal} onAddNew={handleAddNewItem} />}
+
+      {viewModel.state.openModalCreate && (
+        <ModalAddNewPost
+          open={viewModel.state.openModalCreate}
+          setOpenModal={viewModel.state.setOpenModalCreate}
+          onCreate={viewModel.action.handleCreate}
+        />
+      )}
     </>
   )
 }

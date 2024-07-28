@@ -1,6 +1,7 @@
 import { lazy } from 'react'
 import { AiOutlineProduct } from 'react-icons/ai'
 import { GoInfo } from 'react-icons/go'
+import { IoNewspaperOutline } from 'react-icons/io5'
 import { IconType } from 'react-icons/lib'
 import { MdOutlineMiscellaneousServices } from 'react-icons/md'
 import { TbSmartHome } from 'react-icons/tb'
@@ -54,7 +55,7 @@ const routes: SideType[] = [
     name: 'Tin tức & Sự kiện',
     path: '/news',
     component: NewsEventPage,
-    icon: TbSmartHome
+    icon: IoNewspaperOutline
   },
   {
     key: '5',

@@ -1,9 +1,13 @@
 import type { ListProps } from 'antd'
 import { List } from 'antd'
 
-export interface SkyListProps<T extends any> extends ListProps<T> {}
+export interface SkyListRequiredDataType {
+  key: string
+}
 
-const SkyList = <T extends any>({ ...props }: SkyListProps<T>) => {
+export interface SkyListProps<T extends SkyListRequiredDataType> extends ListProps<T> {}
+
+const SkyList = <T extends SkyListRequiredDataType>({ ...props }: SkyListProps<T>) => {
   return (
     <>
       <List {...props} />

@@ -73,6 +73,10 @@ export const numberValidatorCalc = (number?: number): number => {
   return number ? number : 0
 }
 
+export const htmlValidatorDisplay = (text?: string): string => {
+  return text ? text : '<p>No content</p>'
+}
+
 export const textValidatorDisplay = (text?: string): string => {
   return text ? text : '-'
 }
@@ -303,4 +307,9 @@ export function getRandomNumberInRange(start: number, end: number): number {
 export function pickRandomFromArray(array: number[]): number {
   const randomIndex = Math.floor(Math.random() * array.length)
   return array[randomIndex]
+}
+
+export const displayHTML = (htmlContent: string) => {
+  const doc = new DOMParser().parseFromString(htmlContent, 'text/html')
+  return doc.body.textContent
 }

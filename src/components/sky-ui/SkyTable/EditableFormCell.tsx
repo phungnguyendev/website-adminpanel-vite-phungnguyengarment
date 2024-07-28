@@ -2,8 +2,8 @@ import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons'
 import { Checkbox, DatePicker, Flex, Form, Input, InputNumber, Select, Switch, Table, Typography } from 'antd'
 import dayjs from 'dayjs'
 import { memo } from 'react'
-import ReactQuill from 'react-quill'
 import { cn } from '~/utils/helpers'
+import HTMLEditor from '../HTMLEditor'
 import { EditableStateCellProps } from './EditableStateCell'
 
 export type EditableCellRequiredType = { key: string; name?: string; id?: number }
@@ -51,43 +51,7 @@ function EditableFormCell({
           />
         )
       case 'contentEditor':
-        return (
-          <ReactQuill
-            {...contentEditorProps}
-            defaultValue={defaultValue}
-            value={value}
-            onChange={(value: string, delta, source, editor) =>
-              onValueChange?.(value, {
-                delta,
-                source,
-                editor
-              })
-            }
-            modules={{
-              toolbar: [
-                ['bold', 'italic', 'underline', 'strike'], // toggled buttons
-                ['blockquote', 'code-block'],
-                ['link', 'image', 'video', 'formula'],
-
-                [{ header: 1 }, { header: 2 }], // custom button values
-                [{ list: 'ordered' }, { list: 'bullet' }, { list: 'check' }],
-                [{ script: 'sub' }, { script: 'super' }], // superscript/subscript
-                [{ indent: '-1' }, { indent: '+1' }], // outdent/indent
-                [{ direction: 'rtl' }], // text direction
-
-                [{ size: ['small', false, 'large', 'huge'] }], // custom dropdown
-                [{ header: [1, 2, 3, 4, 5, 6, false] }],
-
-                [{ color: [] }, { background: [] }], // dropdown with defaults from theme
-                [{ font: [] }],
-                [{ align: [] }],
-
-                ['clean'] // remove formatting button
-              ]
-            }}
-            theme='snow'
-          />
-        )
+        return <HTMLEditor {...contentEditorProps!} />
       case 'switch':
         return <Switch {...switchProps} />
       case 'checkbox':
@@ -198,6 +162,22 @@ function EditableFormCell({
             readOnly={readonly}
             allowClear={allowClear}
             iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
+          />
+        )
+      case 'text':
+        return (
+          <Input
+            {...inputProps}
+            title={title}
+            required={required}
+            placeholder={placeholder}
+            name={dataIndex}
+            value={value}
+            autoComplete='give-text'
+            allowClear={allowClear}
+            disabled={disabled}
+            readOnly={readonly}
+            className={cn('w-full', restProps.className)}
           />
         )
       default:
