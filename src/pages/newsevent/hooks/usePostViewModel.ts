@@ -16,7 +16,6 @@ const usePostViewModel = () => {
   const [openModalCreate, setOpenModalCreate] = useState<boolean>(false)
   const [openModalReview, setOpenModalReview] = useState<boolean>(false)
   const [newRecord, setNewRecord] = useState<PostTableDataType | null>(null)
-  const [branches, setPosts] = useState<Post[]>([])
 
   useEffect(() => {
     initialize()
@@ -36,7 +35,6 @@ const usePostViewModel = () => {
         (res) => {
           if (!res?.success) throw new Error(`${res?.message}`)
           const data = res.data as Post[]
-          setPosts(data)
           const newDataSource = data.map((item) => {
             return { ...item, key: `${item.id}` }
           })
@@ -132,8 +130,7 @@ const usePostViewModel = () => {
       openModalCreate,
       setOpenModalCreate,
       newRecord,
-      setNewRecord,
-      branches
+      setNewRecord
     },
     service,
     action: {

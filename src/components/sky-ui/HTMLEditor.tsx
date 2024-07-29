@@ -13,12 +13,14 @@ const HTMLEditor: React.FC<HTMLEditorProps> = ({ ...props }) => {
     <>
       <Editor
         apiKey={appConfig.tinyMCEApiKey}
-        initialValue={props.defaultValue ?? '<p>Type something...</p>'}
+        initialValue={props.defaultValue}
         value={props.value}
         onEditorChange={props.onChange}
         init={{
+          placeholder: 'Type something..',
           height: 500,
           menubar: true,
+          entity_encoding: 'raw',
           mode: 'readonly',
           plugins: [
             'importcss',
@@ -43,7 +45,7 @@ const HTMLEditor: React.FC<HTMLEditorProps> = ({ ...props }) => {
           ],
           toolbar:
             'undo redo | accordion accordionremove | blocks fontfamily fontsize | bold italic underline strikethrough | align numlist bullist | link image | table media | lineheight outdent indent| forecolor backcolor removeformat | charmap emoticons | code fullscreen preview | save print | pagebreak anchor codesample | ltr rtl',
-          content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14pt }'
+          content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:12pt }'
         }}
       />
     </>
