@@ -38,7 +38,6 @@ export interface EditableStateCellProps extends HTMLAttributes<HTMLElement> {
   isEditing?: boolean
   dataIndex?: string
   value?: any
-  setLoading?: (enable: boolean) => void
   defaultValue?: any
   onValueChange?: (value: any, option?: any) => void
   selectProps?: SelectProps
@@ -265,7 +264,7 @@ function EditableStateCell({
     }
   })()
 
-  return <>{isEditing ? editableRender ? editableRender : inputNode : <>{restProps.children}</>}</>
+  return <>{isEditing ? (editableRender ? editableRender : inputNode) : restProps.children}</>
 }
 
 export default memo(EditableStateCell)

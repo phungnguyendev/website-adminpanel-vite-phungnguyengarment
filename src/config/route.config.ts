@@ -4,7 +4,7 @@ import { GoInfo } from 'react-icons/go'
 import { IoNewspaperOutline } from 'react-icons/io5'
 import { IconType } from 'react-icons/lib'
 import { MdOutlineMiscellaneousServices } from 'react-icons/md'
-import { TbSmartHome } from 'react-icons/tb'
+import { TbSmartHome, TbUserSearch } from 'react-icons/tb'
 
 const HomePage = lazy(() => import('~/pages/home/HomePage'))
 const AboutPage = lazy(() => import('~/pages/about/AboutPage'))
@@ -62,7 +62,7 @@ const routes: SideType[] = [
     name: 'Tuyển dụng',
     path: '/careers',
     component: RecruitmentPage,
-    icon: TbSmartHome
+    icon: TbUserSearch
   }
 ]
 

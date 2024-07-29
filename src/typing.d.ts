@@ -80,7 +80,7 @@ export interface HomeProduct {
   updatedAt?: string
 }
 
-export interface IndustrySector {
+export interface JobSector {
   id?: number
   title?: string
   orderNumber?: number
@@ -167,9 +167,8 @@ export interface Project {
 
 export interface RecruitmentPost {
   id?: number
-  industrySectorID?: number
-  vacancies?: string
-  quantity?: string
+  jobSectorID?: number
+  quantity?: number
   wage?: string
   workingTime?: string
   workingPlace?: string
@@ -177,4 +176,5 @@ export interface RecruitmentPost {
   orderNumber?: number
   createdAt?: string
   updatedAt?: string
+  jobSector?: JobSector
 }

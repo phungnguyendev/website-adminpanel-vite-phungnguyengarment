@@ -1,83 +1,210 @@
-import { ColumnsType } from 'antd/es/table'
+import { Flex, Typography } from 'antd'
+import { ColumnsType, ColumnType } from 'antd/es/table'
 import BaseLayout from '~/components/layout/BaseLayout'
 import EditableStateCell from '~/components/sky-ui/SkyTable/EditableStateCell'
-import SkyTable2 from '~/components/sky-ui/SkyTable/SkyTable'
-import SkyTableRow from '~/components/sky-ui/SkyTable/SkyTableRow'
+import SkyTable from '~/components/sky-ui/SkyTable/SkyTable'
+import SkyTableActionRow from '~/components/sky-ui/SkyTable/SkyTableActionRow'
 import SkyTableTypography from '~/components/sky-ui/SkyTable/SkyTableTypography'
-import { IndustrySector } from '~/typing'
+import SkyTableWrapperLayout from '~/components/sky-ui/SkyTable/SkyTableWrapperLayout'
 import {
+  dateValidatorChange,
+  dateValidatorDisplay,
+  dateValidatorInit,
   numberValidatorChange,
   numberValidatorDisplay,
+  numberValidatorInit,
   textValidatorChange,
   textValidatorDisplay,
   textValidatorInit
 } from '~/utils/helpers'
-import useRecruitmentViewModel from '../hooks/useRecruitmentViewModel'
-import { RecruitmentTableDataType } from '../type'
-import ModalAddNewRecruitment from './ModalAddNewBranch'
+import useRecruitmentPostViewModel from '../hooks/useRecruitmentPostViewModel'
+import { RecruitmentPostTableDataType } from '../type'
+import ModalAddNewRecruitment from './ModalAddNewRecruitment'
 
 const RecruitmentTable: React.FC = () => {
-  const { table, state, action, service } = useRecruitmentViewModel()
-  const { newRecord, setNewRecord, openModal, setOpenModal, industrySectors } = state
-  const { onUpdate, onCreate, onDelete, onPage } = action
-  const { recruitmentService } = service
-
-  const matchIndustrySectorItem = (industrySectorID?: number | null | undefined): IndustrySector | undefined => {
-    return industrySectors.find((self) => self.id === industrySectorID)
+  const viewModel = useRecruitmentPostViewModel()
+  const columns = {
+    id: (record: RecruitmentPostTableDataType) => {
+      return <SkyTableTypography strong>{textValidatorDisplay(`#${record.id}`)}</SkyTableTypography>
+    },
+    jobSector: (record: RecruitmentPostTableDataType) => {
+      return (
+        <EditableStateCell
+          isEditing={viewModel.table.isEditing(record.key)}
+          dataIndex='vacancies'
+          title='Vị trí tuyển dụng'
+          required
+          inputType='select'
+          onValueChange={(val: number) =>
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, jobSectorID: numberValidatorChange(val) }
+            })
+          }
+          defaultValue={numberValidatorInit(record.jobSectorID)}
+          selectProps={{
+            options: viewModel.state.jobSectors.map((item, index) => {
+              return { label: item.title, value: item.id, key: index }
+            })
+          }}
+        >
+          <Flex wrap='wrap' justify='space-between' align='center' gap={10}>
+            <SkyTableTypography className='w-fit'>{textValidatorDisplay(record.jobSector?.title)}</SkyTableTypography>
+          </Flex>
+        </EditableStateCell>
+      )
+    },
+    quantity: (record: RecruitmentPostTableDataType) => {
+      return (
+        <EditableStateCell
+          isEditing={viewModel.table.isEditing(record.key)}
+          inputType='number'
+          defaultValue={numberValidatorInit(record.quantity)}
+          value={viewModel.state.newRecord?.quantity}
+          onValueChange={(val: number) =>
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, quantity: numberValidatorChange(val) }
+            })
+          }
+        >
+          <SkyTableTypography>{numberValidatorDisplay(record.quantity)}</SkyTableTypography>
+        </EditableStateCell>
+      )
+    },
+    wage: (record: RecruitmentPostTableDataType) => {
+      return (
+        <EditableStateCell
+          isEditing={viewModel.table.isEditing(record.key)}
+          inputType='text'
+          defaultValue={textValidatorInit(record.wage)}
+          value={viewModel.state.newRecord?.wage}
+          onValueChange={(val: string) =>
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, wage: textValidatorChange(val) }
+            })
+          }
+        >
+          <SkyTableTypography>{textValidatorDisplay(record.wage)}</SkyTableTypography>
+        </EditableStateCell>
+      )
+    },
+    workingTime: (record: RecruitmentPostTableDataType) => {
+      return (
+        <EditableStateCell
+          isEditing={viewModel.table.isEditing(record.key)}
+          inputType='text'
+          defaultValue={textValidatorInit(record.workingTime)}
+          value={viewModel.state.newRecord?.workingTime}
+          onValueChange={(val: string) =>
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, workingTime: textValidatorChange(val) }
+            })
+          }
+        >
+          <SkyTableTypography>{textValidatorDisplay(record.workingTime)}</SkyTableTypography>
+        </EditableStateCell>
+      )
+    },
+    workingPlace: (record: RecruitmentPostTableDataType) => {
+      return (
+        <EditableStateCell
+          isEditing={viewModel.table.isEditing(record.key)}
+          inputType='text'
+          defaultValue={textValidatorInit(record.workingPlace)}
+          value={viewModel.state.newRecord?.workingPlace}
+          onValueChange={(val: string) =>
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, workingPlace: textValidatorChange(val) }
+            })
+          }
+        >
+          <SkyTableTypography>{textValidatorDisplay(record.workingPlace)}</SkyTableTypography>
+        </EditableStateCell>
+      )
+    },
+    expirationDate: (record: RecruitmentPostTableDataType) => {
+      return (
+        <EditableStateCell
+          isEditing={viewModel.table.isEditing(record.key)}
+          inputType='datepicker'
+          defaultValue={dateValidatorInit(record.expirationDate)}
+          value={viewModel.state.newRecord?.expirationDate}
+          onValueChange={(val: string) =>
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, expirationDate: dateValidatorChange(val) }
+            })
+          }
+        >
+          <SkyTableTypography>{dateValidatorDisplay(record.expirationDate)}</SkyTableTypography>
+        </EditableStateCell>
+      )
+    },
+    actionCol: (record: RecruitmentPostTableDataType) => {
+      return (
+        <SkyTableActionRow
+          record={record}
+          editingKey={viewModel.table.editingKey}
+          deletingKey={viewModel.table.deletingKey}
+          buttonEdit={{
+            onClick: () => {
+              viewModel.state.setNewRecord({
+                jobSectorID: record.jobSectorID,
+                quantity: record.quantity,
+                wage: record.wage,
+                workingTime: record.workingTime,
+                workingPlace: record.workingPlace,
+                expirationDate: record.expirationDate
+              })
+              viewModel.table.handleStartEditing(record.key)
+            }
+          }}
+          buttonSave={{
+            // Save
+            onClick: () => viewModel.action.handleUpdate(record)
+          }}
+          // Start delete
+          buttonDelete={{
+            onClick: () => viewModel.table.handleStartDeleting(record.key)
+          }}
+          // Cancel editing
+          onConfirmCancelEditing={() => viewModel.table.handleCancelEditing()}
+          // Cancel delete
+          onConfirmCancelDeleting={() => viewModel.table.handleCancelDeleting()}
+          // Delete (update status record => 'deleted')
+          onConfirmDelete={() => viewModel.action.handleDelete(record)}
+        />
+      )
+    }
   }
 
-  const columns: ColumnsType<RecruitmentTableDataType> = [
+  const tableColumns: ColumnsType<RecruitmentPostTableDataType> = [
+    {
+      key: 'sort',
+      width: '2%'
+    },
+    {
+      title: 'ID',
+      dataIndex: 'id',
+      width: '5%',
+      render: (_value: any, record: RecruitmentPostTableDataType) => {
+        return columns.id(record)
+      }
+    },
     {
       title: 'Vị trí tuyển dụng',
-      dataIndex: 'vacancies',
+      dataIndex: 'jobSector',
       width: '20%',
-      render: (_value: any, record: RecruitmentTableDataType) => {
-        return (
-          <EditableStateCell
-            isEditing={table.isEditing(record.key)}
-            dataIndex='vacancies'
-            title='Vị trí tuyển dụng'
-            inputType='select'
-            selectProps={{
-              options: industrySectors.map((item) => {
-                return {
-                  value: numberValidatorDisplay(item.id),
-                  label: textValidatorDisplay(item.title),
-                  optionData: numberValidatorDisplay(item.id)
-                }
-              }),
-              defaultValue: textValidatorInit(matchIndustrySectorItem(record.industrySectorID)?.title)
-            }}
-            onValueChange={(industrySectorID: number) => {
-              setNewRecord({ ...newRecord, industrySectorID: numberValidatorChange(industrySectorID) })
-            }}
-          >
-            <SkyTableTypography status={'active'}>{textValidatorDisplay(record.vacancies)}</SkyTableTypography>
-          </EditableStateCell>
-        )
+      responsive: ['sm'],
+      render: (_value: any, record: RecruitmentPostTableDataType) => {
+        return columns.jobSector(record)
       }
     },
     {
       title: 'Số lượng',
       dataIndex: 'quantity',
-      width: '5%',
+      width: '10%',
       responsive: ['sm'],
-      render: (_value: any, record: RecruitmentTableDataType) => {
-        return (
-          <EditableStateCell
-            isEditing={table.isEditing(record.key)}
-            dataIndex='quantity'
-            title='Quantity'
-            inputType='number'
-            initialValue={textValidatorInit(record.quantity)}
-            value={newRecord.quantity}
-            onValueChange={(quantity: string) => {
-              setNewRecord({ ...newRecord, quantity: textValidatorChange(quantity) })
-            }}
-          >
-            <SkyTableTypography status={'active'}>{textValidatorDisplay(record.quantity)}</SkyTableTypography>
-          </EditableStateCell>
-        )
+      render: (_value: any, record: RecruitmentPostTableDataType) => {
+        return columns.quantity(record)
       }
     },
     {
@@ -85,22 +212,8 @@ const RecruitmentTable: React.FC = () => {
       dataIndex: 'wage',
       width: '10%',
       responsive: ['sm'],
-      render: (_value: any, record: RecruitmentTableDataType) => {
-        return (
-          <EditableStateCell
-            isEditing={table.isEditing(record.key)}
-            dataIndex='wage'
-            title='Wage'
-            inputType='text'
-            initialValue={textValidatorInit(record.wage)}
-            value={newRecord.wage}
-            onValueChange={(wage: string) => {
-              setNewRecord({ ...newRecord, wage: textValidatorChange(wage) })
-            }}
-          >
-            <SkyTableTypography status={'active'}>{textValidatorDisplay(record.wage)}</SkyTableTypography>
-          </EditableStateCell>
-        )
+      render: (_value: any, record: RecruitmentPostTableDataType) => {
+        return columns.wage(record)
       }
     },
     {
@@ -108,22 +221,8 @@ const RecruitmentTable: React.FC = () => {
       dataIndex: 'workingTime',
       width: '15%',
       responsive: ['sm'],
-      render: (_value: any, record: RecruitmentTableDataType) => {
-        return (
-          <EditableStateCell
-            isEditing={table.isEditing(record.key)}
-            dataIndex='workingTime'
-            title='Working Time'
-            inputType='text'
-            initialValue={textValidatorInit(record.workingTime)}
-            value={newRecord.workingTime}
-            onValueChange={(workingTime: string) => {
-              setNewRecord({ ...newRecord, workingTime: textValidatorChange(workingTime) })
-            }}
-          >
-            <SkyTableTypography status={'active'}>{textValidatorDisplay(record.workingTime)}</SkyTableTypography>
-          </EditableStateCell>
-        )
+      render: (_value: any, record: RecruitmentPostTableDataType) => {
+        return columns.workingTime(record)
       }
     },
     {
@@ -131,120 +230,70 @@ const RecruitmentTable: React.FC = () => {
       dataIndex: 'workingPlace',
       width: '15%',
       responsive: ['sm'],
-      render: (_value: any, record: RecruitmentTableDataType) => {
-        return (
-          <EditableStateCell
-            isEditing={table.isEditing(record.key)}
-            dataIndex='workingPlace'
-            title='Working place'
-            inputType='text'
-            initialValue={textValidatorInit(record.workingPlace)}
-            value={newRecord.workingPlace}
-            onValueChange={(workingPlace: string) => {
-              setNewRecord({ ...newRecord, workingPlace: textValidatorChange(workingPlace) })
-            }}
-          >
-            <SkyTableTypography status={'active'}>{textValidatorDisplay(record.workingPlace)}</SkyTableTypography>
-          </EditableStateCell>
-        )
+      render: (_value: any, record: RecruitmentPostTableDataType) => {
+        return columns.workingPlace(record)
       }
     },
     {
       title: 'Ngày hết hạn',
       dataIndex: 'expirationDate',
-      width: '10%',
+      width: '15%',
       responsive: ['sm'],
-      render: (_value: any, record: RecruitmentTableDataType) => {
-        return (
-          <EditableStateCell
-            isEditing={table.isEditing(record.key)}
-            dataIndex='expirationDate'
-            title='Expiration Date'
-            inputType='text'
-            initialValue={textValidatorInit(record.expirationDate)}
-            value={newRecord.expirationDate}
-            onValueChange={(expirationDate: string) => {
-              setNewRecord({ ...newRecord, expirationDate: textValidatorChange(expirationDate) })
-            }}
-          >
-            <SkyTableTypography status={'active'}>{textValidatorDisplay(record.expirationDate)}</SkyTableTypography>
-          </EditableStateCell>
-        )
+      render: (_value: any, record: RecruitmentPostTableDataType) => {
+        return columns.expirationDate(record)
       }
     }
   ]
 
+  const actionCol: ColumnType<RecruitmentPostTableDataType> = {
+    title: 'Operation',
+    width: '0.001%',
+    render: (_value: any, record: RecruitmentPostTableDataType) => {
+      return columns.actionCol(record)
+    }
+  }
+
   return (
     <>
-      <BaseLayout
-        title='Recruitment'
-        titleProps={{
-          level: 3,
-          type: 'secondary'
-        }}
-        onAddNewClick={{
-          onClick: () => setOpenModal(true),
-          isShow: true
-        }}
-      >
-        <SkyTable2
-          dataSource={table.dataSource}
-          setDataSource={table.setDataSource}
-          loading={table.loading}
-          columns={columns}
-          editingKey={table.editingKey}
-          deletingKey={table.deletingKey}
-          metaData={recruitmentService.metaData}
-          onPageChange={onPage}
-          isShowDeleted={table.showDeleted}
-          components={{
-            body: {
-              row: SkyTableRow
-            }
+      <BaseLayout>
+        <SkyTableWrapperLayout
+          before={
+            <>
+              <Flex className='w-full'>
+                <Typography.Text type='secondary' className='text-xl font-semibold'>
+                  Recruitment's length ({viewModel.table.dataSource.length})
+                </Typography.Text>
+              </Flex>
+            </>
+          }
+          addNewProps={{
+            onClick: () => viewModel.state.setOpenModalCreate(true)
           }}
-          onDraggableChange={(oldData, newData) => {
-            if (newData) {
-              console.table({
-                oldData: oldData,
-                newData: newData
-              })
-            }
-          }}
-          actionProps={{
-            onEdit: {
-              onClick: (_e, record) => {
-                setNewRecord({ ...record })
-                table.handleStartEditing(record!.key!)
-              },
-              isShow: true
-            },
-            onSave: {
-              onClick: (_e, record) => onUpdate(record!)
-            },
-            onDelete: {
-              onClick: (_e, record) => table.handleStartDeleting(record!.key!),
-              isShow: !table.showDeleted
-            },
-            onRestore: {
-              onClick: (_e, record) => table.handleStartRestore(record!.key!),
-              isShow: false
-            },
-            onConfirmCancelEditing: () => {
-              table.handleConfirmCancelEditing()
-            },
-            onConfirmCancelDeleting: () => table.handleConfirmCancelDeleting(),
-            onConfirmDelete: (record) => onDelete(record),
-            onConfirmCancelRestore: () => table.handleConfirmCancelRestore(),
-            isShow: true
-          }}
-        />
+        >
+          <SkyTable
+            loading={viewModel.table.loading}
+            tableColumns={{
+              columns: tableColumns,
+              actionColumn: actionCol
+              // showAction: isAcceptRole(PERMISSION_ACCESS_ROLE, currentUser.roles)
+            }}
+            dataSource={viewModel.table.dataSource}
+            setDataSource={viewModel.table.setDataSource}
+            pagination={{
+              pageSize: viewModel.table.paginator.pageSize,
+              current: viewModel.table.paginator.page,
+              onChange: viewModel.action.handlePageChange
+            }}
+            onDragEnd={viewModel.action.handleDraggableEnd}
+          />
+        </SkyTableWrapperLayout>
       </BaseLayout>
-      {openModal && (
+
+      {viewModel.state.openModalCreate && (
         <ModalAddNewRecruitment
-          loading={table.loading}
-          openModal={openModal}
-          setOpenModal={setOpenModal}
-          onAddNew={onCreate}
+          open={viewModel.state.openModalCreate}
+          setOpenModal={viewModel.state.setOpenModalCreate}
+          onCreate={viewModel.action.handleCreate}
         />
       )}
     </>

@@ -1,13 +1,22 @@
-import { Branch, IndustrySector, RecruitmentPost } from '~/typing'
+import { JobSector, RecruitmentPost } from '~/typing'
 
-export interface RecruitmentTableDataType extends RecruitmentPost {
+export interface RecruitmentPostTableDataType extends RecruitmentPost {
   key: string
 }
 
-export interface IndustrySectorTableDataType extends IndustrySector {
+export interface JobSectorTableDataType extends JobSector {
   key: string
 }
 
-export interface BranchTableDataType extends Branch {
-  key: string
+export interface RecruitmentPostNewRecord {
+  jobSectorID?: number
+  quantity?: number
+  wage?: string
+  workingTime?: string
+  workingPlace?: string
+  expirationDate?: string
+}
+
+export interface JobSectorNewRecord {
+  title?: string
 }
