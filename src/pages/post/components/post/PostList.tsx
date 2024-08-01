@@ -29,7 +29,8 @@ const PostList = () => {
           }}
         >
           <SkyList
-            grid={{ gutter: 0, column: 4 }}
+            grid={{ gutter: 20, xxl: 5, xl: 4, lg: 3, md: 2, sm: 1 }}
+            itemLayout='horizontal'
             dataSource={viewModel.table.dataSource}
             renderItem={(record, index) => (
               <SkyListItem key={index}>

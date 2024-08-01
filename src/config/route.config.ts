@@ -10,7 +10,7 @@ const HomePage = lazy(() => import('~/pages/home/HomePage'))
 const AboutPage = lazy(() => import('~/pages/about/AboutPage'))
 const ServicePage = lazy(() => import('~/pages/service-page/ServicePage'))
 const ProductPage = lazy(() => import('~/pages/product/ProductPage'))
-const NewsEventPage = lazy(() => import('~/pages/newsevent/NewsEventPage'))
+const PostPage = lazy(() => import('~/pages/post/PostPage'))
 const RecruitmentPage = lazy(() => import('~/pages/recruitment/RecruitmentPage'))
 
 export type SideType = {
@@ -54,7 +54,7 @@ const routes: SideType[] = [
     key: '4',
     name: 'Tin tức & Sự kiện',
     path: '/news',
-    component: NewsEventPage,
+    component: PostPage,
     icon: IoNewspaperOutline
   },
   {
