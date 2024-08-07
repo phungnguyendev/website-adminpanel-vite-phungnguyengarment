@@ -1,71 +1,62 @@
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons'
-import { App as AntApp, Button, Checkbox, Flex, Form, Input, Typography } from 'antd'
+import { App as AntApp, Button, Flex, Form, Input, Typography } from 'antd'
 import { LockKeyhole, Mail } from 'lucide-react'
 import React, { HTMLAttributes, useEffect, useState } from 'react'
+import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import AuthAPI from '~/api/services/AuthAPI'
 import bg from '~/assets/a1.jpg'
 import logo from '~/assets/logo.svg'
 import useTitle from '~/components/hooks/useTitle'
+import appConfig from '~/config/app.config'
 import useLocalStorage from '~/hooks/useLocalStorage'
+import { setUser } from '~/store/actions-creator'
 import { User } from '~/typing'
+import { isValidString } from '~/utils/helpers'
 
 interface Props extends HTMLAttributes<HTMLElement> {}
 
 type LayoutType = Parameters<typeof Form>[0]['layout']
 
 const LoginPage: React.FC<Props> = ({ ...props }) => {
+  useTitle('Đăng nhập')
   const [form] = Form.useForm()
   const { message } = AntApp.useApp()
   const navigate = useNavigate()
-  const [accessTokenStored, setAccessTokenStored] = useLocalStorage('accessToken', '')
-  const [, setUserStorage] = useLocalStorage<User>('userStorage', {})
   const [loading, setLoading] = useState<boolean>(false)
   const [formLayout, setFormLayout] = useState<LayoutType>('horizontal')
-  useTitle('Đăng nhập')
+  const [userStorage, setUserStorage] = useLocalStorage<User>('user', {})
+  const dispatch = useDispatch()
 
   useEffect(() => {
-    setAccessTokenStored(null)
+    initialize()
   }, [])
 
-  useEffect(() => {
-    if (accessTokenStored && accessTokenStored.length !== 0) {
-      navigate('/')
-    }
-  }, [accessTokenStored])
+  const initialize = () => {
+    if (isValidString(userStorage?.email) || isValidString(userStorage?.password)) localStorage.removeItem('user')
+  }
 
   const onFormLayoutChange = ({ layout }: { layout: LayoutType }) => {
     setFormLayout(layout)
   }
 
-  const onFinish = async (payload: any) => {
+  const handleFinish = async (user: { email: string; password: string }) => {
     try {
-      const { email, password } = payload
       setLoading(true)
-      // Create a new request to login user
-      await AuthAPI.login({ email, password }).then((meta) => {
-        if (!meta?.success) throw new Error(meta?.message)
-        const user = meta.data as User
-        if (user) {
-          // Save to local storage
-          setAccessTokenStored(user.accessToken)
-          setUserStorage(user)
-        }
-        // Send message app
-        message.success('Success!')
-        // Navigation to '/' (Dashboard page) if login success
-        navigate('/')
-      })
+      if (user.email.length <= 0) throw new Error('Please enter email address!')
+      if (user.password.length <= 0) throw new Error('Please enter password!')
+      if (user.email.trim() !== appConfig.admin.email.trim()) throw new Error('Invalid email address')
+      if (user.password.trim() !== appConfig.admin.password.trim()) throw new Error('Invalid password')
+      // Save user to local storage
+      setUserStorage(user)
+      // Set user to redux
+      dispatch(setUser(user))
+      message.success('Login success')
+      navigate('/')
     } catch (error: any) {
-      // const resError: ResponseDataType = error.data
-      message.error(`${error}`)
+      message.error(`${error.message}`)
     } finally {
       setLoading(false)
     }
-  }
-
-  const onFinishFailed = (errorInfo: any) => {
-    console.log('Failed:', errorInfo)
   }
 
   const formItemLayout =
@@ -82,10 +73,6 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
           wrapperCol: { span: 14, offset: 4 }
         }
       : null
-
-  const forgerPasswordHandler = () => {
-    navigate('/verify-email')
-  }
 
   return (
     <Flex {...props} className='relative' align='center' justify='center'>
@@ -125,14 +112,13 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
               labelAlign='left'
               initialValues={{ layout: formLayout }}
               onValuesChange={onFormLayoutChange}
-              onFinish={onFinish}
+              onFinish={handleFinish}
               className='w-full'
-              onFinishFailed={onFinishFailed}
               autoComplete='off'
             >
               <Flex className='w-full' align='end' vertical gap={20}>
                 <Flex className='mb-14 w-full' gap={16} vertical>
-                  <Flex className='w-full' vertical gap={8}>
+                  <Flex className='w-full' vertical gap={20}>
                     <Form.Item
                       name='email'
                       className='m-0 w-full p-0'
@@ -144,14 +130,15 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
                           type: 'email'
                         }
                       ]}
-                      initialValue={'phungnguyengarment.dev@gmail.com'}
                     >
                       <Input
                         placeholder='Email'
                         className='w-full'
                         type='email'
+                        size='large'
                         prefix={<Mail className='mr-1' size={16} />}
                         allowClear
+                        autoComplete='email'
                       />
                     </Form.Item>
 
@@ -159,33 +146,24 @@ const LoginPage: React.FC<Props> = ({ ...props }) => {
                       name='password'
                       className='m-0 w-full p-0'
                       rules={[{ required: true, message: 'Please input your password!' }]}
-                      initialValue={'Phungnguyen@2771'}
                     >
                       <Input.Password
                         placeholder='Password'
                         className='w-full'
                         type='password'
+                        size='large'
                         prefix={<LockKeyhole className='mr-1' size={16} />}
-                        // onChange={(e) => setPassword(e.target.value)}
-                        // value={password}
                         allowClear
                         iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
+                        autoComplete='current-password'
                       />
                     </Form.Item>
-                  </Flex>
-                  <Flex className='w-full' justify='space-between' align='center'>
-                    <Form.Item className='m-0 p-0' name='remember' valuePropName='checked' noStyle>
-                      <Checkbox>Remember me</Checkbox>
-                    </Form.Item>
-                    <Button className='w-fit' onClick={forgerPasswordHandler} type='link' loading={loading}>
-                      Forget password?
-                    </Button>
                   </Flex>
                 </Flex>
 
                 <Flex className='w-full' justify='end'>
                   <Form.Item {...buttonItemLayout} className='m-0 w-fit'>
-                    <Button htmlType='submit' className='button-medium h-fit' type='primary' loading={loading}>
+                    <Button htmlType='submit' className='h-fit' size='large' type='primary' loading={loading}>
                       Login
                     </Button>
                   </Form.Item>

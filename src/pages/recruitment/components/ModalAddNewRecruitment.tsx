@@ -80,7 +80,6 @@ const ModalAddNewRecruitment: React.FC<Props> = ({ onCreate, ...props }) => {
           )}
           <EditableFormCell
             isEditing
-            required
             dataIndex='quantity'
             title='Số lượng'
             defaultValue={5}
@@ -89,7 +88,14 @@ const ModalAddNewRecruitment: React.FC<Props> = ({ onCreate, ...props }) => {
           />
           <EditableFormCell
             isEditing
-            required
+            dataIndex='age'
+            title='Độ tuổi'
+            placeholder='Ví dụ: Từ 18 - 45 tuổi'
+            defaultValue='4tr5 (cơ bản)'
+            inputType='text'
+          />
+          <EditableFormCell
+            isEditing
             dataIndex='wage'
             title='Mức lương'
             placeholder='4tr5 (cơ bản)'
@@ -98,7 +104,6 @@ const ModalAddNewRecruitment: React.FC<Props> = ({ onCreate, ...props }) => {
           />
           <EditableFormCell
             isEditing
-            required
             dataIndex='workingTime'
             title='Thời gian làm việc'
             placeholder='Từ thứ 2 đến thứ 7 (7h30 - 16h30)'
@@ -107,7 +112,6 @@ const ModalAddNewRecruitment: React.FC<Props> = ({ onCreate, ...props }) => {
           />
           <EditableFormCell
             isEditing
-            required
             dataIndex='workingPlace'
             title='Nơi làm việc'
             placeholder='Phụng Nguyên / Phụng Tình'

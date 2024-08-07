@@ -87,6 +87,23 @@ const RecruitmentTable: React.FC = () => {
         </EditableStateCell>
       )
     },
+    routeTitle: (record: RecruitmentPostTableDataType) => {
+      return (
+        <EditableStateCell
+          isEditing={viewModel.table.isEditing(record.key)}
+          inputType='text'
+          defaultValue={textValidatorInit(record.routeTitle)}
+          value={viewModel.state.newRecord?.routeTitle}
+          onValueChange={(val: string) =>
+            viewModel.state.setNewRecord((prev) => {
+              return { ...prev, routeTitle: textValidatorChange(val) }
+            })
+          }
+        >
+          <SkyTableTypography>{textValidatorDisplay(record.routeTitle)}</SkyTableTypography>
+        </EditableStateCell>
+      )
+    },
     workingTime: (record: RecruitmentPostTableDataType) => {
       return (
         <EditableStateCell
@@ -196,6 +213,15 @@ const RecruitmentTable: React.FC = () => {
       responsive: ['sm'],
       render: (_value: any, record: RecruitmentPostTableDataType) => {
         return columns.jobSector(record)
+      }
+    },
+    {
+      title: 'Route title (Short)',
+      dataIndex: 'routeTitle',
+      width: '20%',
+      responsive: ['sm'],
+      render: (_value: any, record: RecruitmentPostTableDataType) => {
+        return columns.routeTitle(record)
       }
     },
     {

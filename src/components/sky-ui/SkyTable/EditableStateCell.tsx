@@ -3,13 +3,15 @@ import {
   Checkbox,
   CheckboxProps,
   DatePicker,
+  Flex,
   Input,
   InputNumber,
   InputNumberProps,
   Select,
   Switch,
   SwitchProps,
-  Table
+  Table,
+  Typography
 } from 'antd'
 import { InputProps, TextAreaProps } from 'antd/es/input'
 import { SelectProps } from 'antd/es/select'
@@ -106,7 +108,14 @@ function EditableStateCell({
           />
         )
       case 'contentEditor':
-        return <HTMLEditor {...contentEditorProps!} />
+        return (
+          <HTMLEditor
+            {...contentEditorProps!}
+            value={value}
+            defaultValue={defaultValue}
+            onChange={(val: string) => onValueChange?.(val)}
+          />
+        )
       case 'number':
         return (
           <InputNumber
@@ -264,7 +273,26 @@ function EditableStateCell({
     }
   })()
 
-  return <>{isEditing ? (editableRender ? editableRender : inputNode) : restProps.children}</>
+  return (
+    <>
+      {isEditing ? (
+        editableRender ? (
+          editableRender
+        ) : title ? (
+          <Flex gap={20}>
+            <Typography.Text className={cn('min-w-[120px] flex-shrink-0', restProps.className)}>
+              {title}
+            </Typography.Text>
+            {inputNode}
+          </Flex>
+        ) : (
+          inputNode
+        )
+      ) : (
+        restProps.children
+      )}
+    </>
+  )
 }
 
 export default memo(EditableStateCell)
