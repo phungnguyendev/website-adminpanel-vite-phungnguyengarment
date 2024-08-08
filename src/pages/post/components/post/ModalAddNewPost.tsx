@@ -32,7 +32,7 @@ const ModalAddNewPost: React.FC<Props> = ({ onCreate, ...props }) => {
           <EditableFormCell isEditing required dataIndex='title' title='Title' inputType='text' />
           <EditableFormCell isEditing required dataIndex='imageUrl' title='Image link:' inputType='text' />
           <EditableFormCell isEditing dataIndex='publishedAt' title='Published at:' inputType='dateTimePicker' />
-          <HTMLEditor onChange={(data) => setNewRecord({ content: data })} />
+          <HTMLEditor value={newRecord.content ?? ''} onChange={(data) => setNewRecord({ content: data })} />
         </Form>
       </SkyModal>
     </>

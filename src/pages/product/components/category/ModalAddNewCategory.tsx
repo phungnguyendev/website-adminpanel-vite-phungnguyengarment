@@ -4,10 +4,10 @@ import SkyModal, { SkyModalProps } from '~/components/sky-ui/SkyModal'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
 import { HeroBanner } from '~/typing'
 import { textValidatorChange } from '~/utils/helpers'
-import { NewRecordCategory } from '../../type'
+import { CategoryNewRecord } from '../../type'
 
 interface Props extends SkyModalProps {
-  onCreate: (data: NewRecordCategory) => void
+  onCreate: (data: CategoryNewRecord) => void
 }
 
 const ModalAddNewCategory: React.FC<Props> = ({ onCreate, ...props }) => {

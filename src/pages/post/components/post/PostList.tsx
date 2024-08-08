@@ -56,7 +56,7 @@ const PostList = () => {
       )}
       {viewModel.state.openModalReview && viewModel.state.newRecord && (
         <ModalReviewPostDetails
-          data={viewModel.state.newRecord}
+          item={{ ...viewModel.state.newRecord }}
           open={viewModel.state.openModalReview}
           setOpenModal={viewModel.state.setOpenModalReview}
           onSave={viewModel.action.handleUpdate}

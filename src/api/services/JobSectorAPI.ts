@@ -1,11 +1,11 @@
 import client, { RequestBodyType, ResponseDataType } from '~/api/client'
-import { IndustrySector } from '~/typing'
+import { JobSector } from '~/typing'
 import { responseFormatter, throwErrorFormatter } from '~/utils/response-formatter'
 
 const NAMESPACE = 'job-sectors'
 
 export default {
-  createItem: async (newItem: IndustrySector, accessToken: string): Promise<ResponseDataType> => {
+  createItem: async (newItem: JobSector, accessToken: string): Promise<ResponseDataType> => {
     return await client
       .post(`${NAMESPACE}`, newItem, {
         headers: {
@@ -47,7 +47,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItemByPk: async (id: number, itemToUpdate: IndustrySector, accessToken: string): Promise<ResponseDataType> => {
+  updateItemByPk: async (id: number, itemToUpdate: JobSector, accessToken: string): Promise<ResponseDataType> => {
     return client
       .patch(`${NAMESPACE}/${id}`, itemToUpdate, {
         headers: {
@@ -61,7 +61,7 @@ export default {
         throwErrorFormatter(error)
       })
   },
-  updateItems: async (itemsToUpdate: IndustrySector[], accessToken: string): Promise<ResponseDataType> => {
+  updateItems: async (itemsToUpdate: JobSector[], accessToken: string): Promise<ResponseDataType> => {
     return client
       .put(`${NAMESPACE}`, itemsToUpdate, {
         headers: {

@@ -1,117 +1,84 @@
-import { App as AntApp, Flex, Image, List, Typography } from 'antd'
-import React, { InputHTMLAttributes, useState } from 'react'
-import { FaCloudUploadAlt } from 'react-icons/fa'
-import { cn } from '~/utils/helpers'
+import { UploadOutlined } from '@ant-design/icons'
+import type { UploadFile, UploadProps } from 'antd'
+import { App as AntApp, Button, Flex, Upload } from 'antd'
+import { Image } from 'lucide-react'
+import React, { useState } from 'react'
+import PublicAPI from '~/api/services/PublicAPI'
+import appConfig from '~/config/app.config'
+import useLocalStorage from '~/hooks/useLocalStorage'
 
-type InputSize = 'small' | 'default' | 'large'
+type UploadType = 'images' | 'videos' | 'icons' | 'files'
 
-export interface UploaderProps extends InputHTMLAttributes<HTMLInputElement> {
-  inputSize?: InputSize
+export interface UploaderProps extends UploadProps {
+  onValueChange?: (fileList: UploadFile[]) => void
+  uploadType?: UploadType
 }
 
-const Uploader: React.FC<UploaderProps> = ({ inputSize = 'small', onChange, ...props }) => {
+const Uploader: React.FC<UploaderProps> = ({ uploadType, onValueChange, ...props }) => {
   const { message } = AntApp.useApp()
-  const [fileList, setFileList] = useState<FileList | null>(null)
-  const [previewOpen, setPreviewOpen] = useState(false)
-  const [previewImage, setPreviewImage] = useState<string | null>(null)
+  const [accessTokenStored] = useLocalStorage<string>('accessToken', '')
+  const [fileList, setFileList] = useState<UploadFile[]>([])
+  const type = props.type ?? 'drag'
 
-  const handleChangeInputFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange?.(e)
-    const files = e.target.files
-    if (files && files.length > 0) {
-      setFileList(files)
-      setPreviewImage(URL.createObjectURL(files[0]))
-      setPreviewOpen(true)
-    }
+  const uploadProps: UploadProps = {
+    ...props,
+    action: appConfig.baseURL + `/public/upload/${[uploadType]}`,
+    headers: {
+      authorization: `${accessTokenStored}`
+    },
+    onChange(info) {
+      setFileList(info.fileList)
+      const { status } = info.file
+      // if (status !== 'uploading') {
+      //   console.log(info.file, info.fileList)
+      // }
+      if (status === 'done') {
+        onValueChange?.(info.fileList)
+        message.success(`${info.file.name} file uploaded successfully.`)
+      } else if (status === 'error') {
+        message.error(`${info.file.name} file upload failed.`)
+      }
+    },
+    onRemove: (file) => {
+      PublicAPI.deleteItemByFileName(file.name ?? '', 'images', '').then((res) => {
+        if (!res?.success) throw new Error(`${res?.message}`)
+        message.success(`${res.message}`)
+      })
+      const index = fileList.indexOf(file)
+      const newFileList = fileList.slice()
+      newFileList.splice(index, 1)
+      setFileList(newFileList)
+    },
+    fileList
   }
 
   return (
-    <>
-      <input
-        {...props}
-        type='file'
-        id='upload-file'
-        onChange={handleChangeInputFile}
-        className='absolute -z-[1] h-0 w-0 overflow-hidden opacity-0'
-      />
-      <Flex
-        vertical
-        gap={10}
-        className={cn({
-          'w-[350px]': inputSize === 'small',
-          'w-[440px]': inputSize === 'default',
-          'w-[530px]': inputSize === 'large'
-        })}
+    <Flex vertical>
+      <Upload
+        {...uploadProps}
+        type={type}
+        style={{
+          height: '350px'
+        }}
+        accept='image/png, image/gif, image/jpeg'
+        className='group'
       >
-        <label
-          htmlFor='upload-file'
-          className={cn(
-            'group relative w-full cursor-pointer rounded-lg border-dashed bg-white transition-colors duration-300 hover:border-primary hover:text-primary',
-            {
-              'h-[140px]': inputSize === 'small',
-              'h-[180px]': inputSize === 'default',
-              'h-[220px]': inputSize === 'large'
-            }
-          )}
-        >
-          <Flex
-            vertical
-            gap={4}
-            justify='center'
-            align='center'
-            className={cn('absolute bottom-0 left-0 right-0 top-0 z-10 h-full w-full rounded-lg bg-accent p-5', {
-              'p-2': inputSize === 'small',
-              'p-5': inputSize === 'default',
-              'p-7': inputSize === 'large'
-            })}
-          >
-            <FaCloudUploadAlt size={inputSize === 'small' ? 32 : inputSize === 'default' ? 64 : 84} />
-            <Typography.Text
-              className={cn('font-semibold duration-500 group-hover:text-primary', {
-                'text-sm': inputSize === 'small',
-                'text-base': inputSize === 'default',
-                'text-lg': inputSize === 'large'
-              })}
-            >
-              Upload Files
-            </Typography.Text>
-            <Typography.Text
-              className={cn('text-center text-xs duration-500 group-hover:text-primary')}
-              type='secondary'
-            >
-              Image size must be less than <strong>2MB</strong>
-            </Typography.Text>
+        {type === 'select' ? (
+          <Button icon={<UploadOutlined />}>Select File</Button>
+        ) : (
+          <Flex vertical className='text-muted group-open:text-primary group-hover:text-primary'>
+            <p className='transition-colors duration-300'>
+              <Image size={46} />
+            </p>
+            <p className='ant-upload-text'>Click or drag file to this area to upload</p>
+            <p className='ant-upload-hint'>
+              Support for a single or bulk upload. Strictly prohibited from uploading company data or other banned
+              files.
+            </p>
           </Flex>
-        </label>
-        {fileList && (
-          <List
-            grid={{
-              gutter: 10,
-              column: 4
-            }}
-            dataSource={Array.from({ length: fileList.length }, (_, index) => {
-              return {
-                file: fileList[index]
-              }
-            })}
-            renderItem={(item, index) => {
-              return (
-                <List.Item key={index} className='h-[80px]'>
-                  <Image
-                    src={URL.createObjectURL(item.file)}
-                    width={80}
-                    height={80}
-                    style={{
-                      objectFit: 'cover'
-                    }}
-                  />
-                </List.Item>
-              )
-            }}
-          />
         )}
-      </Flex>
-    </>
+      </Upload>
+    </Flex>
   )
 }
 

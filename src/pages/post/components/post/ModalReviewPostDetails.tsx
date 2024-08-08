@@ -5,6 +5,7 @@ import HTMLReader from '~/components/sky-ui/HTMLReader'
 import LazyImage from '~/components/sky-ui/LazyImage'
 import SkyModal, { SkyModalProps } from '~/components/sky-ui/SkyModal'
 import EditableFormCell from '~/components/sky-ui/SkyTable/EditableFormCell'
+import { Post } from '~/typing'
 import {
   dateTimeValidatorDisplay,
   dateValidatorInit,
@@ -15,7 +16,7 @@ import {
 import { PostTableDataType } from '../../type'
 
 interface ModalReviewPostDetailsProps extends SkyModalProps {
-  data: PostTableDataType
+  item: Post
   onEdit?: (e?: React.MouseEvent<HTMLButtonElement>) => void
   onCancelEdit?: () => void
   onSave?: (data: PostTableDataType) => void
@@ -23,7 +24,7 @@ interface ModalReviewPostDetailsProps extends SkyModalProps {
 }
 
 const ModalReviewPostDetails: React.FC<ModalReviewPostDetailsProps> = ({
-  data,
+  item,
   onSave,
   onEdit,
   onCancelSave,
@@ -39,7 +40,7 @@ const ModalReviewPostDetails: React.FC<ModalReviewPostDetailsProps> = ({
     await form
       .validateFields()
       .then((row) => {
-        onSave?.({ ...data, ...row, content: model })
+        onSave?.({ ...item, ...row, content: model })
       })
       .catch((e) => {
         message.error(`${e.message}`)
@@ -53,7 +54,7 @@ const ModalReviewPostDetails: React.FC<ModalReviewPostDetailsProps> = ({
   const handleEdit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     onEdit?.(e)
     setEditing(!editing)
-    setModel(`${data.content}`)
+    setModel(`${item.content}`)
   }
 
   const handleCancelEdit = async () => {
@@ -85,9 +86,9 @@ const ModalReviewPostDetails: React.FC<ModalReviewPostDetailsProps> = ({
                 inputType='text'
                 required
                 allowClear
-                defaultValue={textValidatorInit(data.imageUrl)}
+                defaultValue={textValidatorInit(item.imageUrl)}
               >
-                <LazyImage src={textValidatorDisplay(data.imageUrl)} width={150} height={150} />
+                <LazyImage src={textValidatorDisplay(item.imageUrl)} width={150} height={150} />
               </EditableFormCell>
               <EditableFormCell
                 isEditing={editing}
@@ -97,9 +98,9 @@ const ModalReviewPostDetails: React.FC<ModalReviewPostDetailsProps> = ({
                 inputType='text'
                 required
                 allowClear
-                defaultValue={textValidatorInit(data.title)}
+                defaultValue={textValidatorInit(item.title)}
               >
-                <Typography.Title level={4}>{textValidatorDisplay(data.title)}</Typography.Title>
+                <Typography.Title level={4}>{textValidatorDisplay(item.title)}</Typography.Title>
               </EditableFormCell>
               <EditableFormCell
                 isEditing={editing}
@@ -108,20 +109,20 @@ const ModalReviewPostDetails: React.FC<ModalReviewPostDetailsProps> = ({
                 dataIndex='publishedAt'
                 inputType='dateTimePicker'
                 required
-                defaultValue={dateValidatorInit(data.publishedAt)}
+                defaultValue={dateValidatorInit(item.publishedAt)}
               >
                 <Typography.Text type='secondary' className='text-sm italic'>
-                  {dateTimeValidatorDisplay(data.publishedAt)}
+                  {dateTimeValidatorDisplay(item.publishedAt)}
                 </Typography.Text>
               </EditableFormCell>
               {editing ? (
                 <HTMLEditor
                   value={model}
-                  defaultValue={textValidatorInit(data.content)}
+                  defaultValue={textValidatorInit(item.content)}
                   onChange={handleChangeHTMLEditor}
                 />
               ) : (
-                <HTMLReader htmlString={htmlValidatorDisplay(data.content)} />
+                <HTMLReader htmlString={htmlValidatorDisplay(item.content)} />
               )}
             </Flex>
           </Form>

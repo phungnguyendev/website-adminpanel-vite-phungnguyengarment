@@ -17,6 +17,7 @@ module.exports = {
     'react-hooks/exhaustive-deps': 'off',
     'react-refresh/only-export-components': 'off',
     'no-useless-catch': 'off',
+    '@typescript-eslint/no-unnecessary-type-constraint': 'off',
     'prettier/prettier': [
       'warn',
       {

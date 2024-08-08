@@ -15,7 +15,7 @@ const usePostViewModel = () => {
 
   const [openModalCreate, setOpenModalCreate] = useState<boolean>(false)
   const [openModalReview, setOpenModalReview] = useState<boolean>(false)
-  const [newRecord, setNewRecord] = useState<PostTableDataType | null>(null)
+  const [newRecord, setNewRecord] = useState<NewRecordPost | null>(null)
 
   useEffect(() => {
     initialize()

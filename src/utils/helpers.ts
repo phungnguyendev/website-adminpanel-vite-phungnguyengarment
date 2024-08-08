@@ -100,7 +100,7 @@ export const dateTimeValidatorChange = (date?: string | number | Date | dayjs.Da
 }
 
 export const textValidatorChange = (text?: string | null): string => {
-  return text ? text : ''
+  return text ?? ''
 }
 
 export const numberValidatorChange = (number?: number | null): number => {
@@ -189,7 +189,6 @@ export function isValidDate(value?: string | number | Date | dayjs.Dayjs | null 
 }
 
 // Hàm kiểm tra object hợp lệ
-// eslint-disable-next-line @typescript-eslint/ban-types
 export function isValidObject<T extends { id?: number }>(value?: T | null | undefined): value is T {
   return value ? typeof value === 'object' && isValidNumber(value.id) : false
 }
