@@ -1,10 +1,12 @@
 import type { MenuProps } from 'antd'
 import { Flex, Layout, Menu } from 'antd'
 import React, { useEffect, useState } from 'react'
-import { Link, Outlet, useLocation } from 'react-router-dom'
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import logo from '~/assets/logo.svg'
 import routes from '~/config/route.config'
-import { cn } from '~/utils/helpers'
+import useLocalStorage from '~/hooks/useLocalStorage'
+import { User } from '~/typing'
+import { cn, isValidString } from '~/utils/helpers'
 import Footer from './Footer'
 import Header from './Header'
 
@@ -14,6 +16,12 @@ const Main: React.FC = () => {
   const { pathname } = useLocation()
   const [openDrawer, setOpenDrawer] = useState(false)
   const [selectedKey, setSelectedKey] = useState<string>(routes[0].key)
+  const [userStorage] = useLocalStorage<User>('user', {})
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!userStorage || !isValidString(userStorage.email) || !isValidString(userStorage.password)) navigate('/login')
+  }, [])
 
   useEffect(() => {
     const keyFound = routes.find((route) => route.path === pathname)
