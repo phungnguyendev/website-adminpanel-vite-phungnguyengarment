@@ -45,7 +45,7 @@ const Header: React.FC<Props> = ({ onMenuClick, collapsed, setCollapsed, ...prop
           'fixed right-0 top-0 z-[999] min-h-[52px] bg-white px-5 transition-all duration-200',
           {
             'left-[250px]': collapsed,
-            'left-[80px]': !collapsed
+            'left-0 lg:left-[80px]': !collapsed
           },
           {
             'shadow-sm': offsetY > 1,

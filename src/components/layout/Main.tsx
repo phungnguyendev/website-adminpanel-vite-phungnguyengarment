@@ -6,7 +6,8 @@ import logo from '~/assets/logo.svg'
 import routes from '~/config/route.config'
 import useLocalStorage from '~/hooks/useLocalStorage'
 import { User } from '~/typing'
-import { cn, isValidString } from '~/utils/helpers'
+import { breakpoint, cn, isValidString } from '~/utils/helpers'
+import useWindow from '../hooks/useWindow'
 import Footer from './Footer'
 import Header from './Header'
 
@@ -17,6 +18,7 @@ const Main: React.FC = () => {
   const [openDrawer, setOpenDrawer] = useState(false)
   const [selectedKey, setSelectedKey] = useState<string>(routes[0].key)
   const [userStorage] = useLocalStorage<User>('user', {})
+  const { width } = useWindow()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -46,11 +48,11 @@ const Main: React.FC = () => {
   return (
     <Layout className='w-full bg-background' hasSider>
       <Sider
-        breakpoint='lg'
+        breakpoint='xs'
         collapsedWidth={0}
         collapsible
         trigger={null}
-        width={openDrawer ? 250 : 80}
+        width={openDrawer ? 250 : width >= breakpoint.lg ? 80 : 0}
         style={{
           position: 'fixed',
           left: '0px',
@@ -85,7 +87,7 @@ const Main: React.FC = () => {
         <Content
           className={cn('min-h-screen bg-white p-5 transition-all duration-200', {
             'ml-[250px]': openDrawer,
-            'ml-[80px]': !openDrawer
+            'ml-[0px] lg:ml-[80px]': !openDrawer
           })}
         >
           <Outlet />
